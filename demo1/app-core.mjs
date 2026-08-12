@@ -1,22 +1,43 @@
 export function createDashboardState(data) {
   const clonedData = structuredClone(data);
+  const initialPeriod = clonedData.periods[0];
 
   return {
     ...clonedData,
-    selectedPeriod: clonedData.periods[0]?.id ?? null,
+    selectedPeriod: initialPeriod?.id ?? null,
+    ...(initialPeriod?.snapshot ?? {}),
     expandedGroups: [],
-    activeMerchantId: null,
+    activePartnerId: null,
+    activeNavigationId: 'overview',
+    activeNavigationChild: null,
+    demoState: 'normal',
   };
 }
 
 export function selectPeriod(state, periodId) {
-  if (!state.periods.some((period) => period.id === periodId)) {
+  const period = state.periods.find((item) => item.id === periodId);
+
+  if (!period) {
     return state;
   }
 
   return {
     ...state,
     selectedPeriod: periodId,
+    ...(period.snapshot ?? {}),
+  };
+}
+
+export function selectDemoState(state, demoState) {
+  const supportedStates = ['normal', 'empty', 'error', 'permission', 'syncing'];
+
+  if (!supportedStates.includes(demoState)) {
+    return state;
+  }
+
+  return {
+    ...state,
+    demoState,
   };
 }
 
@@ -28,26 +49,5 @@ export function toggleNavigationGroup(state, groupId) {
     expandedGroups: isExpanded
       ? state.expandedGroups.filter((id) => id !== groupId)
       : [...state.expandedGroups, groupId],
-  };
-}
-
-export function applyMerchant(state, merchantId) {
-  const merchant = state.merchants.find((item) => item.id === merchantId);
-
-  if (!merchant) {
-    return {
-      state,
-      message: 'Merchant not found',
-    };
-  }
-
-  return {
-    state: {
-      ...state,
-      merchants: state.merchants.map((item) =>
-        item.id === merchantId ? { ...item, applied: true } : item,
-      ),
-    },
-    message: `Application sent to ${merchant.name}`,
   };
 }

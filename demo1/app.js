@@ -1,13 +1,12 @@
 import { dashboardData } from './data.mjs';
 import {
-  applyMerchant,
   createDashboardState,
+  selectDemoState,
   selectPeriod,
   toggleNavigationGroup,
 } from './app-core.mjs';
 
 let state = createDashboardState(dashboardData);
-let activeNavigationId = 'overview';
 let toastTimer;
 let lastDrawerTrigger = null;
 
@@ -15,8 +14,17 @@ const navigation = document.querySelector('[data-navigation]');
 const metricsGrid = document.querySelector('[data-metrics-grid]');
 const rankingList = document.querySelector('[data-ranking-list]');
 const commissionSummary = document.querySelector('[data-commission-summary]');
-const merchantStatus = document.querySelector('[data-merchant-status]');
-const merchantGrid = document.querySelector('[data-merchants-grid]');
+const partnerStatus = document.querySelector('[data-partner-status]');
+const actionCenter = document.querySelector('[data-action-center]');
+const sectionCount = document.querySelector('[data-section-count]');
+const quickActions = document.querySelector('[data-quick-actions]');
+const demoStateBanner = document.querySelector('[data-demo-state-banner]');
+const demoStateSelect = document.querySelector('[data-demo-state]');
+const overviewPage = document.querySelector('[data-overview-page]');
+const modulePlaceholder = document.querySelector('[data-module-placeholder]');
+const pageTitle = document.querySelector('[data-page-title]');
+const pageDescription = document.querySelector('[data-page-description]');
+const breadcrumbCurrent = document.querySelector('[data-breadcrumb-current]');
 const periodToggle = document.querySelector('[data-period-toggle]');
 const periodMenu = document.querySelector('[data-period-menu]');
 const periodLabel = document.querySelector('[data-period-label]');
@@ -36,12 +44,22 @@ const icon = (name, className = '') => `
   </svg>
 `;
 
+const findNavigationContext = (navigationId) => {
+  for (const item of state.navigation) {
+    if (item.id === navigationId) return { parent: item, current: item };
+    const child = item.children?.find((entry) => entry.id === navigationId);
+    if (child) return { parent: item, current: child };
+  }
+
+  return { parent: state.navigation[0], current: state.navigation[0] };
+};
+
 const renderNavigation = () => {
   navigation.innerHTML = state.navigation
     .map((item) => {
       const hasChildren = Array.isArray(item.children);
       const isExpanded = state.expandedGroups.includes(item.id);
-      const isActive = activeNavigationId === item.id;
+      const isActive = state.activeNavigationId === item.id;
 
       return `
         <div class="nav-entry${isExpanded ? ' is-expanded' : ''}" data-nav-entry="${item.id}">
@@ -63,7 +81,12 @@ const renderNavigation = () => {
                     ${item.children
                       .map(
                         (child) => `
-                          <button class="nav-child" type="button" data-nav-child="${child}">${child}</button>
+                          <button
+                            class="nav-child${state.activeNavigationChild === child.id ? ' is-active' : ''}"
+                            type="button"
+                            data-nav-child="${child.id}"
+                            data-nav-parent="${item.id}"
+                          >${child.label}</button>
                         `,
                       )
                       .join('')}
@@ -98,6 +121,7 @@ const renderPeriods = () => {
 };
 
 const renderMetrics = () => {
+  const isEmpty = state.demoState === 'empty';
   metricsGrid.innerHTML = state.metrics
     .map(
       (metric) => `
@@ -106,10 +130,10 @@ const renderMetrics = () => {
             <span class="metric-card__label">${metric.label}</span>
             <span class="metric-card__icon">${icon(metric.icon)}</span>
           </div>
-          <strong class="metric-card__value">${metric.value}</strong>
+          <strong class="metric-card__value">${isEmpty ? '—' : metric.value}</strong>
           <span class="metric-card__meta">
-            <b class="metric-card__change">${metric.change}</b>
-            <span>${metric.note}</span>
+            <b class="metric-card__change">${isEmpty ? 'No data' : metric.change}</b>
+            <span>${isEmpty ? 'No activity in this range' : metric.note}</span>
           </span>
         </article>
       `,
@@ -117,22 +141,28 @@ const renderMetrics = () => {
     .join('');
 };
 
-const renderRanking = () => {
-  rankingList.innerHTML = state.advertisers
-    .map(
-      (advertiser, index) => `
-        <div class="ranking-row">
-          <span class="ranking-row__rank">${String(index + 1).padStart(2, '0')}</span>
-          <span class="ranking-row__name">${advertiser.name}</span>
-          <span class="ranking-row__track">
-            <span class="ranking-row__fill" data-ranking-fill="${advertiser.percent}"></span>
-          </span>
-          <strong class="ranking-row__amount">${advertiser.amount}</strong>
-          <span class="ranking-row__trend">${advertiser.trend}</span>
-        </div>
-      `,
-    )
-    .join('');
+const renderPartnerPerformance = () => {
+  const isEmpty = state.demoState === 'empty';
+  rankingList.innerHTML = isEmpty
+    ? '<div class="inline-empty"><strong>No partner performance yet</strong><span>Partner results will appear after tracked orders are recorded.</span></div>'
+    : state.partnerPerformance
+        .map(
+          (partner, index) => `
+            <div class="ranking-row">
+              <span class="ranking-row__rank">${String(index + 1).padStart(2, '0')}</span>
+              <span class="ranking-row__name">
+                <strong>${partner.name}</strong>
+                <small>${partner.type} · ${partner.orders} orders</small>
+              </span>
+              <span class="ranking-row__track">
+                <span class="ranking-row__fill" data-ranking-fill="${partner.percent}"></span>
+              </span>
+              <strong class="ranking-row__amount">${partner.amount}</strong>
+              <span class="ranking-row__trend">${partner.trend}</span>
+            </div>
+          `,
+        )
+        .join('');
 
   requestAnimationFrame(() => {
     document.querySelectorAll('[data-ranking-fill]').forEach((bar) => {
@@ -143,33 +173,34 @@ const renderRanking = () => {
 
 const renderCommissionSummary = () => {
   const { commission } = state;
-  const rows = [commission.approved, commission.pending, commission.paid];
+  const rows = [commission.approved, commission.pending, commission.paid, commission.voided];
+  const isEmpty = state.demoState === 'empty';
 
   commissionSummary.innerHTML = `
     <div class="summary-card__header">
       <div>
-        <span class="eyebrow">Earnings flow</span>
+        <span class="eyebrow">Settlement snapshot</span>
         <h2>Commission</h2>
       </div>
       <span class="summary-card__icon">${icon('wallet')}</span>
     </div>
     <div class="summary-total">
       <span>Total tracked</span>
-      <strong>${commission.total}</strong>
+      <strong>${isEmpty ? '—' : commission.total}</strong>
     </div>
     <div class="commission-bar" aria-label="Commission distribution">
-      ${rows.map((item) => `<span class="tone-${item.tone}" style="width:${item.percent}%"></span>`).join('')}
+      ${rows.map((item) => `<span class="tone-${item.tone}" style="width:${isEmpty ? 0 : item.percent}%"></span>`).join('')}
     </div>
     <div class="summary-list">
       ${rows
         .map(
           (item) => `
-            <button class="summary-row" type="button" data-demo-action="${item.label} commission">
+            <button class="summary-row" type="button" data-action-navigation="transactions">
               <span class="summary-row__label">
                 <i class="summary-row__dot tone-${item.tone}"></i>
                 ${item.label}
               </span>
-              <strong>${item.value}</strong>
+              <strong>${isEmpty ? '—' : item.value}</strong>
             </button>
           `,
         )
@@ -178,26 +209,27 @@ const renderCommissionSummary = () => {
   `;
 };
 
-const renderMerchantStatus = () => {
-  merchantStatus.innerHTML = `
+const renderPartnerStatus = () => {
+  const isEmpty = state.demoState === 'empty';
+  partnerStatus.innerHTML = `
     <div class="summary-card__header">
       <div>
-        <span class="eyebrow">Program access</span>
-        <h2>Merchants</h2>
+        <span class="eyebrow">Relationship health</span>
+        <h2>Partners</h2>
       </div>
-      <span class="summary-card__icon">${icon('store')}</span>
+      <span class="summary-card__icon">${icon('users')}</span>
     </div>
     <div class="status-list">
-      ${state.merchantStatus
+      ${state.partnerStatus
         .map(
           (item) => `
-            <button class="status-row" type="button" data-demo-action="${item.label} merchants">
+            <button class="status-row" type="button" data-action-navigation="my-partners">
               <span class="status-row__top">
                 <span><i class="summary-row__dot tone-${item.tone}"></i>${item.label}</span>
-                <strong>${item.value}</strong>
+                <strong>${isEmpty ? '—' : item.value}</strong>
               </span>
               <span class="status-row__track">
-                <span class="status-row__fill tone-${item.tone}" style="width:${item.percent}%"></span>
+                <span class="status-row__fill tone-${item.tone}" style="width:${isEmpty ? 0 : item.percent}%"></span>
               </span>
             </button>
           `,
@@ -207,119 +239,97 @@ const renderMerchantStatus = () => {
   `;
 };
 
-const renderMerchantCard = (merchant) => `
-  <article class="merchant-card" data-merchant-id="${merchant.id}">
-    <div class="merchant-card__top">
-      <button
-        class="merchant-logo"
-        type="button"
-        style="--logo-background:${merchant.logoBackground};--logo-color:${merchant.brandColor}"
-        data-merchant-view="${merchant.id}"
-        aria-label="View ${merchant.name} details"
-      >${merchant.mark}</button>
-      <div class="merchant-card__identity">
-        <h3>${merchant.name}</h3>
-        <p>ID: ${merchant.displayId}</p>
-      </div>
-      <span class="status-chip">New</span>
-    </div>
-    <div class="merchant-card__commission">
-      <span>${merchant.commissionLabel}</span>
-      <strong>${merchant.commission}</strong>
-    </div>
-    <div class="merchant-card__meta">
-      <span>${icon('location')}${merchant.countryCode}</span>
-      <span>${icon('clock')}Cookie: ${merchant.cookieDays} days</span>
-    </div>
-    <div class="merchant-card__footer">
-      <span class="merchant-card__domain">${merchant.domain}</span>
-      <button class="button button--secondary" type="button" data-merchant-view="${merchant.id}">
-        ${icon('eye')} View
-      </button>
-      <button
-        class="button ${merchant.applied ? 'button--applied' : 'button--primary'}"
-        type="button"
-        data-merchant-apply="${merchant.id}"
-        ${merchant.applied ? 'disabled' : ''}
-      >
-        ${icon(merchant.applied ? 'check' : 'send')}
-        ${merchant.applied ? 'Applied' : 'Apply'}
-      </button>
-    </div>
-  </article>
-`;
-
-const renderMerchants = () => {
-  merchantGrid.innerHTML = state.merchants.map(renderMerchantCard).join('');
+const renderActionCenter = () => {
+  sectionCount.textContent = state.demoState === 'empty' ? '0 open items' : `${state.actionItems.length} open items`;
+  actionCenter.innerHTML = state.demoState === 'empty'
+    ? '<div class="action-empty"><span class="action-empty__icon">✓</span><strong>You are all caught up</strong><p>No actions need attention in this workspace.</p></div>'
+    : state.actionItems
+        .map(
+          (item) => `
+            <article class="action-card" data-tone="${item.tone}">
+              <div class="action-card__icon">${icon(item.icon)}</div>
+              <div class="action-card__content">
+                <span class="eyebrow">${item.eyebrow}</span>
+                <h3>${item.title}</h3>
+                <p>${item.description}</p>
+              </div>
+              <div class="action-card__aside">
+                <span class="status-chip">${item.meta}</span>
+                <button class="button button--secondary" type="button" data-action-navigation="${item.navigationId}">
+                  ${item.action}
+                  ${icon('arrow')}
+                </button>
+              </div>
+            </article>
+          `,
+        )
+        .join('');
 };
 
-const renderDrawer = () => {
-  const merchant = state.merchants.find((item) => item.id === state.activeMerchantId);
-  if (!merchant) return;
+const renderQuickActions = () => {
+  quickActions.innerHTML = state.quickActions
+    .map(
+      (item) => `
+        <button class="quick-action" type="button" data-action-navigation="${item.navigationId}">
+          <span>${icon(item.icon)}</span>
+          <strong>${item.label}</strong>
+          ${icon('arrow', 'quick-action__arrow')}
+        </button>
+      `,
+    )
+    .join('');
+};
 
-  drawerContent.innerHTML = `
-    <div class="drawer-header">
-      <div class="drawer-header__merchant">
-        <span
-          class="merchant-logo"
-          style="--logo-background:${merchant.logoBackground};--logo-color:${merchant.brandColor}"
-        >${merchant.mark}</span>
-        <div>
-          <h2 id="merchant-drawer-title">${merchant.name}</h2>
-          <p>Merchant ID: ${merchant.displayId}</p>
-        </div>
-      </div>
-      <button class="icon-button" type="button" data-drawer-close aria-label="Close merchant details">
-        ${icon('x')}
-      </button>
-    </div>
+const renderDemoStateBanner = () => {
+  const messages = {
+    normal: null,
+    empty: { title: 'No activity in this date range', detail: 'Try a wider date range or connect another store.', tone: 'neutral' },
+    error: { title: 'Performance data could not load', detail: 'Retry the request or check the data connection.', tone: 'danger' },
+    permission: { title: 'Some data is restricted', detail: 'Ask an organization owner for access to this brand scope.', tone: 'warning' },
+    syncing: { title: 'Data sync in progress', detail: 'The latest transactions will appear after synchronization finishes.', tone: 'info' },
+  };
+  const message = messages[state.demoState];
 
-    <section class="drawer-section">
-      <p class="drawer-section__label">Commission opportunity</p>
-      <div class="drawer-commission">
-        <span>${merchant.commissionLabel}</span>
-        <strong>${merchant.commission}</strong>
-      </div>
-    </section>
+  if (!message) {
+    demoStateBanner.hidden = true;
+    demoStateBanner.innerHTML = '';
+    return;
+  }
 
-    <section class="drawer-section">
-      <p class="drawer-section__label">Program details</p>
-      <div class="drawer-facts">
-        <div class="drawer-fact"><span>Market</span><strong>${merchant.country}</strong></div>
-        <div class="drawer-fact"><span>Cookie window</span><strong>${merchant.cookieDays} days</strong></div>
-        <div class="drawer-fact"><span>Domain</span><strong>${merchant.domain}</strong></div>
-        <div class="drawer-fact"><span>Status</span><strong>${merchant.applied ? 'Applied' : 'Open to apply'}</strong></div>
-      </div>
-    </section>
+  demoStateBanner.hidden = false;
+  demoStateBanner.dataset.tone = message.tone;
+  demoStateBanner.innerHTML = `<strong>${message.title}</strong><span>${message.detail}</span>`;
+};
 
-    <section class="drawer-section">
-      <p class="drawer-section__label">Promotion fit</p>
-      <div class="drawer-tags">
-        <span class="tag-chip">${merchant.category}</span>
-        <span class="tag-chip">${merchant.channel}</span>
-      </div>
-    </section>
+const renderPage = () => {
+  const context = findNavigationContext(state.activeNavigationChild ?? state.activeNavigationId);
+  const isOverview = state.activeNavigationId === 'overview' && !state.activeNavigationChild;
 
-    <section class="drawer-section">
-      <p class="drawer-section__label">About the program</p>
-      <p class="drawer-description">${merchant.description}</p>
-    </section>
+  pageTitle.textContent = isOverview ? 'Business overview' : context.current.label;
+  pageDescription.textContent = isOverview
+    ? 'Monitor partnerships, campaigns and revenue performance.'
+    : `${context.current.label} workspace preview for the current brand scope.`;
+  breadcrumbCurrent.textContent = isOverview ? 'Overview' : context.current.label;
+  overviewPage.hidden = !isOverview;
+  modulePlaceholder.hidden = isOverview;
 
-    <div class="drawer-actions">
-      <button class="button button--secondary" type="button" data-demo-action="Open ${merchant.domain}">
-        ${icon('external')} Visit website
-      </button>
-      <button
-        class="button ${merchant.applied ? 'button--applied' : 'button--primary'}"
-        type="button"
-        data-merchant-apply="${merchant.id}"
-        ${merchant.applied ? 'disabled' : ''}
-      >
-        ${icon(merchant.applied ? 'check' : 'send')}
-        ${merchant.applied ? 'Application sent' : 'Apply to program'}
-      </button>
-    </div>
-  `;
+  if (!isOverview) {
+    modulePlaceholder.querySelector('[data-module-title]').textContent = context.current.label;
+    modulePlaceholder.querySelector('[data-module-parent]').textContent = context.parent.label;
+  }
+};
+
+const renderAll = () => {
+  renderNavigation();
+  renderPeriods();
+  renderMetrics();
+  renderPartnerPerformance();
+  renderCommissionSummary();
+  renderPartnerStatus();
+  renderActionCenter();
+  renderQuickActions();
+  renderDemoStateBanner();
+  renderPage();
 };
 
 const showToast = (message) => {
@@ -341,10 +351,64 @@ const closePeriodMenu = () => {
   periodToggle.setAttribute('aria-expanded', 'false');
 };
 
-const openMerchantDrawer = (merchantId, trigger) => {
+const navigateTo = (navigationId) => {
+  const context = findNavigationContext(navigationId);
+  state = {
+    ...state,
+    activeNavigationId: context.parent.id,
+    activeNavigationChild: context.current.id === context.parent.id ? null : context.current.id,
+  };
+  renderPage();
+  renderNavigation();
+  showToast(`${context.current.label} selected`);
+
+  if (window.matchMedia('(max-width: 767px)').matches) closeSidebar();
+};
+
+const openPartnerDrawer = (partnerId, trigger) => {
+  const partner = state.partners.find((item) => item.id === partnerId);
+  if (!partner) return;
+
   lastDrawerTrigger = trigger ?? document.activeElement;
-  state = { ...state, activeMerchantId: merchantId };
-  renderDrawer();
+  state = { ...state, activePartnerId: partnerId };
+  drawerContent.innerHTML = `
+    <div class="drawer-header">
+      <div class="drawer-header__merchant">
+        <span class="merchant-logo" style="--logo-background:#eaf5fe;--logo-color:#1777bf">N</span>
+        <div>
+          <h2 id="merchant-drawer-title">${partner.name}</h2>
+          <p>${partner.type} · ${partner.channel}</p>
+        </div>
+      </div>
+      <button class="icon-button" type="button" data-drawer-close aria-label="Close partner details">
+        ${icon('x')}
+      </button>
+    </div>
+    <section class="drawer-section">
+      <p class="drawer-section__label">Relationship summary</p>
+      <div class="drawer-commission">
+        <span>Tracked commission</span>
+        <strong>${partner.commission}</strong>
+      </div>
+    </section>
+    <section class="drawer-section">
+      <p class="drawer-section__label">Partner profile</p>
+      <div class="drawer-facts">
+        <div class="drawer-fact"><span>Status</span><strong>${partner.status}</strong></div>
+        <div class="drawer-fact"><span>Group</span><strong>${partner.group}</strong></div>
+        <div class="drawer-fact"><span>Channel</span><strong>${partner.channel}</strong></div>
+        <div class="drawer-fact"><span>Audience</span><strong>${partner.audience}</strong></div>
+      </div>
+    </section>
+    <div class="drawer-actions">
+      <button class="button button--secondary" type="button" data-action-navigation="my-partners">
+        View partner record
+      </button>
+      <button class="button button--primary" type="button" data-action-navigation="transactions">
+        View performance
+      </button>
+    </div>
+  `;
   drawer.hidden = false;
   document.body.classList.add('is-overlay-open');
   requestAnimationFrame(() => {
@@ -354,20 +418,16 @@ const openMerchantDrawer = (merchantId, trigger) => {
   });
 };
 
-const closeMerchantDrawer = () => {
-  const activeMerchantId = state.activeMerchantId;
+const closePartnerDrawer = () => {
+  const activePartnerId = state.activePartnerId;
   drawer.classList.remove('is-open');
   drawerBackdrop.classList.remove('is-open');
   window.setTimeout(() => {
-    const fallbackTrigger = document.querySelector(
-      `[data-merchant-view="${activeMerchantId}"]`,
-    );
-    const focusTarget = lastDrawerTrigger?.isConnected
-      ? lastDrawerTrigger
-      : fallbackTrigger;
+    const fallbackTrigger = document.querySelector(`[data-partner-view="${activePartnerId}"]`);
+    const focusTarget = lastDrawerTrigger?.isConnected ? lastDrawerTrigger : fallbackTrigger;
 
     drawer.hidden = true;
-    state = { ...state, activeMerchantId: null };
+    state = { ...state, activePartnerId: null };
     document.body.classList.remove('is-overlay-open');
     focusTarget?.focus();
     lastDrawerTrigger = null;
@@ -388,48 +448,25 @@ const closeSidebar = () => {
   sidebarOpenButton.focus();
 };
 
-const handleMerchantAction = (event) => {
-  const viewButton = event.target.closest('[data-merchant-view]');
-  const applyButton = event.target.closest('[data-merchant-apply]');
-
-  if (viewButton) {
-    openMerchantDrawer(viewButton.dataset.merchantView, viewButton);
-    return;
-  }
-
-  if (applyButton) {
-    const result = applyMerchant(state, applyButton.dataset.merchantApply);
-    state = result.state;
-    renderMerchants();
-    renderDrawer();
-    showToast(result.message);
-  }
-};
-
 navigation.addEventListener('click', (event) => {
   const groupButton = event.target.closest('[data-nav-group]');
-  const itemButton = event.target.closest('[data-nav-item]');
   const childButton = event.target.closest('[data-nav-child]');
+  const itemButton = event.target.closest('[data-nav-item]');
 
   if (childButton) {
-    showToast(`${childButton.dataset.navChild} selected`);
+    navigateTo(childButton.dataset.navChild);
     return;
   }
 
   if (!itemButton) return;
-  activeNavigationId = itemButton.dataset.navItem;
 
   if (groupButton) {
     state = toggleNavigationGroup(state, groupButton.dataset.navGroup);
-  } else {
-    showToast(`${itemButton.textContent.trim()} selected`);
+    renderNavigation();
+    return;
   }
 
-  renderNavigation();
-
-  if (window.matchMedia('(max-width: 767px)').matches) {
-    closeSidebar();
-  }
+  navigateTo(itemButton.dataset.navItem);
 });
 
 periodToggle.addEventListener('click', (event) => {
@@ -444,37 +481,49 @@ periodMenu.addEventListener('click', (event) => {
   if (!option) return;
 
   state = selectPeriod(state, option.dataset.period);
-  renderPeriods();
+  renderAll();
   closePeriodMenu();
   showToast(`Date range updated to ${option.textContent.trim().replace(/\s+/g, ' ')}`);
 });
 
-merchantGrid.addEventListener('click', handleMerchantAction);
-drawerContent.addEventListener('click', (event) => {
-  if (event.target.closest('[data-drawer-close]')) {
-    closeMerchantDrawer();
-    return;
-  }
-
-  handleMerchantAction(event);
+demoStateSelect.addEventListener('change', (event) => {
+  state = selectDemoState(state, event.target.value);
+  renderAll();
 });
-drawerBackdrop.addEventListener('click', closeMerchantDrawer);
-sidebarOpenButton.addEventListener('click', openSidebar);
-sidebarCloseButton.addEventListener('click', closeSidebar);
-sidebarBackdrop.addEventListener('click', closeSidebar);
 
 document.addEventListener('click', (event) => {
   if (!event.target.closest('.period-picker')) closePeriodMenu();
+
+  const actionNavigation = event.target.closest('[data-action-navigation]');
+  if (actionNavigation) {
+    navigateTo(actionNavigation.dataset.actionNavigation);
+    return;
+  }
+
+  const partnerView = event.target.closest('[data-partner-view]');
+  if (partnerView) {
+    openPartnerDrawer(partnerView.dataset.partnerView, partnerView);
+    return;
+  }
 
   const demoAction = event.target.closest('[data-demo-action]');
   if (demoAction) showToast(`${demoAction.dataset.demoAction} is ready for product integration`);
 });
 
+drawerContent.addEventListener('click', (event) => {
+  if (event.target.closest('[data-drawer-close]')) closePartnerDrawer();
+});
+
+drawerBackdrop.addEventListener('click', closePartnerDrawer);
+sidebarOpenButton.addEventListener('click', openSidebar);
+sidebarCloseButton.addEventListener('click', closeSidebar);
+sidebarBackdrop.addEventListener('click', closeSidebar);
+
 document.addEventListener('keydown', (event) => {
   if (event.key !== 'Escape') return;
 
   if (drawer.classList.contains('is-open')) {
-    closeMerchantDrawer();
+    closePartnerDrawer();
     return;
   }
 
@@ -502,10 +551,4 @@ document.querySelector('[data-toast-close]').addEventListener('click', () => {
   }, 220);
 });
 
-renderNavigation();
-renderPeriods();
-renderMetrics();
-renderRanking();
-renderCommissionSummary();
-renderMerchantStatus();
-renderMerchants();
+renderAll();

@@ -9,16 +9,19 @@ const demoDirectory = resolve(currentDirectory, '..');
 const html = readFileSync(resolve(demoDirectory, 'index.html'), 'utf8');
 const css = readFileSync(resolve(demoDirectory, 'styles.css'), 'utf8');
 const appJs = readFileSync(resolve(demoDirectory, 'app.js'), 'utf8');
+const data = readFileSync(resolve(demoDirectory, 'data.mjs'), 'utf8');
 
 test('page provides the required sidebar and dashboard regions', () => {
   assert.match(html, /data-sidebar/);
   assert.match(html, /data-metrics-grid/);
   assert.match(html, /data-ranking-list/);
   assert.match(html, /data-commission-summary/);
-  assert.match(html, /data-merchant-status/);
-  assert.match(html, /data-merchants-grid/);
+  assert.match(html, /data-partner-status/);
+  assert.match(html, /data-action-center/);
   assert.match(html, /data-drawer/);
   assert.match(html, /data-toast/);
+  assert.match(html, /data-action-center/);
+  assert.match(html, /data-demo-state/);
 });
 
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
@@ -34,6 +37,14 @@ test('styles define the documented blue-card visual tokens', () => {
   assert.match(css, /--shadow-card:/i);
 });
 
+test('merchant overview keeps task-oriented navigation and account context', () => {
+  assert.match(html, /Merchant workspace/);
+  assert.match(html, /Brand Admin/);
+  assert.match(data, /Recruitment & Partners/);
+  assert.match(data, /Products & Assets/);
+  assert.match(data, /Data & Transactions/);
+});
+
 test('styles load all local Plus Jakarta Sans weights without remote font requests', () => {
   const fontFaces = css.match(/@font-face/g) ?? [];
   assert.equal(fontFaces.length, 5);
@@ -42,10 +53,11 @@ test('styles load all local Plus Jakarta Sans weights without remote font reques
   assert.doesNotMatch(css, /fonts\.googleapis|use\.typekit|https?:\/\//i);
 });
 
-test('merchant details use accessible modal dialog semantics', () => {
+test('partner details use accessible modal dialog semantics', () => {
   assert.match(html, /data-drawer[^>]+role="dialog"/);
   assert.match(html, /data-drawer[^>]+aria-modal="true"/);
   assert.match(html, /data-drawer[^>]+aria-labelledby="merchant-drawer-title"/);
+  assert.match(html, /data-drawer-backdrop[^>]+aria-label="Dismiss partner details overlay"/);
 });
 
 test('styles retain a side drawer on mobile and respect reduced motion', () => {
@@ -58,11 +70,11 @@ test('desktop-only stylesheet hides both mobile navigation controls with a selec
   assert.match(css, /\.sidebar__close\.icon-button,\s*\.mobile-menu\.icon-button\s*\{\s*display:\s*none;/s);
 });
 
-test('advertiser ranking fills are block elements so percentage widths can render', () => {
+test('partner ranking fills are block elements so percentage widths can render', () => {
   assert.match(css, /\.ranking-row__fill\s*\{[^}]*display:\s*block;/s);
 });
 
-test('drawer focus restoration falls back to the re-rendered merchant trigger', () => {
+test('drawer focus restoration falls back to the partner trigger', () => {
   assert.match(appJs, /lastDrawerTrigger\?\.isConnected/);
-  assert.match(appJs, /data-merchant-view=.*activeMerchantId/s);
+  assert.match(appJs, /data-partner-view=.*activePartnerId/s);
 });
