@@ -1,0 +1,10 @@
+# No implementation or generated prototype belongs in framework v0.1.
+node_modules/
+dist/
+.DS_Store
+Thumbs.db
+
+# Source manual images may contain personal or business-sensitive data.
+pb_manual_images/
+source-images/
+redacted-source-images/
