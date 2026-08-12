@@ -1,39 +1,23 @@
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import path from 'node:path';
 import test from 'node:test';
+import { createDashboardStore } from '../src/state/useDashboardStore.js';
 
-const corePath = path.resolve(import.meta.dirname, '..', 'app-core.mjs');
-const dataPath = path.resolve(import.meta.dirname, '..', 'data.mjs');
+test('方案六状态层提供时间范围、任务与风险数据', () => {
+  const store = createDashboardStore();
 
-test('方案二状态模块提供时间范围和演示状态切换', async () => {
-  assert.equal(fs.existsSync(corePath), true, 'demo2/app-core.mjs should exist');
-  assert.equal(fs.existsSync(dataPath), true, 'demo2/data.mjs should exist');
-  if (!fs.existsSync(corePath) || !fs.existsSync(dataPath)) return;
-
-  const [{ createDashboardState, selectPeriod, selectDemoState }, { dashboardData }] = await Promise.all([
-    import('../app-core.mjs'),
-    import('../data.mjs'),
-  ]);
-  const state = createDashboardState(dashboardData);
-  const nextState = selectPeriod(state, '30d');
-  const emptyState = selectDemoState(nextState, 'empty');
-
-  assert.equal(state.selectedPeriod, '7d');
-  assert.equal(nextState.selectedPeriod, '30d');
-  assert.notEqual(nextState.metrics[0].value, state.metrics[0].value);
-  assert.equal(emptyState.demoState, 'empty');
+  assert.equal(store.state.selectedPeriod, '7d');
+  assert.equal(store.openTaskCount.value, 4);
+  assert.equal(store.riskItems.value.length, 3);
+  assert.equal(store.currentSnapshot.value.metrics.length, 7);
 });
 
-test('无效的时间范围和演示状态不会破坏当前状态', async () => {
-  if (!fs.existsSync(corePath) || !fs.existsSync(dataPath)) return;
+test('切换时间范围会更新运营状态与指标快照', () => {
+  const store = createDashboardStore();
+  const originalClicks = store.currentSnapshot.value.metrics[0].value;
 
-  const [{ createDashboardState, selectPeriod, selectDemoState }, { dashboardData }] = await Promise.all([
-    import('../app-core.mjs'),
-    import('../data.mjs'),
-  ]);
-  const state = createDashboardState(dashboardData);
+  store.selectPeriod('30d');
 
-  assert.equal(selectPeriod(state, 'unknown'), state);
-  assert.equal(selectDemoState(state, 'unknown'), state);
+  assert.equal(store.state.selectedPeriod, '30d');
+  assert.notEqual(store.currentSnapshot.value.metrics[0].value, originalClicks);
+  assert.equal(store.operationalStatus.value.periodLabel, 'Jul 13 — Aug 12, 2026');
 });

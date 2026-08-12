@@ -1,39 +1,42 @@
-# Demo 2：雾灰蓝 SaaS 商家工作台
+# Demo 2：方案六卡片化运营驾驶舱
 
-该目录是 YeahPromos Merchant 端方案二 Demo。页面参考 `pb_manual_images` 的 PartnerBoost 工作台，但将视觉调整为雾灰蓝 SaaS 控制台：浅灰蓝背景、白色内容卡、克制蓝色高亮、筛选胶囊、趋势指标和右侧详情抽屉。
+该目录是 YeahPromos Merchant 端方案六 Demo。页面参考 `pb_manual_images` 中 PartnerBoost 的商家工作台框架，但将首页重构为“行动中心”：先看今日业务状态，再处理任务和风险，最后查看指标、伙伴表现与快捷操作。
+
+## 视觉与布局
+
+- 固定侧边栏，按伙伴、活动、产品、规则、数据和财务等任务域分组；
+- 浅灰蓝画布、湖蓝 `#168C9B` 主色，橙色风险、绿色完成、紫色活动；
+- 使用不规则 Bento 卡片布局，突出“指标 + 原因 + 操作”；
+- 顶部展示问候、商家上下文、数据周期和工作区状态，不使用顶部主导航；
+- 伙伴区域使用排行卡和详情抽屉，不使用密集表格；
+- 使用本地 Plus Jakarta Sans 字体，不请求在线字体；
+- 支持桌面端、平板和手机端，手机端侧边栏变为抽屉。
+
+## 技术结构
+
+- Vue 3 + Vite：`src/main.js`、`src/App.vue`；
+- 响应式状态：`src/state/useDashboardStore.js`；
+- 演示数据：`src/data/cockpit-data.js` 和现有 `data.mjs`；
+- 组件：`src/components/`；
+- 视觉 Token 和样式：`src/styles/`；
+- Sites Worker 打包桥接：`site-runtime/package-build.mjs`。
 
 ## 运行方式
 
-在仓库根目录运行：
-
 ```powershell
-python -m http.server 8776 --bind 127.0.0.1
+cd D:\Code\YeahPromos-Brand\demo2
+npm install
+npm run dev
 ```
 
-打开：
-
-```text
-http://127.0.0.1:8776/demo2/
-```
-
-## 页面内容
-
-- 固定侧边栏和商家工作区上下文；
-- 雾灰蓝 SaaS 页面背景与白色数据卡片；
-- 日期、品牌、伙伴类型和渠道筛选胶囊；
-- Clicks、Orders、Gross Sales、Net Sales、Commission、Conversion、Total Payout 指标；
-- 伙伴表现排行、佣金结算、伙伴关系状态；
-- Action Center 和 Quick Actions；
-- 日期范围切换、筛选切换、模块导航和伙伴详情抽屉；
-- 正常、空数据、加载错误、权限受限和同步中状态；
-- 桌面端、平板和手机响应式布局；
-- 本地 Plus Jakarta Sans 字体，不请求在线字体。
+打开 `http://127.0.0.1:5173/`。
 
 ## 检查命令
 
 ```powershell
-node --test .\demo2\tests\*.test.mjs
-node --check .\demo2\app.js
-node --check .\demo2\data.mjs
-node --check .\demo2\app-core.mjs
+cd D:\Code\YeahPromos-Brand\demo2
+npm test
+npm run build
 ```
+
+页面右上角的演示状态选择器可以检查正常、空数据、同步中、错误和权限受限状态；点击伙伴排行可以打开详情抽屉，点击侧边栏模块可以检查后续迁移用的页面占位路径。
