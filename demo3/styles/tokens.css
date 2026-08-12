@@ -1,0 +1,29 @@
+:root {
+  --font-sans: 'Plus Jakarta Sans', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --canvas: #08141B;
+  --sidebar: #0C1D26;
+  --panel: #102630;
+  --panel-raised: #15313C;
+  --panel-deep: #0A1A22;
+  --text-primary: #EAF5F5;
+  --text-secondary: #9DB3B8;
+  --text-muted: #668087;
+  --signal: #66D4E8;
+  --signal-soft: #193B46;
+  --action: #F0A64A;
+  --action-soft: #3D301F;
+  --success: #59C99A;
+  --success-soft: #16392F;
+  --risk: #EF6B62;
+  --risk-soft: #40262A;
+  --campaign: #A78BFA;
+  --campaign-soft: #2B2748;
+  --hairline: rgba(137, 199, 206, .16);
+  --hairline-strong: rgba(137, 199, 206, .28);
+  --shadow-ambient: 0 24px 58px rgba(2, 11, 16, .20);
+  --radius-shell: 21px;
+  --radius-core: 16px;
+  --radius-control: 11px;
+  --sidebar-width: 232px;
+  --motion: cubic-bezier(.32, .72, 0, 1);
+}

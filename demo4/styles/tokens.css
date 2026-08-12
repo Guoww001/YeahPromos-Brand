@@ -1,0 +1,68 @@
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('../fonts/plus-jakarta-sans-latin-400-normal.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('../fonts/plus-jakarta-sans-latin-500-normal.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('../fonts/plus-jakarta-sans-latin-600-normal.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('../fonts/plus-jakarta-sans-latin-700-normal.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('../fonts/plus-jakarta-sans-latin-800-normal.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+}
+
+:root {
+  --font-sans: 'Plus Jakarta Sans', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --paper: #FAFAF8;
+  --surface: #FFFFFF;
+  --surface-soft: #F4F1F2;
+  --surface-rose: #FFF3F6;
+  --ink: #111111;
+  --ink-soft: #383537;
+  --graphite: #666366;
+  --muted: #969194;
+  --brand: #F20A4F;
+  --brand-dark: #72062A;
+  --coral: #FF6368;
+  --mint: #C9F5D8;
+  --mint-ink: #11623C;
+  --blue: #91B5FF;
+  --line: rgba(17, 17, 17, .075);
+  --line-strong: rgba(17, 17, 17, .14);
+  --brand-line: rgba(242, 10, 79, .18);
+  --shadow-soft: 0 24px 70px rgba(74, 12, 34, .07);
+  --shadow-float: 0 30px 90px rgba(66, 9, 29, .14);
+  --radius-shell: 29px;
+  --radius-core: 23px;
+  --radius-control: 14px;
+  --sidebar-width: 238px;
+  --sidebar-collapsed: 76px;
+  --motion: cubic-bezier(.32, .72, 0, 1);
+}
