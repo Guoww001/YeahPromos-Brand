@@ -1,0 +1,12 @@
+{
+  "name": "yeahpromos-merchant-demo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node site-runtime/build.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
