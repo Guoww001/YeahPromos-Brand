@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node site-runtime/build.mjs"
+    "build": "node site-runtime/build.mjs",
+    "test": "node --test site-runtime/portal.test.mjs"
   },
   "engines": {
     "node": ">=20"

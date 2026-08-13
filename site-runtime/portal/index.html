@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111112">
+  <meta name="description" content="YeahPromos merchant workspace design demo selector">
+  <title>YeahPromos / Merchant workspace demos</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+  <div class="portal-shell">
+    <aside class="portal-rail" aria-label="Demo 导航">
+      <div class="rail-top">
+        <a class="brand" href="./" aria-label="返回 YeahPromos demo 总览">
+          <span class="brand-mark" aria-hidden="true">YP</span>
+          <span class="brand-copy">
+            <strong>YeahPromos</strong>
+            <small>Merchant workspace</small>
+          </span>
+        </a>
+        <p class="rail-kicker">DESIGN REVIEW / 2026</p>
+        <p class="rail-intro">同一套商家能力，四种不同的视觉语言与信息组织方式。</p>
+      </div>
+
+      <nav class="demo-selector" id="demo-selector" aria-label="选择 demo">
+        <a class="demo-option is-active" data-demo="demo1" href="./demo1/index.html" aria-current="page">
+          <span class="option-index">01</span>
+          <span class="option-copy">
+            <strong>Business Overview</strong>
+            <small>清晰的经营总览</small>
+          </span>
+          <span class="option-arrow" aria-hidden="true">↗</span>
+        </a>
+        <a class="demo-option" data-demo="demo2" href="./demo2/index.html">
+          <span class="option-index">02</span>
+          <span class="option-copy">
+            <strong>Operations Cockpit</strong>
+            <small>面向行动的运营驾驶舱</small>
+          </span>
+          <span class="option-arrow" aria-hidden="true">↗</span>
+        </a>
+        <a class="demo-option" data-demo="demo3" href="./demo3/index.html">
+          <span class="option-index">03</span>
+          <span class="option-copy">
+            <strong>Signal Control Room</strong>
+            <small>信号优先的经营控制台</small>
+          </span>
+          <span class="option-arrow" aria-hidden="true">↗</span>
+        </a>
+        <a class="demo-option" data-demo="demo4" href="./demo4/index.html">
+          <span class="option-index">04</span>
+          <span class="option-copy">
+            <strong>Brand Pulse</strong>
+            <small>品牌化的运营编辑台</small>
+          </span>
+          <span class="option-arrow" aria-hidden="true">↗</span>
+        </a>
+      </nav>
+
+      <div class="rail-bottom">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span>Prototype space</span>
+        <span class="rail-version">v0.4</span>
+      </div>
+    </aside>
+
+    <main class="portal-main" id="main-content">
+      <header class="portal-topbar">
+        <span class="topbar-label">YEAHPROMOS / MERCHANT EXPERIENCE LAB</span>
+        <span class="topbar-status"><span class="status-dot" aria-hidden="true"></span>四个方向已就绪</span>
+      </header>
+
+      <section class="portal-hero" aria-labelledby="portal-title">
+        <div class="hero-copy">
+          <p class="eyebrow">ONE SYSTEM / FOUR DIRECTIONS</p>
+          <h1 id="portal-title">Four ways to read<br><em>the same business.</em></h1>
+          <p class="hero-description">选择一个方向查看对应的商家首页 demo。功能信息保持一致，布局、节奏、数据表现和操作方式各自独立。</p>
+        </div>
+        <div class="hero-note" aria-label="当前说明">
+          <span class="hero-note-index">00</span>
+          <span>选择左侧方案<br>开始浏览</span>
+        </div>
+      </section>
+
+      <section class="preview-section" aria-labelledby="preview-title">
+        <div class="preview-heading">
+          <div>
+            <p class="eyebrow">LIVE PREVIEW / <span id="preview-number">01</span></p>
+            <h2 id="preview-title">Business Overview</h2>
+            <p id="preview-description">清晰、稳妥的商家经营总览，适合作为默认工作台。</p>
+          </div>
+          <div class="preview-actions">
+            <span class="preview-state"><span class="status-dot" aria-hidden="true"></span>正在预览</span>
+            <a id="full-view" class="full-view-link" href="./demo1/index.html" target="_blank" rel="noreferrer">打开完整页面 <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+        <div class="frame-shell">
+          <div class="frame-toolbar" aria-hidden="true">
+            <span></span><span></span><span></span>
+            <small id="frame-path">yeahpromos.local / demo1</small>
+          </div>
+          <iframe id="demo-frame" title="Business Overview demo 预览" src="./demo1/index.html"></iframe>
+        </div>
+      </section>
+
+      <footer class="portal-footer">
+        <span>YEAHPROMOS MERCHANT WORKSPACE</span>
+        <span>功能保持一致 · 视觉方案可独立迁移</span>
+      </footer>
+    </main>
+  </div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
