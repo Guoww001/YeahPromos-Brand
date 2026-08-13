@@ -9,7 +9,7 @@ const parentByPage = {
   account: 'systems', brands: 'systems', integrations: 'systems', team: 'systems', subscriptions: 'systems', api: 'systems', security: 'systems', support: 'systems',
 };
 
-export function createBrandPulseState() {
+export function createBrandPulseState({ language = 'en' } = {}) {
   return {
     activePage: 'overview',
     expandedGroup: 'partners',
@@ -22,7 +22,10 @@ export function createBrandPulseState() {
     commandQuery: '',
     mobileNavOpen: false,
     sidebarCollapsed: false,
+    workflowId: null,
+    workflowStep: 0,
     toast: '',
+    language: language === 'zh-CN' ? 'zh-CN' : 'en',
   };
 }
 
@@ -36,6 +39,8 @@ export function navigateTo(state, pageId) {
     commandOpen: false,
     commandQuery: '',
     mobileNavOpen: false,
+    workflowId: null,
+    workflowStep: 0,
   };
 }
 
@@ -49,4 +54,9 @@ export const setCommandOpen = (state, commandOpen) => ({ ...state, commandOpen, 
 export const setCommandQuery = (state, commandQuery) => ({ ...state, commandQuery });
 export const setMobileNavOpen = (state, mobileNavOpen) => ({ ...state, mobileNavOpen });
 export const toggleSidebar = (state) => ({ ...state, sidebarCollapsed: !state.sidebarCollapsed });
+export const setLanguage = (state, language) => ({ ...state, language: language === 'zh-CN' ? 'zh-CN' : 'en' });
+export const openWorkflow = (state, workflowId) => ({ ...state, workflowId, workflowStep: 0, inspectorId: null, commandOpen: false });
+export const closeWorkflow = (state) => ({ ...state, workflowId: null, workflowStep: 0 });
+export const advanceWorkflow = (state) => ({ ...state, workflowStep: state.workflowStep + 1 });
+export const rewindWorkflow = (state) => ({ ...state, workflowStep: Math.max(0, state.workflowStep - 1) });
 export const setToast = (state, toast) => ({ ...state, toast });

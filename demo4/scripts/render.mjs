@@ -1,4 +1,6 @@
 import { brandPulseData } from './data.mjs';
+import { CHINESE_LANGUAGE, localizeHtml, translateText } from './i18n.mjs';
+import { workflowCatalog, workflowForPage } from './workflows.mjs';
 
 const iconPaths = {
   home: ['M4 10.5 12 4l8 6.5V20H4z', 'M9 20v-6h6v6'],
@@ -40,6 +42,14 @@ function nestedAction(label, attributes = '', tone = 'dark') {
   return `<button class="nested-action tone-${tone}" type="button" ${attributes}><span>${label}</span><i>${icon('arrow', 14)}</i></button>`;
 }
 
+function renderLanguageSwitch(state, mobile = false) {
+  const chineseActive = state.language === CHINESE_LANGUAGE;
+  const label = chineseActive ? 'Switch to English' : '切换到中文';
+  return `<button class="language-switch${mobile ? ' mobile-language-switch' : ''}" type="button" data-language-toggle aria-label="${label}" title="${label}">
+    <span class="${chineseActive ? '' : 'is-active'}">EN</span><span class="${chineseActive ? 'is-active' : ''}">中文</span>
+  </button>`;
+}
+
 function navGroup(item, state) {
   const activeChild = item.children?.some((child) => child.id === state.activePage);
   const active = state.activePage === item.id || activeChild;
@@ -76,10 +86,11 @@ function renderTopbar(state) {
       <button class="command-trigger" type="button" data-open-command aria-label="Search or jump to">${icon('search', 16)}<span>Search or jump to</span><kbd>⌘ K</kbd></button>
       <label class="period-control">${icon('calendar', 15)}<span class="sr-only">Date range</span><select data-period><option value="7d" ${state.selectedPeriod === '7d' ? 'selected' : ''}>Last 7 days</option><option value="30d" ${state.selectedPeriod === '30d' ? 'selected' : ''}>Last 30 days</option><option value="90d" ${state.selectedPeriod === '90d' ? 'selected' : ''}>Last 90 days</option></select>${icon('chevron', 12)}</label>
       <label class="demo-control"><span class="sr-only">Demo state</span><select data-demo-state><option value="normal" ${state.demoState === 'normal' ? 'selected' : ''}>Normal</option><option value="empty" ${state.demoState === 'empty' ? 'selected' : ''}>Empty</option><option value="loading" ${state.demoState === 'loading' ? 'selected' : ''}>Loading</option><option value="error" ${state.demoState === 'error' ? 'selected' : ''}>Error</option><option value="permission" ${state.demoState === 'permission' ? 'selected' : ''}>Permission</option><option value="success" ${state.demoState === 'success' ? 'selected' : ''}>Success</option></select>${icon('chevron', 12)}</label>
+      ${renderLanguageSwitch(state)}
       <button class="icon-control bell-control" type="button" data-page="notifications" aria-label="Open notifications">${icon('bell', 17)}<i></i></button>
       <button class="account-control" type="button" data-toast="Account menu opened">G</button>
     </div>
-    <div class="mobile-tools"><label>${icon('calendar', 14)}<select data-period aria-label="Mobile date range"><option value="7d" ${state.selectedPeriod === '7d' ? 'selected' : ''}>7 days</option><option value="30d" ${state.selectedPeriod === '30d' ? 'selected' : ''}>30 days</option><option value="90d" ${state.selectedPeriod === '90d' ? 'selected' : ''}>90 days</option></select></label><label><select data-demo-state aria-label="Mobile demo state"><option value="normal" ${state.demoState === 'normal' ? 'selected' : ''}>Normal</option><option value="empty" ${state.demoState === 'empty' ? 'selected' : ''}>Empty</option><option value="loading" ${state.demoState === 'loading' ? 'selected' : ''}>Loading</option><option value="error" ${state.demoState === 'error' ? 'selected' : ''}>Error</option><option value="permission" ${state.demoState === 'permission' ? 'selected' : ''}>Permission</option><option value="success" ${state.demoState === 'success' ? 'selected' : ''}>Success</option></select></label><button type="button" data-page="notifications" aria-label="Open notifications">${icon('bell', 14)}</button></div>
+    <div class="mobile-tools"><label>${icon('calendar', 14)}<select data-period aria-label="Mobile date range"><option value="7d" ${state.selectedPeriod === '7d' ? 'selected' : ''}>7 days</option><option value="30d" ${state.selectedPeriod === '30d' ? 'selected' : ''}>30 days</option><option value="90d" ${state.selectedPeriod === '90d' ? 'selected' : ''}>90 days</option></select></label><label><select data-demo-state aria-label="Mobile demo state"><option value="normal" ${state.demoState === 'normal' ? 'selected' : ''}>Normal</option><option value="empty" ${state.demoState === 'empty' ? 'selected' : ''}>Empty</option><option value="loading" ${state.demoState === 'loading' ? 'selected' : ''}>Loading</option><option value="error" ${state.demoState === 'error' ? 'selected' : ''}>Error</option><option value="permission" ${state.demoState === 'permission' ? 'selected' : ''}>Permission</option><option value="success" ${state.demoState === 'success' ? 'selected' : ''}>Success</option></select></label>${renderLanguageSwitch(state, true)}<button type="button" data-page="notifications" aria-label="Open notifications">${icon('bell', 14)}</button></div>
   </header>`;
 }
 
@@ -168,7 +179,9 @@ function renderOverview(state) {
 }
 
 function renderPageIntro(view, state) {
-  const action = state.demoState === 'permission' ? '<button class="nested-action tone-light" type="button" disabled aria-disabled="true"><span>Role required</span></button>' : nestedAction(view.action, `data-toast="${view.action} flow opened"`, 'brand');
+  const workflowId = workflowForPage(view.id);
+  const actionAttributes = workflowId ? `data-workflow="${workflowId}"` : `data-toast="${view.action} flow opened"`;
+  const action = state.demoState === 'permission' ? '<button class="nested-action tone-light" type="button" disabled aria-disabled="true"><span>Role required</span></button>' : nestedAction(view.action, actionAttributes, 'brand');
   return `<section class="module-intro reveal"><div><span class="eyebrow">${view.eyebrow}</span><h1>${view.thesis}</h1><p>${view.title} · Northstar Labs / US Store</p></div>${action}</section>`;
 }
 
@@ -217,13 +230,154 @@ function renderEmptyState(title, copy, action, page) {
   return `<section class="empty-state reveal"><span class="empty-mark"><i></i><i></i><i></i></span><span class="eyebrow">READY WHEN YOU ARE</span><h1>${title}</h1><p>${copy}</p>${nestedAction(action, `data-page="${page}"`, 'brand')}</section>`;
 }
 
+function renderReferenceWorkflow(view) {
+  const workflowId = workflowForPage(view.id);
+  const workflow = workflowCatalog[workflowId];
+  if (!workflow) return '';
+  return `<section class="reference-workflow reveal" aria-label="Reference-backed workflow preview">
+    <div class="reference-index"><span>REFERENCE-BACKED WORKFLOW</span><b>0${workflow.steps.length}</b></div>
+    <div class="reference-copy"><span class="eyebrow">${workflow.eyebrow}</span><h2>${workflow.title}</h2><p>${workflow.summary}</p></div>
+    <div class="reference-capabilities">${workflow.capabilities.map((item) => `<span>${item}</span>`).join('')}</div>
+    ${nestedAction('Open interactive flow', `data-workflow="${workflowId}"`, 'dark')}
+  </section>`;
+}
+
+function workflowField(label, control, wide = false) {
+  return `<label class="workflow-field ${wide ? 'is-wide' : ''}"><span>${label}</span>${control}</label>`;
+}
+
+function renderPartnerInviteDemo() {
+  return `<div class="workflow-demo-grid">
+    <section class="workflow-section is-wide"><header><span>01 / Discovery signal</span><strong>Filter for the right audience</strong></header><div class="workflow-fields four-up">
+      ${workflowField('Category', '<select><option>Home & lifestyle</option><option>Beauty</option><option>Technology</option></select>')}
+      ${workflowField('Customer reach', '<select><option>United States</option><option>Canada</option></select>')}
+      ${workflowField('Platform', '<select><option>Instagram + Blog</option><option>YouTube</option><option>TikTok</option></select>')}
+      ${workflowField('Followers', '<select><option>25K — 250K</option><option>250K+</option></select>')}
+    </div></section>
+    <section class="workflow-profile"><span class="profile-orbit">NM</span><div><small>94% audience fit</small><strong>Northstar Media</strong><p>Editorial commerce · US · 186K monthly reach</p></div><span class="status-pill">High fit</span></section>
+    <section class="workflow-section"><header><span>02 / Channel profile</span><strong>Recent content</strong></header><div class="content-preview"><i></i><div><b>Summer home edit</b><small>Instagram · 42K views</small></div></div><div class="tag-row"><span>#homedesign</span><span>#amazonfinds</span><span>#giftguide</span></div></section>
+    <section class="workflow-section is-wide"><header><span>03 / Invitation</span><strong>Compose with partner context</strong></header><div class="workflow-fields">
+      ${workflowField('Recipient channel', '<select><option>Email · hello@northstarmedia.co</option><option>Platform inbox</option></select>')}
+      ${workflowField('Template', '<select><option>Editorial partner invitation</option><option>Creator launch invitation</option></select>')}
+      ${workflowField('Subject', '<input value="A curated Northstar Labs partnership" autocomplete="off">', true)}
+      ${workflowField('Message', '<textarea rows="4">Hi Maya — your recent home edit is a strong match for our summer collection. We would love to invite you to the Northstar partner program.</textarea>', true)}
+    </div></section>
+  </div>`;
+}
+
+function renderBulkInviteDemo() {
+  return `<div class="workflow-demo-grid">
+    <section class="workflow-section is-wide"><header><span>01 / Invite source</span><strong>Bring your audience list</strong></header>${workflowField('Reusable invitation link', '<div class="copy-field"><input value="yeahpromos.com/invite/northstar-26" readonly><button type="button" data-toast="Invitation link copied">Copy</button></div>', true)}<div class="method-tabs"><button class="is-active" type="button">Manual entry</button><button type="button" data-toast="CSV picker opened">Upload CSV</button></div></section>
+    <section class="workflow-section"><header><span>02 / Recipients</span><strong>3 ready to invite</strong></header><div class="recipient-list"><span><i>ML</i><b>Maya Lee</b><small>maya@northstar.media</small></span><span><i>AR</i><b>Alex Reed</b><small>alex@dealroom.co</small></span><span><i>SK</i><b>Sora Kim</b><small>sora@shopperedit.com</small></span></div></section>
+    <section class="workflow-section"><header><span>Batch quality</span><strong>All recipients valid</strong></header><div class="quality-ring"><b>100%</b><span>Email validation</span></div><p class="workflow-note">Duplicates are removed before the batch is queued.</p></section>
+    <section class="workflow-section is-wide"><header><span>03 / Shared message</span><strong>Personalization remains available</strong></header><div class="workflow-fields">${workflowField('Template', '<select><option>Summer recruitment · Editorial</option></select>')}${workflowField('Subject', '<input value="A new Northstar Labs partner opportunity">')}${workflowField('Message', '<textarea rows="4">Hi {{first_name}}, we selected your channel for our summer partner cohort. Explore the collection and preferred commission terms below.</textarea>', true)}</div></section>
+  </div>`;
+}
+
+function renderApplicationReviewDemo() {
+  return `<div class="workflow-demo-grid">
+    <section class="applicant-card is-wide"><div class="applicant-identity"><span>ME</span><div><small>Application #YP-2048</small><strong>Mara Edit</strong><p>Lifestyle creator · United States</p></div></div><div class="applicant-stats"><span><b>128K</b><small>Followers</small></span><span><b>4.8%</b><small>Engagement</small></span><span><b>89%</b><small>Audience fit</small></span></div></section>
+    <section class="workflow-section"><header><span>01 / Evidence</span><strong>Channel footprint</strong></header><div class="channel-list"><span>Instagram <b>Verified</b></span><span>YouTube <b>42K subs</b></span><span>Website <b>12K / mo</b></span></div></section>
+    <section class="workflow-section"><header><span>Application note</span><strong>Why this brand</strong></header><blockquote>“My audience asks for design-forward products that still feel practical. Northstar fits that exact brief.”</blockquote></section>
+    <section class="workflow-section is-wide"><header><span>02 / Decision controls</span><strong>Choose the relationship path</strong></header><div class="decision-grid"><label class="toggle-line"><span><b>Auto-approve verified channels</b><small>Apply to future applications with 80%+ fit</small></span><input type="checkbox"><i></i></label><div class="decision-actions"><button type="button" data-toast="Application rejected">Reject application</button><button class="is-primary" type="button" data-toast="Application approved">Approve partner</button></div></div></section>
+  </div>`;
+}
+
+function renderProductFilterDemo() {
+  return `<div class="workflow-demo-grid">
+    <section class="workflow-section is-wide"><header><span>01 / Amazon scope</span><strong>Choose storefront and rule behavior</strong></header><div class="workflow-fields">${workflowField('Storefront', '<select><option>Northstar Labs · Amazon US</option><option>Northstar Labs · Amazon CA</option></select>')}${workflowField('Rule type', '<select><option>Whitelist selected products</option><option>Exclude selected products</option></select>')}</div></section>
+    <section class="workflow-section"><header><span>02 / Product rules</span><strong>Parent ASIN whitelist</strong></header>${workflowField('One ASIN per line', '<textarea rows="7">B0C8NORTH1\nB0D4LUMEN2\nB0F2ROAM03</textarea>', true)}<small class="validation-copy">ASIN starts with B and uses 10 characters.</small></section>
+    <section class="workflow-section"><header><span>Validation preview</span><strong>3 accepted · 0 rejected</strong></header><div class="validation-stack"><span><i></i>B0C8NORTH1 <b>Accepted</b></span><span><i></i>B0D4LUMEN2 <b>Accepted</b></span><span><i></i>B0F2ROAM03 <b>Accepted</b></span></div></section>
+    <section class="workflow-section is-wide"><header><span>03 / Upload history</span><strong>Changes remain traceable</strong></header><div class="history-row"><span><b>northstar_whitelist_aug.csv</b><small>Uploaded by Guowv · 4 minutes ago</small></span><em>3 products</em><strong>Ready</strong></div></section>
+  </div>`;
+}
+
+function renderCommissionRuleDemo() {
+  return `<div class="workflow-demo-grid">
+    <section class="workflow-section is-wide"><header><span>01 / Rule basics</span><strong>Define the commercial intent</strong></header><div class="workflow-fields">${workflowField('Rule name', '<input value="Summer editorial accelerator">')}${workflowField('Commission rate', '<div class="suffix-field"><input type="number" value="18"><span>%</span></div>')}${workflowField('Starts', '<input type="date" value="2026-08-15">')}${workflowField('Ends', '<input type="date" value="2026-09-15">')}${workflowField('Description', '<textarea rows="3">Higher commission for selected editorial partners and summer products.</textarea>', true)}</div></section>
+    <section class="workflow-section is-wide"><header><span>02 / Conditions</span><strong>All selected conditions must match</strong></header><div class="condition-list"><div><span>01</span><label><small>Condition type</small><select><option>Parent ASIN</option><option>SKU</option><option>Category</option></select></label><label><small>Value</small><input value="B0C8NORTH1"></label><button type="button" aria-label="Remove condition">×</button></div><div><span>02</span><label><small>Condition type</small><select><option>Partner group</option><option>Partner</option><option>Customer</option></select></label><label><small>Value</small><select><option>Editorial Select</option></select></label><button type="button" aria-label="Remove condition">×</button></div><div><span>03</span><label><small>Condition type</small><select><option>Coupon Code</option><option>Category</option></select></label><label><small>Value</small><input value="NORTHSTAR20"></label><button type="button" aria-label="Remove condition">×</button></div></div><button class="add-condition" type="button" data-toast="New condition row added">+ Add condition</button></section>
+    <section class="rule-summary is-wide"><span>Effective logic</span><strong>18% when Parent ASIN + Editorial Select + NORTHSTAR20 match</strong><small>Estimated exposure · $12,480 commission / month</small></section>
+  </div>`;
+}
+
+function renderCouponBuilderDemo() {
+  return `<div class="workflow-demo-grid">
+    <section class="coupon-art"><span>NS</span><strong>SUMMER / 20</strong><small>Partner-exclusive offer</small><button type="button" data-toast="Image picker opened">Replace visual</button></section>
+    <section class="workflow-section"><header><span>01 / Offer identity</span><strong>Make the asset unmistakable</strong></header><div class="workflow-fields one-up">${workflowField('Title', '<input value="Summer Studio Event">')}${workflowField('Coupon code', '<input value="NORTHSTAR20">')}${workflowField('Destination link', '<input value="amazon.com/northstar/summer">')}${workflowField('Category', '<select><option>Home & lifestyle</option><option>Seasonal offer</option></select>')}</div></section>
+    <section class="workflow-section is-wide"><header><span>02 / Availability</span><strong>Control who can use it</strong></header><div class="availability-row"><label><input type="radio" name="coupon-visibility" checked><span><b>Public to partners</b><small>Visible in the shared offer library</small></span></label><label><input type="radio" name="coupon-visibility"><span><b>Private distribution</b><small>Only selected partner groups</small></span></label></div><div class="workflow-fields">${workflowField('End date', '<input type="date" value="2026-09-15">')}${workflowField('Restrictions', '<input value="One use per customer · US only">')}</div></section>
+  </div>`;
+}
+
+function renderTemplateLibraryDemo() {
+  return `<div class="template-workspace">
+    <aside class="template-folders"><span>LIBRARY</span><button class="is-active" type="button">Recruitment <b>04</b></button><button type="button">Campaigns <b>08</b></button><button type="button">Operations <b>03</b></button><button type="button">Archived <b>12</b></button></aside>
+    <div class="template-list"><button class="is-active" type="button"><small>INVITATION</small><strong>Editorial partner</strong><span>Updated today</span></button><button type="button"><small>INVITATION</small><strong>Creator launch</strong><span>Updated Aug 08</span></button><button type="button"><small>FOLLOW-UP</small><strong>Application reminder</strong><span>Updated Jul 28</span></button></div>
+    <section class="template-editor"><header><span>02 / Composer</span><strong>Editorial partner invitation</strong></header>${workflowField('Subject', '<input value="A curated Northstar Labs partnership">', true)}${workflowField('Message', '<textarea rows="8">Hi {{first_name}},\n\nYour recent editorial work feels closely aligned with Northstar Labs. We would love to invite you to our partner program with preferred access to the summer collection.\n\n— Northstar Partnerships</textarea>', true)}<footer><span>3 dynamic fields available</span><button type="button" data-toast="Template preview opened">Preview message</button></footer></section>
+  </div>`;
+}
+
+function renderReportBuilderDemo() {
+  return `<div class="workflow-demo-grid">
+    <section class="workflow-section is-wide"><header><span>01 / Measures</span><strong>Choose the decision lens</strong></header><div class="metric-picker"><button class="is-active" type="button">Sales</button><button type="button">Commission</button><button type="button">Orders</button><button type="button">Clicks</button><button type="button">CVR</button><button type="button">BRB</button></div><div class="workflow-fields">${workflowField('Date range', '<select><option>Last 30 days</option><option>Last 90 days</option></select>')}${workflowField('Arrange by', '<select><option>Publisher</option><option>Campaign</option><option>Product</option></select>')}</div></section>
+    <section class="report-signal"><span>TRACKED SALES</span><strong>$724,680</strong><small>+18.2% vs previous period</small><svg viewBox="0 0 280 80" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,70 38,59 75,63 112,40 150,46 190,26 230,31 280,8"></polyline></svg></section>
+    <section class="workflow-section"><header><span>Selected filters</span><strong>US · Approved · Editorial</strong></header><div class="tag-row"><span>Amazon US</span><span>Approved</span><span>Editorial</span></div><p class="workflow-note">The saved report keeps dimensions, filters, and sort order together.</p></section>
+    <section class="workflow-section is-wide"><header><span>02 / Transaction preview</span><strong>Decision-ready detail</strong></header><div class="mini-table"><span><b>Publisher</b><b>Orders</b><b>Sales</b><b>Commission</b></span><span><strong>Northstar Media</strong><em>1,284</em><em>$186,420</em><em>$24,860</em></span><span><strong>The Dealroom</strong><em>842</em><em>$128,940</em><em>$18,420</em></span><span><strong>Shopper Edit</strong><em>619</em><em>$92,680</em><em>$12,180</em></span></div><div class="inline-actions"><button type="button" data-toast="Report saved">Save report</button><button class="is-primary" type="button" data-toast="CSV export prepared">Export CSV</button></div></section>
+  </div>`;
+}
+
+function renderPaymentFlowDemo() {
+  return `<div class="workflow-demo-grid">
+    <section class="balance-stage is-wide"><div><span>AVAILABLE BALANCE</span><strong>$42,860.40</strong><small>9 days of payout coverage</small></div><i><b style="transform:scaleX(.72)"></b></i><div class="balance-meta"><span>Next payout <b>$31,280</b></span><span>Scheduled <b>Aug 16</b></span></div></section>
+    <section class="workflow-section"><header><span>01 / Add funds</span><strong>Prepare the next cycle</strong></header><div class="workflow-fields one-up">${workflowField('Deposit amount', '<div class="prefix-field"><span>$</span><input type="number" value="25000"></div>')}${workflowField('Payment method', '<select><option>Bank · ending 0284</option><option>Wire transfer</option></select>')}${workflowField('Reference', '<input value="August partner funding">')}</div><button class="inline-primary" type="button" data-toast="Deposit review opened">Review deposit</button></section>
+    <section class="workflow-section"><header><span>02 / Reconcile</span><strong>Recent finance records</strong></header><div class="invoice-list"><button type="button" data-toast="Invoice INV-2026-0812 opened"><span><b>INV-2026-0812</b><small>Platform subscription</small></span><em>$2,400</em><strong>Paid</strong></button><button type="button" data-toast="Invoice INV-2026-0808 opened"><span><b>INV-2026-0808</b><small>Sample fulfillment</small></span><em>$6,280</em><strong class="is-attention">Awaiting</strong></button></div><button class="download-line" type="button" data-toast="Invoice download prepared">Download selected invoice</button></section>
+  </div>`;
+}
+
+function renderPermissionBuilderDemo() {
+  return `<div class="workflow-demo-grid">
+    <section class="workflow-section is-wide"><header><span>01 / Account scope</span><strong>Invite by role, not by guesswork</strong></header><div class="workflow-fields">${workflowField('Account name', '<input value="Elena Finance">')}${workflowField('Email address', '<input type="email" value="elena@northstarlabs.com">')}${workflowField('Brand access', '<select><option>Northstar Labs · US Store</option><option>All Northstar brands</option></select>', true)}</div></section>
+    <section class="permission-column"><header><span>ALL PERMISSIONS</span><strong>Choose capabilities</strong></header><label><input type="checkbox" checked><span><b>Finance</b><small>Balance, payments, invoices</small></span></label><label><input type="checkbox" checked><span><b>Transactions</b><small>Review and approve records</small></span></label><label><input type="checkbox"><span><b>Partner management</b><small>Invite, approve, message</small></span></label><label><input type="checkbox"><span><b>Campaign operations</b><small>Create and publish campaigns</small></span></label></section>
+    <section class="permission-column is-allowed"><header><span>Permission allowed</span><strong>Final access set</strong></header><div><span>01</span><p><b>Finance operator</b><small>Balance · Payments · Invoices</small></p><button type="button" aria-label="Remove finance permission">×</button></div><div><span>02</span><p><b>Transaction reviewer</b><small>View · Approve · Export</small></p><button type="button" aria-label="Remove transaction permission">×</button></div><footer>2 capability groups · 1 brand</footer></section>
+  </div>`;
+}
+
+function renderWorkflowDemo(workflowId) {
+  return ({
+    'partner-invite': renderPartnerInviteDemo,
+    'bulk-invite': renderBulkInviteDemo,
+    'application-review': renderApplicationReviewDemo,
+    'product-filter': renderProductFilterDemo,
+    'commission-rule': renderCommissionRuleDemo,
+    'coupon-builder': renderCouponBuilderDemo,
+    'template-library': renderTemplateLibraryDemo,
+    'report-builder': renderReportBuilderDemo,
+    'payment-flow': renderPaymentFlowDemo,
+    'permission-builder': renderPermissionBuilderDemo,
+  }[workflowId] ?? (() => ''))();
+}
+
+function renderWorkflowPanel(state) {
+  const workflow = workflowCatalog[state.workflowId];
+  if (!workflow) return '';
+  const activeStep = Math.min(state.workflowStep, workflow.steps.length - 1);
+  const isLastStep = activeStep === workflow.steps.length - 1;
+  return `<div class="workflow-layer"><button class="workflow-scrim" type="button" data-close-workflow aria-label="Close workflow"></button><aside class="workflow-panel" role="dialog" aria-label="${workflow.ariaLabel}" aria-modal="true">
+    <div class="workflow-shell"><div class="workflow-core">
+      <header class="workflow-head"><div><span class="eyebrow">${workflow.eyebrow}</span><h2>${workflow.title}</h2><p>${workflow.summary}</p></div><button class="icon-control" type="button" data-close-workflow aria-label="Close">${icon('close', 17)}</button></header>
+      <div class="workflow-stepper">${workflow.steps.map((step, index) => `<span class="${index === activeStep ? 'is-active' : ''} ${index < activeStep ? 'is-complete' : ''}"><b>${index < activeStep ? icon('check', 12) : String(index + 1).padStart(2, '0')}</b><small>${step}</small></span>`).join('')}<i><b style="transform:scaleX(${(activeStep + 1) / workflow.steps.length})"></b></i></div>
+      <div class="workflow-scroll">${renderWorkflowDemo(workflow.id)}</div>
+      <footer class="workflow-footer"><div><span>${workflow.source}</span><strong>Illustrative data · no changes will be saved</strong></div><div>${activeStep > 0 ? '<button class="workflow-back" type="button" data-workflow-back>Back</button>' : ''}${isLastStep ? nestedAction('Finish demo', 'data-workflow-finish', 'brand') : nestedAction(`Continue to ${workflow.steps[activeStep + 1]}`, 'data-workflow-next', 'dark')}</div></footer>
+    </div></div>
+  </aside></div>`;
+}
+
 function renderModule(state) {
   const view = brandPulseData.views[state.activePage];
   if (!view) return renderEmptyState('Page not found', 'Choose another workspace page from the sidebar.', 'Return to overview', 'overview');
   if (state.demoState === 'loading') return renderLoadingState();
   if (state.demoState === 'empty') return renderEmptyState(`No ${view.title.toLowerCase()} yet`, `Create the first record or change the current filters to begin working in ${view.title}.`, 'Show sample data', state.activePage).replace(`data-page="${state.activePage}"`, 'data-demo-reset');
   const layout = view.type === 'dossier' ? renderDossier(view, state) : view.type === 'canvas' ? renderCanvas(view, state) : view.type === 'ledger' ? renderLedger(view, state) : renderMatrix(view, state);
-  return `<div class="module-page type-${view.type}">${renderPageIntro(view, state)}${renderModuleMetrics(view)}${layout}</div>`;
+  return `<div class="module-page type-${view.type}">${renderPageIntro(view, state)}${renderModuleMetrics(view)}${renderReferenceWorkflow(view)}${layout}</div>`;
 }
 
 function currentRecord(state) {
@@ -242,7 +396,11 @@ function renderInspector(state) {
 function renderCommandPalette(state) {
   if (!state.commandOpen) return '';
   const query = state.commandQuery.trim().toLowerCase();
-  const results = brandPulseData.commands.filter((command) => !query || `${command.label} ${command.hint} ${command.group}`.toLowerCase().includes(query));
+  const results = brandPulseData.commands.filter((command) => {
+    const english = `${command.label} ${command.hint} ${command.group}`;
+    const localized = translateText(english, state.language);
+    return !query || `${english} ${localized}`.toLowerCase().includes(query);
+  });
   return `<div class="command-layer"><button class="command-scrim" type="button" data-close-command aria-label="Close command menu"></button><section class="command-palette" role="dialog" aria-modal="true" aria-label="Command menu"><div class="command-search">${icon('search', 18)}<input type="search" name="command-search" aria-label="Search commands" autocomplete="off" placeholder="Search actions, partners, transactions or pages" value="${escapeHtml(state.commandQuery)}" data-command-input><kbd>ESC</kbd></div><div class="command-results">${results.length ? results.map((command, index) => `<button type="button" data-command-page="${command.page}" ${command.record ? `data-command-record="${command.record}"` : ''}><span class="command-index">${String(index + 1).padStart(2, '0')}</span><span><small>${command.group}</small><strong>${command.label}</strong><em>${command.hint}</em></span>${icon('arrow', 14)}</button>`).join('') : '<div class="command-empty">No matching command. Try “transaction” or “partner”.</div>'}</div><footer><span>Type to filter</span><span>Click to open</span><span>Esc close</span></footer></section></div>`;
 }
 
@@ -251,5 +409,6 @@ function renderToast(state) {
 }
 
 export function renderApp(state) {
-  return `<div class="brand-pulse ${state.sidebarCollapsed ? 'sidebar-collapsed' : ''}">${renderSidebar(state)}<main class="workspace" id="main-content"><div class="workspace-frame">${renderTopbar(state)}${renderStateBanner(state)}${state.activePage === 'overview' ? renderOverview(state) : renderModule(state)}</div></main>${state.mobileNavOpen ? '<button class="mobile-scrim" type="button" data-close-nav aria-label="Close navigation"></button>' : ''}${renderInspector(state)}${renderCommandPalette(state)}${renderToast(state)}</div>`;
+  const html = `<div class="brand-pulse ${state.language === CHINESE_LANGUAGE ? 'is-zh' : ''} ${state.sidebarCollapsed ? 'sidebar-collapsed' : ''}">${renderSidebar(state)}<main class="workspace" id="main-content"><div class="workspace-frame">${renderTopbar(state)}${renderStateBanner(state)}${state.activePage === 'overview' ? renderOverview(state) : renderModule(state)}</div></main>${state.mobileNavOpen ? '<button class="mobile-scrim" type="button" data-close-nav aria-label="Close navigation"></button>' : ''}${renderInspector(state)}${renderCommandPalette(state)}${renderWorkflowPanel(state)}${renderToast(state)}</div>`;
+  return localizeHtml(html, state.language);
 }

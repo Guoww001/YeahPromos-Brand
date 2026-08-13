@@ -31,7 +31,7 @@ h1, h2, h3, p { text-wrap: balance; }
 .round-link { display: grid; width: 42px; height: 42px; flex: 0 0 auto; place-items: center; color: #fff; background: var(--ink); border-radius: 50%; transition: transform 300ms var(--motion), background 300ms var(--motion); }
 .round-link:hover { background: var(--brand); transform: translate(2px, -2px); }
 .section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
-.section-heading h2 { max-width: 590px; margin: 10px 0 0; font-size: clamp(20px, 2vw, 29px); letter-spacing: -.045em; line-height: 1.16; }
+.section-heading h2 { max-width: 590px; margin: 10px 0 0; font-size: clamp(20px, 2vw, 29px); letter-spacing: -.02em; line-height: 1.16; }
 .tone-positive { --tone: var(--mint-ink); --tone-bg: #EAFBF0; --tone-line: #58C98B; }
 .tone-brand, .tone-attention { --tone: var(--brand); --tone-bg: var(--surface-rose); --tone-line: var(--brand); }
 .tone-risk { --tone: var(--brand-dark); --tone-bg: #FFE9EA; --tone-line: var(--coral); }

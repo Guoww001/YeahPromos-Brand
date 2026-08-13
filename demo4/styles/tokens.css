@@ -47,22 +47,22 @@
   --ink: #111111;
   --ink-soft: #383537;
   --graphite: #666366;
-  --muted: #969194;
+  --muted: #706B6F;
   --brand: #F20A4F;
   --brand-dark: #72062A;
   --coral: #FF6368;
   --mint: #C9F5D8;
   --mint-ink: #11623C;
   --blue: #91B5FF;
-  --line: rgba(17, 17, 17, .075);
-  --line-strong: rgba(17, 17, 17, .14);
+  --line: rgba(17, 17, 17, .095);
+  --line-strong: rgba(17, 17, 17, .17);
   --brand-line: rgba(242, 10, 79, .18);
   --shadow-soft: 0 24px 70px rgba(74, 12, 34, .07);
   --shadow-float: 0 30px 90px rgba(66, 9, 29, .14);
   --radius-shell: 29px;
   --radius-core: 23px;
   --radius-control: 14px;
-  --sidebar-width: 238px;
+  --sidebar-width: 252px;
   --sidebar-collapsed: 76px;
   --motion: cubic-bezier(.32, .72, 0, 1);
 }

@@ -67,3 +67,11 @@ test('折叠导航、图表数据与移动端控件保留可访问能力', () =>
   assert.match(commandHtml, /class="command-search"[\s\S]+aria-label="Search commands"/);
   assert.doesNotMatch(shell, /\.period-control select, \.demo-control select \{[^}]+outline:\s*0/);
 });
+
+test('应用入口绑定参考功能抽屉的完整交互事件', () => {
+  const app = read('scripts/app.mjs');
+
+  assert.match(app, /dataset\.workflow/);
+  assert.match(app, /dataset\.workflowNext/);
+  assert.match(app, /dataset\.closeWorkflow/);
+});

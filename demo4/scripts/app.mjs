@@ -1,25 +1,44 @@
 import { renderApp } from './render.mjs';
 import {
+  advanceWorkflow,
+  closeWorkflow,
   closeInspector,
   createBrandPulseState,
   navigateTo,
+  openWorkflow,
   openInspector,
+  rewindWorkflow,
   selectMetric,
   selectPeriod,
   setActiveFilter,
   setCommandOpen,
   setCommandQuery,
   setDemoState,
+  setLanguage,
   setMobileNavOpen,
   setToast,
   toggleSidebar,
 } from './state.mjs';
 
 const app = document.querySelector('#app');
-let state = createBrandPulseState();
+const LANGUAGE_STORAGE_KEY = 'yeahpromos-demo4-language';
+
+function readLanguagePreference() {
+  try {
+    return localStorage.getItem(LANGUAGE_STORAGE_KEY) === 'zh-CN' ? 'zh-CN' : 'en';
+  } catch {
+    return 'en';
+  }
+}
+
+let state = createBrandPulseState({ language: readLanguagePreference() });
 let toastTimer;
 
 function render({ focusCommand = false } = {}) {
+  document.documentElement.lang = state.language;
+  document.title = state.language === 'zh-CN' ? 'YeahPromos · 品牌脉搏' : 'YeahPromos · Brand Pulse';
+  const skipLink = document.querySelector('.skip-link');
+  if (skipLink) skipLink.textContent = state.language === 'zh-CN' ? '跳转到主要内容' : 'Skip to content';
   app.innerHTML = renderApp(state);
   if (focusCommand) requestAnimationFrame(() => app.querySelector('[data-command-input]')?.focus());
 }
@@ -60,8 +79,44 @@ app.addEventListener('click', (event) => {
     render();
     return;
   }
+  if (button.dataset.languageToggle !== undefined) {
+    const nextLanguage = state.language === 'zh-CN' ? 'en' : 'zh-CN';
+    state = setLanguage(state, nextLanguage);
+    try {
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, state.language);
+    } catch {
+      // file:// 或隐私模式可能禁用存储，当前会话内切换仍然有效。
+    }
+    render();
+    return;
+  }
   if (button.dataset.demoReset !== undefined) {
     state = setDemoState(state, 'normal');
+    render();
+    return;
+  }
+  if (button.dataset.workflow) {
+    state = openWorkflow(state, button.dataset.workflow);
+    render();
+    return;
+  }
+  if (button.dataset.workflowNext !== undefined) {
+    state = advanceWorkflow(state);
+    render();
+    return;
+  }
+  if (button.dataset.workflowBack !== undefined) {
+    state = rewindWorkflow(state);
+    render();
+    return;
+  }
+  if (button.dataset.workflowFinish !== undefined) {
+    state = closeWorkflow(state);
+    notify('Workflow demo completed');
+    return;
+  }
+  if (button.dataset.closeWorkflow !== undefined) {
+    state = closeWorkflow(state);
     render();
     return;
   }
@@ -131,6 +186,7 @@ document.addEventListener('keydown', (event) => {
   }
   if (event.key === 'Escape') {
     if (state.commandOpen) state = setCommandOpen(state, false);
+    else if (state.workflowId) state = closeWorkflow(state);
     else if (state.inspectorId) state = closeInspector(state);
     else if (state.mobileNavOpen) state = setMobileNavOpen(state, false);
     else return;
