@@ -19,6 +19,11 @@
   font-size: 12px;
 }
 
+/* demo4 的语言开关位于顶栏右侧，桌面端将 Demo 切换器下移，避免覆盖。 */
+body[data-demo-page="demo4"] .demo-switcher {
+  top: 96px;
+}
+
 .demo-switcher[hidden],
 .demo-switcher__panel[hidden] {
   display: none;
@@ -216,6 +221,10 @@
     top: 12px;
     right: 12px;
     width: min(270px, calc(100vw - 24px));
+  }
+
+  body[data-demo-page="demo4"] .demo-switcher {
+    top: 12px;
   }
 }
 

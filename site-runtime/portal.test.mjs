@@ -7,6 +7,7 @@ const portalIndex = resolve(import.meta.dirname, "portal", "index.html");
 const distClient = resolve(import.meta.dirname, "..", "dist", "client");
 const demo2Styles = resolve(import.meta.dirname, "..", "demo2", "src", "styles", "scheme-six.css");
 const demo3Styles = resolve(import.meta.dirname, "..", "demo3", "styles", "control-room.css");
+const standaloneSwitcherStyles = resolve(import.meta.dirname, "demo-switcher", "standalone-nav.css");
 
 test("统一入口提供四个 demo 的切换入口和预览容器", () => {
   assert.ok(existsSync(portalIndex), "统一入口文件应该存在");
@@ -41,4 +42,11 @@ test("demo2 和 demo3 的侧栏保留滚动能力但隐藏滚动条", () => {
     assert.match(css, /-ms-overflow-style:\s*none/);
     assert.match(css, /\.sidebar::?-webkit-scrollbar|\.sidebar__navigation::?-webkit-scrollbar/);
   }
+});
+
+test("demo4 的切换按钮为语言按钮留出独立的桌面位置", () => {
+  const css = readFileSync(standaloneSwitcherStyles, "utf8");
+  assert.match(css, /body\[data-demo-page=["']demo4["']\]\s+\.demo-switcher/);
+  assert.match(css, /body\[data-demo-page=["']demo4["']\]\s+\.demo-switcher[\s\S]*?top:\s*96px/);
+  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*?body\[data-demo-page=["']demo4["']\]\s+\.demo-switcher[\s\S]*?top:\s*12px/);
 });
