@@ -4,7 +4,7 @@
 
 - 产品：YeahPromos 商家侧站内后台
 - 目标：在视觉探索前，确定全量站内功能框架
-- 证据：`pb_manual_images` 中 40 张 PartnerBoost 商家手册图片
+- 证据：`pb_manual_images` 中 40 张原框架图片，加上 `onboarding_images` 中 25 张 Amazon 商家入驻补充图片，共 65 张
 - 审计模式：产品流程、信息架构与可访问性风险的联合审计
 - 限制：素材不是连续录屏，也不含真实接口、权限配置、响应式行为或错误处理；因此不能据此声称完整可用性或 WCAG 合规
 
@@ -38,6 +38,12 @@
 ### 对达人与媒体保留了不同画像
 
 达人画像强调社交平台、粉丝、内容和互动；媒体画像强调推广方式、站点渠道、受众地域、排名和访问。这两个对象不应被强行压成完全相同的数据卡片。
+
+### 新增证据补齐了 Amazon 商家启用主链路
+
+补充素材明确展示了“新增/切换品牌站点 → 完善品牌资料 → 设置项目参数 → Amazon 授权 → ASIN 筛选 → 商品自动同步 → 充值”的连续链路。原框架中 Brand Integration、Account Details、Program Settings 和 Payment Methods 不再只是菜单引用，应提升为已确认能力。
+
+同时，授权素材来自至少两个界面版本：一版使用集成指南与首页 URL 验证，另一版选择 Amazon Profile 与 Storefront。框架必须保留版本/账号类型分流，不能把两种画面误写成固定连续步骤。完整合同见 [Amazon 商家入驻、站点授权与商品启用](07-amazon-merchant-onboarding-and-products.md)。
 
 ### 已存在跨品牌和团队权限概念
 

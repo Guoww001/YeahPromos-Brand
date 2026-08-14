@@ -1,6 +1,6 @@
 # YeahPromos 商家端产品框架
 
-> Merchant-side product framework · v0.1 · 待业务评审
+> Merchant-side product framework · v0.2 · 待业务评审
 
 本仓库当前只定义 **站内产品框架**：栏目、页面职责、功能、字段、状态、权限、流程分支和验收边界。它不是桌面 Demo，不包含视觉风格、高保真页面、前端工程或后端实现。
 
@@ -23,6 +23,7 @@
 ### 包含
 
 - 商家站内全局导航、账户与品牌上下文
+- Amazon 商家新增站点、品牌资料、项目参数、店铺授权与商品启用
 - 伙伴发现、邀请、申请审核、伙伴关系与分组
 - 活动入口及其与伙伴、素材、数据的站内关系
 - 商品、优惠券、佣金规则、邮件模板等推广资产
@@ -43,7 +44,7 @@
 
 | 标签 | 含义 | 如何处理 |
 |---|---|---|
-| `C · Confirmed` | 40 张素材中直接展示 | 进入框架基线 |
+| `C · Confirmed` | 65 张素材（40 张原框架证据 + 25 张 Amazon 入驻补充证据）中直接展示 | 进入框架基线 |
 | `R · Referenced` | 只在菜单、入口或跳转中出现 | 保留栏目，详细需求待补 |
 | `P · Proposed` | 为形成完整站内闭环而提出 | 需业务确认后进入基线 |
 | `X · Excluded` | 明确为站外或本阶段不做 | 不进入后续 Demo |
@@ -77,8 +78,9 @@ flowchart LR
 3. [完整功能目录](docs/02-functional-catalog.md)：页面内容、字段、动作、状态和优先级。
 4. [核心流程与分支](docs/03-core-flows-and-branches.md)：招募、审核、配置、复盘和权限闭环。
 5. [领域数据、状态与权限](docs/04-domain-data-states-and-permissions.md)：后续设计和研发共用的产品契约。
-6. [素材证据矩阵](docs/05-source-evidence-matrix.md)：40 张文件逐项对应到功能。
+6. [素材证据矩阵](docs/05-source-evidence-matrix.md)：65 张文件（40 张原框架 + 25 张 Amazon 入驻补充）逐项对应到功能。
 7. [框架确认清单](docs/06-framework-review-checklist.md)：需要你做出的具体决定。
+8. [Amazon 商家入驻、站点授权与商品启用](docs/07-amazon-merchant-onboarding-and-products.md)：新增站点到商品同步与充值的完整产品合同。
 
 也可以通过 [GitHub 反馈模板](.github/ISSUE_TEMPLATE/framework-feedback.md) 按模块提交意见。
 
