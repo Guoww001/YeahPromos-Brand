@@ -23,6 +23,26 @@ test("统一入口提供四个 demo 的切换入口和预览容器", () => {
   assert.match(html, /id=["']demo-selector["']/);
 });
 
+test("demo1-3 鐙珯椤甸潰閮芥彁渚涗腑鑻辨枃鍒囨崲鎺т欢", () => {
+  for (const demo of ["demo1", "demo2", "demo3"]) {
+    const standalonePage = resolve(distClient, demo, "index.html");
+    assert.ok(existsSync(standalonePage), `${demo} 鏋勫缓椤甸潰搴旇瀛樺湪`);
+
+    const html = readFileSync(standalonePage, "utf8");
+    assert.match(html, /standalone-language\.css/);
+    assert.match(html, /standalone-language\.mjs/);
+  }
+});
+
+test("璇█鎺т欢鏀寔璺熼殢鍔ㄦ€佹覆鏌撳苟淇濆瓨璇█鍋忓ソ", () => {
+  const script = readFileSync(resolve(import.meta.dirname, "demo-switcher", "standalone-language.mjs"), "utf8");
+
+  assert.match(script, /MutationObserver/);
+  assert.match(script, /data-standalone-language/);
+  assert.match(script, /localStorage\.setItem/);
+  assert.match(script, /translateText/);
+});
+
 test("每个独立 demo 页面都提供跨 demo 切换入口", () => {
   for (const demo of ["demo1", "demo2", "demo3", "demo4"]) {
     const standalonePage = resolve(distClient, demo, "index.html");

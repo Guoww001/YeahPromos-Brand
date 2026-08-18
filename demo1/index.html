@@ -9,7 +9,7 @@
       content="YeahPromos merchant business overview demo"
     />
     <title>Business Overview · YeahPromos</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=merchant-reference-1" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -46,8 +46,7 @@
       <aside class="sidebar" id="app-sidebar" data-sidebar>
         <div class="sidebar__top">
           <a class="brand" href="#main-content" aria-label="YeahPromos home">
-            <span class="brand__mark" aria-hidden="true"><span>Y</span><span>P</span></span>
-            <span class="brand__wordmark"><strong>Yeah</strong><b>Promos</b></span>
+            <span class="brand__wordmark"><strong>YEAH</strong><b>P</b><strong>ROMOS</strong></span>
           </a>
           <button class="icon-button sidebar__close" type="button" data-sidebar-close aria-label="Close menu">
             <svg><use href="#icon-x"></use></svg>
@@ -91,39 +90,43 @@
               <div>
                 <div class="breadcrumb"><span>Merchant workspace</span><i>/</i><strong data-breadcrumb-current>Overview</strong></div>
                 <h1 data-page-title>Business overview</h1>
-                <p data-page-description>Monitor partnerships, campaigns and revenue performance.</p>
-                <div class="scope-line"><span>Northstar Labs</span><i>·</i><strong>US Store</strong><em>Brand Admin</em></div>
+                <p data-page-description>Monitor your affiliate program performance and partner activity.</p>
+                <div class="scope-line"><span>Scope: All partners and campaigns</span><i aria-hidden="true">⌄</i></div>
               </div>
             </div>
 
             <div class="page-header__actions">
-              <label class="demo-state-picker">
-                <span>Demo state</span>
-                <select data-demo-state aria-label="Choose demo state">
-                  <option value="normal">Normal data</option>
-                  <option value="empty">Empty state</option>
-                  <option value="error">Load error</option>
-                  <option value="permission">Permission limited</option>
-                  <option value="syncing">Syncing</option>
-                </select>
-              </label>
-              <div class="period-picker">
-                <button class="period-picker__trigger" type="button" data-period-toggle aria-expanded="false">
-                  <svg><use href="#icon-calendar"></use></svg>
-                  <span data-period-label>Aug 05 – Aug 12, 2026</span>
-                  <svg class="period-picker__chevron"><use href="#icon-chevron"></use></svg>
+              <div class="page-header__utility" aria-label="Workspace utilities">
+                <button class="icon-button utility-action" type="button" data-demo-action="Messages" aria-label="Messages">
+                  <svg><use href="#icon-message"></use></svg>
                 </button>
-                <div class="period-picker__menu" data-period-menu hidden></div>
+                <button class="icon-button utility-action has-indicator" type="button" data-demo-action="Notifications" aria-label="Notifications">
+                  <svg><use href="#icon-bell"></use></svg>
+                </button>
+                <button class="icon-button utility-action" type="button" data-demo-action="Download center" aria-label="Download center">
+                  <svg><use href="#icon-download"></use></svg>
+                </button>
               </div>
-              <button class="icon-button utility-action" type="button" data-demo-action="Messages" aria-label="Messages">
-                <svg><use href="#icon-message"></use></svg>
-              </button>
-              <button class="icon-button utility-action has-indicator" type="button" data-demo-action="Notifications" aria-label="Notifications">
-                <svg><use href="#icon-bell"></use></svg>
-              </button>
-              <button class="icon-button utility-action" type="button" data-demo-action="Download center" aria-label="Download center">
-                <svg><use href="#icon-download"></use></svg>
-              </button>
+              <div class="page-header__filters">
+                <label class="demo-state-picker">
+                  <span>Demo state</span>
+                  <select data-demo-state aria-label="Choose demo state">
+                    <option value="normal">Normal data</option>
+                    <option value="empty">Empty state</option>
+                    <option value="error">Load error</option>
+                    <option value="permission">Permission limited</option>
+                    <option value="syncing">Syncing</option>
+                  </select>
+                </label>
+                <div class="period-picker">
+                  <button class="period-picker__trigger" type="button" data-period-toggle aria-expanded="false">
+                    <svg><use href="#icon-calendar"></use></svg>
+                    <span data-period-label>Aug 05 – Aug 12, 2026</span>
+                    <svg class="period-picker__chevron"><use href="#icon-chevron"></use></svg>
+                  </button>
+                  <div class="period-picker__menu" data-period-menu hidden></div>
+                </div>
+              </div>
             </div>
           </header>
 
@@ -133,10 +136,9 @@
             <section class="metrics-section" aria-labelledby="performance-heading">
               <div class="section-heading section-heading--compact">
                 <div>
-                  <span class="eyebrow">Performance pulse</span>
-                  <h2 id="performance-heading">Your business at a glance</h2>
+                  <h2 id="performance-heading">Performance overview</h2>
                 </div>
-                <span class="live-status"><i></i> Updated 4 min ago</span>
+                <span class="live-status"><i></i> Live</span>
               </div>
               <div class="metrics-grid" data-metrics-grid></div>
             </section>
@@ -154,7 +156,18 @@
                     <svg><use href="#icon-arrow"></use></svg>
                   </button>
                 </div>
+                <div class="ranking-table-head" aria-hidden="true">
+                  <span>Rank</span>
+                  <span>Partner</span>
+                  <span>Orders</span>
+                  <span>Commission</span>
+                  <span>Trend</span>
+                </div>
                 <div class="ranking-list" data-ranking-list></div>
+                <button class="text-link ranking-card__footer-link" type="button" data-partner-view="northstar">
+                  View all partners
+                  <svg><use href="#icon-arrow"></use></svg>
+                </button>
               </article>
 
               <div class="summary-grid">
@@ -166,11 +179,9 @@
             <section class="action-center-section" aria-labelledby="action-center-heading">
               <div class="section-heading">
                 <div>
-                  <span class="eyebrow">Action center</span>
-                  <h2 id="action-center-heading">Keep the workspace moving</h2>
-                  <p>Prioritized work across partners, campaigns, products and transactions.</p>
+                  <h2 id="action-center-heading">Action Center</h2>
                 </div>
-                <span class="section-count" data-section-count>4 open items</span>
+                <span class="section-count" data-section-count>4 tasks</span>
               </div>
               <div class="action-center-grid" data-action-center></div>
             </section>
@@ -178,8 +189,7 @@
             <section class="quick-actions-section" aria-labelledby="quick-actions-heading">
               <div class="section-heading">
                 <div>
-                  <span class="eyebrow">Shortcuts</span>
-                  <h2 id="quick-actions-heading">Start a task</h2>
+                  <h2 id="quick-actions-heading">Shortcuts</h2>
                 </div>
               </div>
               <div class="quick-actions-grid" data-quick-actions></div>
@@ -223,6 +233,6 @@
       <button type="button" data-toast-close aria-label="Dismiss notification"><svg><use href="#icon-x"></use></svg></button>
     </div>
 
-    <script type="module" src="./app.js"></script>
+    <script type="module" src="./app.js?v=merchant-reference-1"></script>
   </body>
 </html>
