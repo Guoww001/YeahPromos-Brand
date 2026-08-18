@@ -125,10 +125,10 @@ const renderMetrics = () => {
   metricsGrid.innerHTML = state.metrics
     .map(
       (metric) => `
-        <article class="metric-card" data-tone="${metric.tone}">
+        <article class="metric-card" data-metric-id="${metric.id}" data-tone="${metric.tone}">
           <div class="metric-card__top">
-            <span class="metric-card__label">${metric.label}</span>
             <span class="metric-card__icon">${icon(metric.icon)}</span>
+            <span class="metric-card__label">${metric.label}</span>
           </div>
           <strong class="metric-card__value">${isEmpty ? '—' : metric.value}</strong>
           <span class="metric-card__meta">
@@ -149,14 +149,15 @@ const renderPartnerPerformance = () => {
         .map(
           (partner, index) => `
             <div class="ranking-row">
-              <span class="ranking-row__rank">${String(index + 1).padStart(2, '0')}</span>
+              <span class="ranking-row__rank">${index + 1}</span>
               <span class="ranking-row__name">
-                <strong>${partner.name}</strong>
-                <small>${partner.type} · ${partner.orders} orders</small>
+                <span class="ranking-row__avatar" aria-hidden="true">${partner.name.charAt(0)}</span>
+                <span class="ranking-row__identity">
+                  <strong>${partner.name}</strong>
+                  <small>${partner.type}</small>
+                </span>
               </span>
-              <span class="ranking-row__track">
-                <span class="ranking-row__fill" data-ranking-fill="${partner.percent}"></span>
-              </span>
+              <span class="ranking-row__orders">${partner.orders}</span>
               <strong class="ranking-row__amount">${partner.amount}</strong>
               <span class="ranking-row__trend">${partner.trend}</span>
             </div>
@@ -173,14 +174,14 @@ const renderPartnerPerformance = () => {
 
 const renderCommissionSummary = () => {
   const { commission } = state;
-  const rows = [commission.approved, commission.pending, commission.paid, commission.voided];
+  const rows = [commission.pending, commission.approved, commission.paid];
   const isEmpty = state.demoState === 'empty';
 
   commissionSummary.innerHTML = `
     <div class="summary-card__header">
       <div>
         <span class="eyebrow">Settlement snapshot</span>
-        <h2>Commission</h2>
+        <h2>Commission summary</h2>
       </div>
       <span class="summary-card__icon">${icon('wallet')}</span>
     </div>
@@ -215,7 +216,7 @@ const renderPartnerStatus = () => {
     <div class="summary-card__header">
       <div>
         <span class="eyebrow">Relationship health</span>
-        <h2>Partners</h2>
+        <h2>Partner status</h2>
       </div>
       <span class="summary-card__icon">${icon('users')}</span>
     </div>
@@ -226,10 +227,10 @@ const renderPartnerStatus = () => {
             <button class="status-row" type="button" data-action-navigation="my-partners">
               <span class="status-row__top">
                 <span><i class="summary-row__dot tone-${item.tone}"></i>${item.label}</span>
-                <strong>${isEmpty ? '—' : item.value}</strong>
-              </span>
-              <span class="status-row__track">
-                <span class="status-row__fill tone-${item.tone}" style="width:${isEmpty ? 0 : item.percent}%"></span>
+                <span class="status-row__meta">
+                  <strong>${isEmpty ? '—' : item.value}</strong>
+                  <em>${isEmpty ? '—' : `${item.percent}%`}</em>
+                </span>
               </span>
             </button>
           `,
@@ -240,7 +241,7 @@ const renderPartnerStatus = () => {
 };
 
 const renderActionCenter = () => {
-  sectionCount.textContent = state.demoState === 'empty' ? '0 open items' : `${state.actionItems.length} open items`;
+  sectionCount.textContent = state.demoState === 'empty' ? '0 tasks' : `${state.actionItems.length} tasks`;
   actionCenter.innerHTML = state.demoState === 'empty'
     ? '<div class="action-empty"><span class="action-empty__icon">✓</span><strong>You are all caught up</strong><p>No actions need attention in this workspace.</p></div>'
     : state.actionItems
@@ -307,7 +308,7 @@ const renderPage = () => {
 
   pageTitle.textContent = isOverview ? 'Business overview' : context.current.label;
   pageDescription.textContent = isOverview
-    ? 'Monitor partnerships, campaigns and revenue performance.'
+    ? 'Monitor your affiliate program performance and partner activity.'
     : `${context.current.label} workspace preview for the current brand scope.`;
   breadcrumbCurrent.textContent = isOverview ? 'Overview' : context.current.label;
   overviewPage.hidden = !isOverview;

@@ -25,16 +25,46 @@ test('page provides the required sidebar and dashboard regions', () => {
 });
 
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
-  assert.match(html, /<script type="module" src="\.\/app\.js"><\/script>/);
+  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-1"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);
   assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
 });
 
-test('styles define the documented blue-card visual tokens', () => {
-  assert.match(css, /--color-brand:\s*#3297e9/i);
-  assert.match(css, /--color-canvas:\s*#f4f7fb/i);
-  assert.match(css, /--radius-card:\s*14px/i);
-  assert.match(css, /--shadow-card:/i);
+test('styles define the light red merchant-dashboard visual tokens', () => {
+  assert.match(css, /--color-brand:\s*#fa4a4a/i);
+  assert.match(css, /--color-canvas:\s*#fbfbfa/i);
+  assert.match(css, /--color-brand-soft:\s*#fff1f3/i);
+  assert.match(css, /--radius-card:\s*6px/i);
+});
+
+test('overview follows the reference dashboard hierarchy', () => {
+  assert.match(html, /class="brand__wordmark"><strong>YEAH<\/strong><b>P<\/b><strong>ROMOS<\/strong>/);
+  assert.match(html, /Performance overview/);
+  assert.match(html, /class="live-status"[^>]*><i><\/i> Live/);
+  assert.match(html, /Scope: All partners and campaigns/);
+  assert.match(html, /class="page-header__utility"/);
+  assert.match(html, /class="ranking-table-head"/);
+  assert.match(appJs, /data-metric-id="\$\{metric\.id\}"/);
+  assert.match(css, /\.metric-card\[data-metric-id="net-sales"\]/i);
+  assert.match(css, /\.analytics-grid\s*\{[\s\S]*grid-template-columns:\s*minmax\(0, 1\.9fr\)\s+minmax\(0, \.9fr\)\s+minmax\(0, \.9fr\)/s);
+  assert.match(css, /\.summary-grid\s*\{[\s\S]*display:\s*contents;/s);
+  assert.match(css, /\.metric-card::before\s*\{[\s\S]*width:\s*38px;/s);
+});
+
+test('preview busts the entry cache for the reference dashboard skin', () => {
+  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-1"/);
+  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-1"/);
+});
+
+test('reference dashboard keeps flat cards and red action controls', () => {
+  assert.match(css, /\.card\s*\{[\s\S]*box-shadow:\s*none;/s);
+  assert.match(css, /\.action-card\s*\{[\s\S]*border-radius:\s*0;/s);
+  assert.match(css, /\.quick-action\s*\{[\s\S]*border-radius:\s*6px;/s);
+});
+
+test('mobile date control stays readable beside the demo state selector', () => {
+  assert.match(css, /\.period-picker__trigger span\s*\{[^}]*white-space:\s*nowrap;/s);
+  assert.match(css, /\.page-header__actions\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)\s+minmax\(125px, \.62fr\);/s);
 });
 
 test('merchant overview keeps task-oriented navigation and account context', () => {
