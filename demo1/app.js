@@ -1,4 +1,4 @@
-import { dashboardData } from './data.mjs';
+import { campaignPageData, dashboardData } from './data.mjs';
 import {
   createDashboardState,
   selectDemoState,
@@ -24,6 +24,7 @@ const overviewPage = document.querySelector('[data-overview-page]');
 const modulePlaceholder = document.querySelector('[data-module-placeholder]');
 const pageTitle = document.querySelector('[data-page-title]');
 const pageDescription = document.querySelector('[data-page-description]');
+const breadcrumbParent = document.querySelector('[data-breadcrumb-parent]');
 const breadcrumbCurrent = document.querySelector('[data-breadcrumb-current]');
 const periodToggle = document.querySelector('[data-period-toggle]');
 const periodMenu = document.querySelector('[data-period-menu]');
@@ -37,6 +38,46 @@ const sidebar = document.querySelector('[data-sidebar]');
 const sidebarBackdrop = document.querySelector('[data-sidebar-backdrop]');
 const sidebarOpenButton = document.querySelector('[data-sidebar-open]');
 const sidebarCloseButton = document.querySelector('[data-sidebar-close]');
+const campaignPage = document.querySelector('[data-campaign-page]');
+const campaignMetrics = document.querySelector('[data-campaign-metrics]');
+const campaignTabs = document.querySelector('[data-campaign-tabs]');
+const campaignRows = document.querySelector('[data-campaign-rows]');
+const campaignSearch = document.querySelector('[data-campaign-search]');
+const campaignSelectionCount = document.querySelector('[data-campaign-selection-count]');
+const campaignSelectAll = document.querySelector('[data-campaign-select-all]');
+const campaignResultCount = document.querySelector('[data-campaign-result-count]');
+
+const campaignState = {
+  activeTab: 'all',
+  search: '',
+  filters: {
+    type: 'all',
+    channel: 'all',
+    status: 'all',
+    owner: 'all',
+    date: '90d',
+    savedView: 'all',
+  },
+  selectedIds: new Set(['spring-collection-promo']),
+};
+
+const campaignStatusMeta = {
+  Active: { tone: 'active' },
+  Pending: { tone: 'pending' },
+  Completed: { tone: 'completed' },
+  Paused: { tone: 'paused' },
+  Closed: { tone: 'closed' },
+  Draft: { tone: 'draft' },
+};
+
+const campaignDateRangeDays = {
+  '7d': 7,
+  '30d': 30,
+  '90d': 90,
+};
+
+const campaignReferenceDate = Date.parse('2025-05-16T23:59:59Z');
+const campaignCurrentOwner = 'Taylor Morgan';
 
 const icon = (name, className = '') => `
   <svg class="${className}" aria-hidden="true">
@@ -86,6 +127,7 @@ const renderNavigation = () => {
                             type="button"
                             data-nav-child="${child.id}"
                             data-nav-parent="${item.id}"
+                            ${state.activeNavigationChild === child.id ? 'aria-current="page"' : ''}
                           >${child.label}</button>
                         `,
                       )
@@ -302,22 +344,185 @@ const renderDemoStateBanner = () => {
   demoStateBanner.innerHTML = `<strong>${message.title}</strong><span>${message.detail}</span>`;
 };
 
+
+const getFilteredCampaigns = () => {
+  const query = campaignState.search.trim().toLowerCase();
+  return campaignPageData.campaigns.filter((campaign) => {
+    const matchesTab = campaignState.activeTab === 'all' || campaign.status === campaignState.activeTab;
+    const matchesQuery = !query || [
+      campaign.name,
+      campaign.code,
+      campaign.type,
+      campaign.channel,
+      campaign.status,
+      campaign.stage,
+      campaign.nextAction,
+      campaign.updatedBy,
+    ].some((value) => value.toLowerCase().includes(query));
+    const matchesType = campaignState.filters.type === 'all' || campaign.type === campaignState.filters.type;
+    const matchesChannel = campaignState.filters.channel === 'all' || campaign.channel === campaignState.filters.channel;
+    const matchesStatus = campaignState.filters.status === 'all' || campaign.status === campaignState.filters.status;
+    const matchesOwner = campaignState.filters.owner === 'all' || campaign.updatedBy === campaignState.filters.owner;
+    const rangeDays = campaignDateRangeDays[campaignState.filters.date] ?? 90;
+    const updatedAt = Date.parse(campaign.updated);
+    const matchesDate = !Number.isNaN(updatedAt)
+      && updatedAt <= campaignReferenceDate
+      && campaignReferenceDate - updatedAt <= rangeDays * 24 * 60 * 60 * 1000;
+    const matchesSavedView = campaignState.filters.savedView === 'all'
+      || (campaignState.filters.savedView === 'active' && campaign.status === 'Active')
+      || (campaignState.filters.savedView === 'owned' && campaign.updatedBy === campaignCurrentOwner);
+
+    return matchesTab
+      && matchesQuery
+      && matchesType
+      && matchesChannel
+      && matchesStatus
+      && matchesOwner
+      && matchesDate
+      && matchesSavedView;
+  });
+};
+
+const renderCampaignMetrics = () => {
+  if (!campaignMetrics) return;
+  campaignMetrics.innerHTML = campaignPageData.metrics.map((metric) => `
+    <article class="campaign-metric">
+      <span class="campaign-metric__icon">${icon(metric.icon)}</span>
+      <div class="campaign-metric__copy">
+        <span class="campaign-metric__label">${metric.label}</span>
+        <strong>${metric.value}</strong>
+        <span class="campaign-metric__meta"><b>${metric.change}</b><span>${metric.note}</span></span>
+      </div>
+      <svg class="campaign-metric__sparkline" viewBox="0 0 100 34" role="img" aria-label="${metric.label} trend">
+        <polyline points="${metric.sparkline}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
+      </svg>
+    </article>
+  `).join('');
+};
+
+const renderCampaignTabs = () => {
+  if (!campaignTabs) return;
+  const tabs = [
+    ['all', 'All'],
+    ['Active', 'Active'],
+    ['Draft', 'Draft'],
+    ['Completed', 'Completed'],
+    ['Pending', 'Pending'],
+    ['Paused', 'Paused'],
+    ['Closed', 'Closed'],
+  ];
+  campaignTabs.innerHTML = tabs.map(([value, label]) => `
+    <button class="campaign-tab${campaignState.activeTab === value ? ' is-active' : ''}" type="button" role="tab" aria-selected="${campaignState.activeTab === value}" data-campaign-tab="${value}">${label}</button>
+  `).join('');
+};
+
+const renderCampaignRows = () => {
+  if (!campaignRows) return;
+  const filteredCampaigns = getFilteredCampaigns();
+  if (!filteredCampaigns.length) {
+    campaignRows.innerHTML = '<tr><td class="campaign-empty" colspan="12"><strong>No campaigns found</strong><span>Try changing your search or filters.</span></td></tr>';
+  } else {
+    campaignRows.innerHTML = filteredCampaigns.map((campaign) => {
+      const statusTone = campaignStatusMeta[campaign.status]?.tone ?? 'draft';
+      return `
+        <tr data-campaign-row="${campaign.id}">
+          <td class="campaign-cell--check">
+            <label class="campaign-checkbox">
+              <input type="checkbox" data-campaign-select="${campaign.id}" ${campaignState.selectedIds.has(campaign.id) ? 'checked' : ''} aria-label="Select ${campaign.name}" />
+              <span aria-hidden="true"></span>
+            </label>
+          </td>
+          <td class="campaign-cell--campaign">
+            <strong>${campaign.name}</strong>
+            <small>${campaign.code}</small>
+          </td>
+          <td class="campaign-cell--type">
+            <span class="campaign-cell__icon">${icon(campaign.typeIcon)}</span>
+            <span>${campaign.type}</span>
+          </td>
+          <td class="campaign-cell--channel">
+            <span class="campaign-cell__icon">${icon(campaign.channelIcon)}</span>
+            <span>${campaign.channel}</span>
+          </td>
+          <td class="campaign-cell--status">
+            <span class="campaign-status campaign-status--${statusTone}">
+              <span class="campaign-status__top"><i></i><strong>${campaign.status}</strong></span>
+              <small>${campaign.statusDetail}</small>
+            </span>
+          </td>
+          <td>${campaign.stage}</td>
+          <td class="campaign-cell--number">${campaign.partners}</td>
+          <td class="campaign-cell--sales"><strong>${campaign.sales}</strong><small>${campaign.orders}</small></td>
+          <td class="campaign-cell--progress">
+            <strong>${campaign.progress}%</strong>
+            <span class="campaign-progress__track"><i style="width:${campaign.progress}%"></i></span>
+          </td>
+          <td class="campaign-cell--next">
+            <span class="campaign-cell__icon">${icon(campaign.nextActionIcon)}</span>
+            <span>${campaign.nextAction}</span>
+          </td>
+          <td class="campaign-cell--updated"><span>${campaign.updated}</span><small>by ${campaign.updatedBy}</small></td>
+          <td class="campaign-cell--actions">
+            <button type="button" class="campaign-row-action" data-campaign-action="row" data-campaign-id="${campaign.id}" aria-label="More actions for ${campaign.name}">${icon('more')}</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  if (campaignResultCount) {
+    const total = campaignPageData.campaigns.length;
+    const shown = filteredCampaigns.length;
+    campaignResultCount.textContent = shown
+      ? `Showing 1 to ${shown} of ${total} campaigns`
+      : `Showing 0 of ${total} campaigns`;
+    campaignResultCount.dataset.total = String(total);
+  }
+};
+
+const updateCampaignSelection = () => {
+  const visibleIds = getFilteredCampaigns().map((campaign) => campaign.id);
+  const visibleSelected = visibleIds.filter((id) => campaignState.selectedIds.has(id));
+  if (campaignSelectionCount) campaignSelectionCount.textContent = `${visibleSelected.length} selected`;
+  if (campaignSelectAll) {
+    campaignSelectAll.checked = visibleIds.length > 0 && visibleSelected.length === visibleIds.length;
+    campaignSelectAll.indeterminate = visibleSelected.length > 0 && visibleSelected.length < visibleIds.length;
+  }
+};
+
+const renderCampaignPage = () => {
+  if (!campaignPage) return;
+  renderCampaignMetrics();
+  renderCampaignTabs();
+  renderCampaignRows();
+  updateCampaignSelection();
+};
+
 const renderPage = () => {
   const context = findNavigationContext(state.activeNavigationChild ?? state.activeNavigationId);
   const isOverview = state.activeNavigationId === 'overview' && !state.activeNavigationChild;
+  const isCampaignPage = state.activeNavigationChild === 'all-campaigns';
 
+  document.body.classList.toggle('is-campaign-page', isCampaignPage);
   pageTitle.textContent = isOverview ? 'Business overview' : context.current.label;
   pageDescription.textContent = isOverview
     ? 'Monitor your affiliate program performance and partner activity.'
-    : `${context.current.label} workspace preview for the current brand scope.`;
-  breadcrumbCurrent.textContent = isOverview ? 'Overview' : context.current.label;
+    : isCampaignPage
+      ? 'View, manage, and analyze all your campaigns in one place.'
+      : `${context.current.label} workspace preview for the current brand scope.`;
+  breadcrumbParent.textContent = isCampaignPage ? 'Campaigns' : 'Merchant workspace';
+  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isOverview ? 'Overview' : context.current.label;
+  breadcrumbCurrent.setAttribute('aria-current', 'page');
   overviewPage.hidden = !isOverview;
-  modulePlaceholder.hidden = isOverview;
+  campaignPage.hidden = !isCampaignPage;
+  modulePlaceholder.hidden = isOverview || isCampaignPage;
 
-  if (!isOverview) {
+  if (!isOverview && !isCampaignPage) {
     modulePlaceholder.querySelector('[data-module-title]').textContent = context.current.label;
     modulePlaceholder.querySelector('[data-module-parent]').textContent = context.parent.label;
   }
+
+  if (isCampaignPage) renderCampaignPage();
 };
 
 const renderAll = () => {
@@ -354,10 +559,14 @@ const closePeriodMenu = () => {
 
 const navigateTo = (navigationId) => {
   const context = findNavigationContext(navigationId);
+  const activeNavigationChild = context.current.id === context.parent.id ? null : context.current.id;
   state = {
     ...state,
     activeNavigationId: context.parent.id,
-    activeNavigationChild: context.current.id === context.parent.id ? null : context.current.id,
+    activeNavigationChild,
+    expandedGroups: context.parent.children?.length
+      ? [...new Set([...state.expandedGroups, context.parent.id])]
+      : state.expandedGroups,
   };
   renderPage();
   renderNavigation();
@@ -491,6 +700,74 @@ demoStateSelect.addEventListener('change', (event) => {
   state = selectDemoState(state, event.target.value);
   renderAll();
 });
+
+
+if (campaignPage) {
+  campaignPage.addEventListener('input', (event) => {
+    if (event.target.matches('[data-campaign-search]')) {
+      campaignState.search = event.target.value;
+      renderCampaignRows();
+      updateCampaignSelection();
+    }
+  });
+
+  campaignPage.addEventListener('change', (event) => {
+    const filter = event.target.closest('[data-campaign-filter]');
+    if (filter) {
+      campaignState.filters[filter.dataset.campaignFilter] = filter.value;
+      renderCampaignRows();
+      updateCampaignSelection();
+      return;
+    }
+
+    const rowCheckbox = event.target.closest('[data-campaign-select]');
+    if (rowCheckbox) {
+      if (rowCheckbox.checked) campaignState.selectedIds.add(rowCheckbox.dataset.campaignSelect);
+      else campaignState.selectedIds.delete(rowCheckbox.dataset.campaignSelect);
+      updateCampaignSelection();
+      return;
+    }
+
+    if (event.target.matches('[data-campaign-select-all]')) {
+      const visibleIds = getFilteredCampaigns().map((campaign) => campaign.id);
+      if (event.target.checked) visibleIds.forEach((id) => campaignState.selectedIds.add(id));
+      else visibleIds.forEach((id) => campaignState.selectedIds.delete(id));
+      renderCampaignRows();
+      updateCampaignSelection();
+    }
+  });
+
+  campaignPage.addEventListener('click', (event) => {
+    const tab = event.target.closest('[data-campaign-tab]');
+    if (tab) {
+      campaignState.activeTab = tab.dataset.campaignTab;
+      renderCampaignTabs();
+      renderCampaignRows();
+      updateCampaignSelection();
+      return;
+    }
+
+    const action = event.target.closest('[data-campaign-action]');
+    if (!action) return;
+    const actionName = action.dataset.campaignAction;
+
+    if (actionName === 'clear') {
+      campaignState.selectedIds.clear();
+      renderCampaignRows();
+      updateCampaignSelection();
+      return;
+    }
+
+    const selectedCount = campaignState.selectedIds.size;
+    if (actionName === 'create') {
+      showToast('Create campaign is ready for product integration');
+    } else if (actionName === 'row') {
+      showToast('Campaign actions are ready for product integration');
+    } else {
+      showToast(`${actionName.replace('-', ' ')} is ready for product integration (${selectedCount} selected)`);
+    }
+  });
+}
 
 document.addEventListener('click', (event) => {
   if (!event.target.closest('.period-picker')) closePeriodMenu();
