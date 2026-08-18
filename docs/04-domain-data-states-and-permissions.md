@@ -17,6 +17,10 @@ erDiagram
     PARTNER ||--o{ INVITATION : receives
     PARTNER ||--o{ APPLICATION : submits
     PROGRAM ||--o{ APPLICATION : receives
+    BRAND ||--o{ STOREFRONT : owns
+    STOREFRONT ||--o{ INTEGRATION : connects
+    STOREFRONT ||--o{ PRODUCT_FILTER_RULE : controls
+    INTEGRATION ||--o{ PRODUCT : syncs
     BRAND ||--o{ PRODUCT : owns
     BRAND ||--o{ COUPON : owns
     BRAND ||--o{ CREATIVE : owns
@@ -29,6 +33,8 @@ erDiagram
     PRODUCT ||--o{ TRANSACTION : contains
     COMMISSION_RULE ||--o{ TRANSACTION : calculates
     TRANSACTION ||--o{ PAYMENT_LINE : settles
+    ORGANIZATION ||--o{ PAYMENT_METHOD : stores
+    BRAND ||--o{ DEPOSIT : receives
     PAYMENT ||--o{ PAYMENT_LINE : contains
     TEAM_ACCOUNT ||--o{ AUDIT_EVENT : performs
 ```
@@ -47,6 +53,26 @@ erDiagram
 - sites / storefronts、marketplaces
 - currency、timezone、locale
 - integration_status、status
+
+### Storefront / Integration
+
+- storefront_id、brand_id、name、homepage_url、homepage_name
+- provider（Amazon/Shopify/Shoplazza/WooCommerce/embedded/API）
+- marketplace_region、country、currency、timezone
+- integration_id、campaign_model、platform_type、tracking_provider
+- external_profile_id（受保护）、profile_name
+- authorization_status、verification_status、test_order_status
+- connected_at、last_verified_at、last_synced_at、expires_at
+- error_code、error_summary、recovery_action
+
+### Product Filter Rule
+
+- rule_id、brand_id、storefront_id
+- list_type（whitelist / blacklist）
+- asin_items（原始值、规范化值、验证状态、错误原因）
+- status、pending_add_count、pending_remove_count
+- saved_by、saved_at、last_sync_at、last_sync_result
+- version、audit_events
 
 ### Team Account
 
@@ -138,8 +164,13 @@ erDiagram
 - coupon、group、status、lock_state
 - source、attribution identifiers
 
-### Payment / Invoice
+### Payment Method / Deposit / Payment / Invoice
 
+- payment_method_id、organization_id、provider、type、display_label
+- default、auto_pay_enabled、status、created_at、last_used_at
+- 卡号仅保留支付服务商令牌、品牌和脱敏后四位；不保存 CVC
+- deposit_id、brand_id、input_amount/currency、settlement_amount/currency
+- exchange_rate/source/expires_at、fee、provider_reference
 - payment_id、brand_id、method、type、description
 - amount、currency、status、created_at、settled_at
 - payment lines/order references、invoice_id/file_status
@@ -243,7 +274,9 @@ stateDiagram-v2
 | Coupon | draft、scheduled、active、expired、disabled、invalid |
 | Creative | draft、published、withdrawn、expired、archived |
 | Commission Rule | draft、scheduled、active、expired、disabled、superseded |
-| Integration | not_connected、connecting、connected、degraded、syncing、error、disconnected |
+| Integration | not_started、configuring、awaiting_authorization、verifying、connected、test_pending、online、degraded、authorization_expired、failed、disconnected |
+| Product Filter Rule | draft、validating、invalid、pending_sync、syncing、applied、partially_failed、failed |
+| Storefront Onboarding | site_created、profile_incomplete、settings_incomplete、authorization_pending、product_sync_pending、funding_pending、ready、online |
 
 状态必须配套原因、更新时间和可恢复动作，不能只给颜色。
 
@@ -263,8 +296,11 @@ stateDiagram-v2
 
 ### Payment / Deposit / Invoice
 
-- pending、processing、paid/succeeded、failed、refunded/cancelled
+- deposit：draft、redirecting、pending、processing、succeeded、failed、cancelled、expired、refunded
+- payment：pending、processing、paid/succeeded、failed、refunded/cancelled
 - invoice：generating、ready、failed、void
+- 外部支付回跳与 webhook 使用同一幂等键；只有服务端确认后更新余额
+- 0 金额站点启用与真实充值使用不同对象或明确的 type
 
 ## 8. 角色模型（建议）
 
