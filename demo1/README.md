@@ -29,6 +29,8 @@ http://127.0.0.1:8766/demo1/
 - Commission 结算摘要和 Partner relationship 状态摘要；
 - Action center：申请审核、商品同步、活动启动、交易审批；
 - 快速操作：邀请伙伴、创建活动、添加商品、添加优惠券和导出报告；
+- `Campaigns > All campaigns`：活动指标、Type / Channel 分列、状态筛选、进度和批量操作；
+- `Commission & Rules > Attribution rules`：归因模型、渠道信用分配、归因规则表和审计历史；
 - 日期范围切换会同步切换整组模拟数据；
 - Demo state 切换：正常、空数据、加载错误、权限受限和同步中；
 - 伙伴详情右侧抽屉；
@@ -101,11 +103,11 @@ Demo 1 使用白、黑、红三色构成品牌视觉；旧蓝色不得继续作�
 
 | 文件 | 职责 |
 | --- | --- |
-| `index.html` | Merchant 页面语义骨架、SVG 图标库、抽屉、状态选择器和占位页 |
+| `index.html` | Merchant 页面语义骨架、SVG 图标库、抽屉、状态选择器、活动页和归因规则页 |
 | `styles.css` | 视觉 Token、布局、组件、状态、动效和响应式样式 |
-| `data.mjs` | 工作区、任务导航、时间范围快照、指标、伙伴和待办模拟数据 |
+| `data.mjs` | 工作区、任务导航、时间范围快照、指标、伙伴、活动和归因规则模拟数据 |
 | `app-core.mjs` | 不依赖 DOM 的状态函数 |
-| `app.js` | 数据渲染、模块导航、筛选、状态切换、抽屉和浏览器交互 |
+| `app.js` | 数据渲染、模块导航、活动筛选、归因模型交互、状态切换、抽屉和浏览器交互 |
 | `tests/app-core.test.mjs` | 时间范围、导航展开和 Demo 状态行为测试 |
 | `tests/structure.test.mjs` | Merchant 结构、字体、响应式和无障碍规则测试 |
 
