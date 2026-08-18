@@ -414,3 +414,63 @@ export const campaignPageData = {
     },
   ],
 };
+
+export const attributionPageData = {
+  models: [
+    {
+      id: 'data-driven',
+      label: 'Data-driven (recommended)',
+      summaryLabel: 'Data-driven model',
+      description: 'Data-driven model analyzes historical performance to determine the optimal credit distribution across touchpoints.',
+    },
+    {
+      id: 'last-click',
+      label: 'Last-click',
+      summaryLabel: 'Last-click model',
+      description: 'Last-click model assigns conversion credit to the final eligible touchpoint before purchase.',
+    },
+    {
+      id: 'first-click',
+      label: 'First-click',
+      summaryLabel: 'First-click model',
+      description: 'First-click model assigns conversion credit to the first eligible touchpoint in the journey.',
+    },
+    {
+      id: 'linear',
+      label: 'Linear',
+      summaryLabel: 'Linear model',
+      description: 'Linear model distributes conversion credit evenly across eligible touchpoints.',
+    },
+    {
+      id: 'position-based',
+      label: 'Position-based (U-shape)',
+      summaryLabel: 'Position-based model',
+      description: 'Position-based model gives more credit to the first and last eligible touchpoints.',
+    },
+  ],
+  activeModel: 'data-driven',
+  summary: {
+    assistedRevenue: '$128,430.76',
+    trackingCoverage: '88.7%',
+  },
+  distribution: [
+    { id: 'last-click', label: 'Last-click', value: 40, icon: 'users', tone: 'coral' },
+    { id: 'direct-publisher', label: 'Direct publisher', value: 30, icon: 'send', tone: 'orange' },
+    { id: 'influencer', label: 'Influencer', value: 20, icon: 'star', tone: 'purple' },
+    { id: 'paid-media', label: 'Paid media', value: 10, icon: 'trend', tone: 'blue' },
+  ],
+  rules: [
+    { id: 'main-website-blog', name: 'Main Website & Blog', channelType: 'Publisher', channelTone: 'publisher', logic: 'Last-click within channel', lookback: '30 days', priority: 1, status: 'Active' },
+    { id: 'partner-content-reviews', name: 'Partner Content & Reviews', channelType: 'Publisher', channelTone: 'publisher', logic: 'Data-driven (weighted)', lookback: '30 days', priority: 2, status: 'Active' },
+    { id: 'influencer-social-traffic', name: 'Influencer Social Traffic', channelType: 'Influencer', channelTone: 'influencer', logic: 'First-click within channel', lookback: '14 days', priority: 3, status: 'Active' },
+    { id: 'influencer-promo-codes', name: 'Influencer Promo Codes', channelType: 'Influencer', channelTone: 'influencer', logic: 'Last-click within channel', lookback: '30 days', priority: 4, status: 'Active' },
+    { id: 'paid-search-campaigns', name: 'Paid Search Campaigns', channelType: 'Paid', channelTone: 'paid', logic: 'Last-click', lookback: '7 days', priority: 5, status: 'Active' },
+    { id: 'paid-social-campaigns', name: 'Paid Social Campaigns', channelType: 'Paid', channelTone: 'paid', logic: 'Position-based (U-shape)', lookback: '7 days', priority: 6, status: 'Active' },
+  ],
+  audit: [
+    { id: 'lookback-update', date: 'May 12, 2025, 10:24 AM', title: 'Updated lookback window for Influencer Social Traffic', by: 'Demo1 Admin' },
+    { id: 'paid-social-rule', date: 'May 9, 2025, 3:18 PM', title: 'Added rule: Paid Social Campaigns', by: 'Demo1 Admin' },
+    { id: 'model-change', date: 'May 5, 2025, 9:41 AM', title: 'Changed attribution model to Data-driven', by: 'Demo1 Admin' },
+    { id: 'initial-rules', date: 'Apr 28, 2025, 2:11 PM', title: 'Initial attribution rules created', by: 'Demo1 Admin' },
+  ],
+};

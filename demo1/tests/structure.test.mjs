@@ -24,6 +24,27 @@ test('page provides the required sidebar and dashboard regions', () => {
   assert.match(html, /data-demo-state/);
 });
 
+test('attribution rules has its own routed page shell and controls', () => {
+  assert.match(html, /data-attribution-page/);
+  assert.match(html, /Attribution rules/);
+  assert.match(html, /data-page-actions/);
+  assert.match(html, /data-attribution-model/);
+  assert.match(html, /data-attribution-distribution/);
+  assert.match(html, /data-attribution-rules/);
+  assert.match(html, /data-attribution-audit/);
+  assert.match(appJs, /isAttributionPage/);
+  assert.match(appJs, /renderAttributionPage/);
+  assert.match(data, /Commission & Rules/);
+  assert.match(data, /attributionPageData/);
+});
+
+test('attribution rules reuses the README red navigation tokens', () => {
+  assert.match(css, /body\.is-attribution-page[\s\S]*--attribution-red:\s*#e60000/i);
+  assert.match(css, /--attribution-soft-red:\s*#fde8e8/i);
+  assert.match(css, /--attribution-selected-red:\s*#ff312e/i);
+  assert.match(css, /nav-child\[data-nav-child="attribution-rules"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--attribution-selected-red\)/i);
+});
+
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
   assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-1"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);

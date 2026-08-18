@@ -1,4 +1,4 @@
-import { campaignPageData, dashboardData } from './data.mjs';
+import { attributionPageData, campaignPageData, dashboardData } from './data.mjs';
 import {
   createDashboardState,
   selectDemoState,
@@ -46,6 +46,18 @@ const campaignSearch = document.querySelector('[data-campaign-search]');
 const campaignSelectionCount = document.querySelector('[data-campaign-selection-count]');
 const campaignSelectAll = document.querySelector('[data-campaign-select-all]');
 const campaignResultCount = document.querySelector('[data-campaign-result-count]');
+const pageActions = document.querySelector('[data-page-actions]');
+const attributionPage = document.querySelector('[data-attribution-page]');
+const attributionModelSelect = document.querySelector('[data-attribution-model]');
+const attributionCalloutIcon = document.querySelector('.attribution-callout__icon');
+const attributionCalloutCopy = document.querySelector('[data-attribution-callout-copy]');
+const attributionActiveModel = document.querySelector('[data-attribution-active-model]');
+const attributionModelState = document.querySelector('[data-attribution-model-state]');
+const attributionAssistedRevenue = document.querySelector('[data-attribution-assisted-revenue]');
+const attributionCoverage = document.querySelector('[data-attribution-coverage]');
+const attributionDistribution = document.querySelector('[data-attribution-distribution]');
+const attributionRules = document.querySelector('[data-attribution-rules]');
+const attributionAudit = document.querySelector('[data-attribution-audit]');
 
 const campaignState = {
   activeTab: 'all',
@@ -78,6 +90,11 @@ const campaignDateRangeDays = {
 
 const campaignReferenceDate = Date.parse('2025-05-16T23:59:59Z');
 const campaignCurrentOwner = 'Taylor Morgan';
+
+const attributionState = {
+  activeModel: attributionPageData.activeModel,
+  isDirty: false,
+};
 
 const icon = (name, className = '') => `
   <svg class="${className}" aria-hidden="true">
@@ -498,31 +515,97 @@ const renderCampaignPage = () => {
   updateCampaignSelection();
 };
 
+const renderAttributionPage = () => {
+  if (!attributionPage) return;
+
+  const model = attributionPageData.models.find((item) => item.id === attributionState.activeModel) ?? attributionPageData.models[0];
+
+  attributionModelSelect.innerHTML = attributionPageData.models
+    .map((item) => `<option value="${item.id}" ${item.id === model.id ? 'selected' : ''}>${item.label}</option>`)
+    .join('');
+  attributionActiveModel.textContent = model.summaryLabel;
+  attributionModelState.textContent = attributionState.isDirty ? 'Unsaved changes' : 'Active model';
+  attributionAssistedRevenue.textContent = attributionPageData.summary.assistedRevenue;
+  attributionCoverage.textContent = attributionPageData.summary.trackingCoverage;
+  attributionCalloutIcon.innerHTML = icon('check');
+  attributionCalloutCopy.textContent = model.description;
+
+  attributionDistribution.innerHTML = attributionPageData.distribution
+    .map((channel) => `
+      <div class="attribution-distribution-row">
+        <div class="attribution-distribution-label">
+          <span class="attribution-channel-icon attribution-channel-icon--${channel.tone}">${icon(channel.icon)}</span>
+          <span>${channel.label}</span>
+        </div>
+        <span class="attribution-distribution-bar"><i style="width:${channel.value}%"></i></span>
+        <strong>${channel.value}%</strong>
+      </div>
+    `)
+    .join('');
+
+  attributionRules.innerHTML = attributionPageData.rules
+    .map((rule) => `
+      <tr data-attribution-rule="${rule.id}">
+        <td class="attribution-cell--name"><strong>${rule.name}</strong></td>
+        <td><span class="attribution-channel-chip attribution-channel-chip--${rule.channelTone}">${rule.channelType}</span></td>
+        <td>${rule.logic}</td>
+        <td>${rule.lookback}</td>
+        <td class="attribution-cell--priority">${rule.priority}</td>
+        <td><span class="attribution-status"><i></i>${rule.status}</span></td>
+        <td class="attribution-cell--actions">
+          <button type="button" data-attribution-action="edit-rule" data-attribution-rule="${rule.name}" aria-label="Edit ${rule.name}">${icon('edit')}</button>
+          <button type="button" data-attribution-action="rule-menu" data-attribution-rule="${rule.name}" aria-label="More actions for ${rule.name}">${icon('more')}</button>
+        </td>
+      </tr>
+    `)
+    .join('');
+
+  attributionAudit.innerHTML = attributionPageData.audit
+    .map((entry) => `
+      <div class="attribution-audit-entry">
+        <span class="attribution-audit-entry__marker" aria-hidden="true"></span>
+        <div>
+          <time>${entry.date}</time>
+          <strong>${entry.title}</strong>
+          <small>by ${entry.by}</small>
+        </div>
+      </div>
+    `)
+    .join('');
+};
+
 const renderPage = () => {
   const context = findNavigationContext(state.activeNavigationChild ?? state.activeNavigationId);
   const isOverview = state.activeNavigationId === 'overview' && !state.activeNavigationChild;
   const isCampaignPage = state.activeNavigationChild === 'all-campaigns';
+  const isAttributionPage = state.activeNavigationChild === 'attribution-rules';
 
   document.body.classList.toggle('is-campaign-page', isCampaignPage);
+  document.body.classList.toggle('is-attribution-page', isAttributionPage);
   pageTitle.textContent = isOverview ? 'Business overview' : context.current.label;
   pageDescription.textContent = isOverview
     ? 'Monitor your affiliate program performance and partner activity.'
     : isCampaignPage
       ? 'View, manage, and analyze all your campaigns in one place.'
+      : isAttributionPage
+        ? 'Configure how conversions are attributed across channels and partners.'
       : `${context.current.label} workspace preview for the current brand scope.`;
-  breadcrumbParent.textContent = isCampaignPage ? 'Campaigns' : 'Merchant workspace';
-  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isOverview ? 'Overview' : context.current.label;
+  breadcrumbParent.textContent = isCampaignPage ? 'Campaigns' : isAttributionPage ? 'Commission & Rules' : 'Merchant workspace';
+  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isOverview ? 'Overview' : context.current.label;
   breadcrumbCurrent.setAttribute('aria-current', 'page');
   overviewPage.hidden = !isOverview;
   campaignPage.hidden = !isCampaignPage;
-  modulePlaceholder.hidden = isOverview || isCampaignPage;
+  attributionPage.hidden = !isAttributionPage;
+  modulePlaceholder.hidden = isOverview || isCampaignPage || isAttributionPage;
+  if (pageActions) pageActions.hidden = !isAttributionPage;
 
-  if (!isOverview && !isCampaignPage) {
+  if (!isOverview && !isCampaignPage && !isAttributionPage) {
     modulePlaceholder.querySelector('[data-module-title]').textContent = context.current.label;
     modulePlaceholder.querySelector('[data-module-parent]').textContent = context.parent.label;
   }
 
   if (isCampaignPage) renderCampaignPage();
+  if (isAttributionPage) renderAttributionPage();
 };
 
 const renderAll = () => {
@@ -769,6 +852,16 @@ if (campaignPage) {
   });
 }
 
+if (attributionPage) {
+  attributionPage.addEventListener('change', (event) => {
+    if (!event.target.matches('[data-attribution-model]')) return;
+    attributionState.activeModel = event.target.value;
+    attributionState.isDirty = true;
+    renderAttributionPage();
+    showToast('Attribution model updated. Save changes to apply.');
+  });
+}
+
 document.addEventListener('click', (event) => {
   if (!event.target.closest('.period-picker')) closePeriodMenu();
 
@@ -781,6 +874,31 @@ document.addEventListener('click', (event) => {
   const partnerView = event.target.closest('[data-partner-view]');
   if (partnerView) {
     openPartnerDrawer(partnerView.dataset.partnerView, partnerView);
+    return;
+  }
+
+  const attributionAction = event.target.closest('[data-attribution-action]');
+  if (attributionAction) {
+    const action = attributionAction.dataset.attributionAction;
+    if (action === 'save') {
+      attributionState.isDirty = false;
+      renderAttributionPage();
+      showToast('Attribution settings saved');
+    } else if (action === 'export') {
+      showToast('Attribution settings export is ready for download');
+    } else if (action === 'add-rule') {
+      showToast('Rule editor is ready for product integration');
+    } else if (action === 'performance') {
+      showToast('Model performance is ready for product integration');
+    } else if (action === 'history') {
+      showToast('Full audit history is ready for product integration');
+    } else if (action === 'edit-rule') {
+      showToast(`Edit ${attributionAction.dataset.attributionRule} is ready for product integration`);
+    } else if (action === 'rule-menu') {
+      showToast(`More actions for ${attributionAction.dataset.attributionRule} are ready for product integration`);
+    } else {
+      showToast('This attribution metric is ready for product integration');
+    }
     return;
   }
 
