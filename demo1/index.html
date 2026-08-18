@@ -38,6 +38,13 @@
       <symbol id="icon-check" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="m8 12 3 3 6-7" /></symbol>
       <symbol id="icon-send" viewBox="0 0 24 24"><path d="m3 4 18 8-18 8 3-8-3-8ZM6 12h15" /></symbol>
       <symbol id="icon-tag" viewBox="0 0 24 24"><path d="M4 5v6l9 9 7-7-9-9H4Z" /><circle cx="8" cy="8" r="1" /></symbol>
+      <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" /></symbol>
+      <symbol id="icon-edit" viewBox="0 0 24 24"><path d="m4 16 10.5-10.5a2.1 2.1 0 0 1 3 3L7 19H4v-3Z" /><path d="m13 7 4 4M4 21h16" /></symbol>
+      <symbol id="icon-archive" viewBox="0 0 24 24"><path d="M4 7h16v13H4zM3 4h18v3H3zM9 11h6" /></symbol>
+      <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" /></symbol>
+      <symbol id="icon-bookmark" viewBox="0 0 24 24"><path d="M6 4h12v16l-6-3-6 3V4Z" /></symbol>
+      <symbol id="icon-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4" /></symbol>
+      <symbol id="icon-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="19" cy="12" r="1.2" /></symbol>
       <symbol id="icon-x" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" /></symbol>
       <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5" /></symbol>
     </svg>
@@ -88,7 +95,7 @@
                 <svg><use href="#icon-menu"></use></svg>
               </button>
               <div>
-                <div class="breadcrumb"><span>Merchant workspace</span><i>/</i><strong data-breadcrumb-current>Overview</strong></div>
+                <div class="breadcrumb"><span data-breadcrumb-parent>Merchant workspace</span><i aria-hidden="true">/</i><strong data-breadcrumb-current aria-current="page">Overview</strong></div>
                 <h1 data-page-title>Business overview</h1>
                 <p data-page-description>Monitor your affiliate program performance and partner activity.</p>
                 <div class="scope-line"><span>Scope: All partners and campaigns</span><i aria-hidden="true">⌄</i></div>
@@ -195,6 +202,187 @@
               <div class="quick-actions-grid" data-quick-actions></div>
             </section>
           </div>
+
+
+          <section class="campaign-page" data-campaign-page hidden aria-labelledby="campaign-page-title">
+            <div class="campaign-metrics-grid" data-campaign-metrics></div>
+
+            <section class="campaign-workspace" aria-label="All campaigns management">
+              <div class="campaign-toolbar">
+                <label class="campaign-search">
+                  <span class="sr-only">Search campaigns</span>
+                  <svg><use href="#icon-search"></use></svg>
+                  <input type="search" data-campaign-search placeholder="Search campaigns..." autocomplete="off" />
+                </label>
+
+                <label class="campaign-filter">
+                  <span>Type</span>
+                  <select data-campaign-filter="type" aria-label="Filter by type">
+                    <option value="all">All selected (4)</option>
+                    <option value="Co-op">Co-op</option>
+                    <option value="MDF">MDF</option>
+                    <option value="Event">Event</option>
+                    <option value="Enablement">Enablement</option>
+                  </select>
+                </label>
+
+                <label class="campaign-filter">
+                  <span>Channel</span>
+                  <select data-campaign-filter="channel" aria-label="Filter by channel">
+                    <option value="all">All selected (3)</option>
+                    <option value="Affiliate">Affiliate</option>
+                    <option value="Influencer">Influencer</option>
+                    <option value="Publisher">Publisher</option>
+                  </select>
+                </label>
+
+                <label class="campaign-filter">
+                  <span>Status</span>
+                  <select data-campaign-filter="status" aria-label="Filter by status">
+                    <option value="all">All selected (7)</option>
+                    <option value="Active">Active</option>
+                    <option value="Draft">Draft</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Paused">Paused</option>
+                    <option value="Closed">Closed</option>
+                  </select>
+                </label>
+
+                <label class="campaign-filter">
+                  <span>Owner</span>
+                  <select data-campaign-filter="owner" aria-label="Filter by owner">
+                    <option value="all">All owners</option>
+                    <option value="Taylor Morgan">Taylor Morgan</option>
+                    <option value="Alex Rivera">Alex Rivera</option>
+                    <option value="Jamie Lee">Jamie Lee</option>
+                  </select>
+                </label>
+
+                <label class="campaign-filter">
+                  <span>Date</span>
+                  <select data-campaign-filter="date" aria-label="Filter by date">
+                    <option value="90d">Last 90 days</option>
+                    <option value="30d">Last 30 days</option>
+                    <option value="7d">Last 7 days</option>
+                  </select>
+                </label>
+
+                <label class="campaign-filter">
+                  <span>Saved view</span>
+                  <select data-campaign-filter="savedView" aria-label="Choose saved view">
+                    <option value="all">All campaigns</option>
+                    <option value="active">Active campaigns</option>
+                    <option value="owned">My campaigns</option>
+                  </select>
+                </label>
+
+                <button class="button button--primary campaign-create-button" type="button" data-campaign-action="create">
+                  <span aria-hidden="true">+</span>
+                  Create campaign
+                </button>
+              </div>
+
+              <div class="campaign-tabs" role="tablist" aria-label="Campaign status views" data-campaign-tabs></div>
+
+              <div class="campaign-table-shell">
+                <div class="campaign-bulk-toolbar" data-campaign-bulk-toolbar>
+                  <div class="campaign-bulk-selection">
+                    <label class="campaign-checkbox campaign-checkbox--header">
+                      <input type="checkbox" data-campaign-select-all aria-label="Select all visible campaigns" />
+                      <span aria-hidden="true"></span>
+                    </label>
+                    <strong data-campaign-selection-count>1 selected</strong>
+                  </div>
+                  <div class="campaign-bulk-actions">
+                    <button type="button" class="campaign-bulk-action" data-campaign-action="edit">
+                      <svg><use href="#icon-edit"></use></svg>
+                      Edit
+                    </button>
+                    <button type="button" class="campaign-bulk-action" data-campaign-action="assign">
+                      <svg><use href="#icon-users"></use></svg>
+                      Assign
+                    </button>
+                    <button type="button" class="campaign-bulk-action" data-campaign-action="change-status">
+                      <svg><use href="#icon-tag"></use></svg>
+                      Change status
+                      <svg class="campaign-bulk-action__chevron"><use href="#icon-chevron"></use></svg>
+                    </button>
+                    <button type="button" class="campaign-bulk-action" data-campaign-action="archive">
+                      <svg><use href="#icon-archive"></use></svg>
+                      Archive
+                    </button>
+                    <button type="button" class="campaign-bulk-action" data-campaign-action="delete">
+                      <svg><use href="#icon-trash"></use></svg>
+                      Delete
+                    </button>
+                  </div>
+                  <button type="button" class="campaign-clear-selection" data-campaign-action="clear">
+                    Clear selection
+                    <svg><use href="#icon-x"></use></svg>
+                  </button>
+                </div>
+
+                <div class="campaign-table-scroll">
+                  <table class="campaign-table">
+                    <caption class="sr-only">All campaigns</caption>
+                    <colgroup>
+                      <col class="campaign-col--check" />
+                      <col class="campaign-col--campaign" />
+                      <col class="campaign-col--type" />
+                      <col class="campaign-col--channel" />
+                      <col class="campaign-col--status" />
+                      <col class="campaign-col--stage" />
+                      <col class="campaign-col--partners" />
+                      <col class="campaign-col--sales" />
+                      <col class="campaign-col--progress" />
+                      <col class="campaign-col--next" />
+                      <col class="campaign-col--updated" />
+                      <col class="campaign-col--actions" />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th scope="col">
+                          <span class="sr-only">Select</span>
+                        </th>
+                        <th scope="col">Campaign <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">Type <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">Channel <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">Status <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">Stage <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">Partners <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">Sales <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">Progress <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">Next action <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">Updated <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">
+                          <span class="sr-only">Actions</span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody data-campaign-rows></tbody>
+                  </table>
+                </div>
+
+                <div class="campaign-table-footer">
+                  <span data-campaign-result-count>Showing 1 to 8 of 8 campaigns</span>
+                  <div class="campaign-pagination">
+                    <label>Rows per page
+                      <select data-campaign-page-size aria-label="Rows per page">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                      </select>
+                    </label>
+                    <button type="button" aria-label="First page" disabled>‹‹</button>
+                    <button type="button" aria-label="Previous page" disabled>‹</button>
+                    <button type="button" class="is-current" aria-current="page">1</button>
+                    <button type="button" aria-label="Next page" disabled>›</button>
+                    <button type="button" aria-label="Last page" disabled>››</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </section>
 
           <section class="module-placeholder card" data-module-placeholder hidden aria-live="polite">
             <div class="module-placeholder__mark">◎</div>
