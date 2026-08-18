@@ -47,6 +47,10 @@
       <symbol id="icon-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="19" cy="12" r="1.2" /></symbol>
       <symbol id="icon-x" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" /></symbol>
       <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5" /></symbol>
+      <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></symbol>
+      <symbol id="icon-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 10v6M12 7h.01" /></symbol>
+      <symbol id="icon-star" viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z" /></symbol>
+      <symbol id="icon-grip" viewBox="0 0 24 24"><circle cx="8" cy="6" r="1" /><circle cx="16" cy="6" r="1" /><circle cx="8" cy="12" r="1" /><circle cx="16" cy="12" r="1" /><circle cx="8" cy="18" r="1" /><circle cx="16" cy="18" r="1" /></symbol>
     </svg>
 
     <div class="app-shell">
@@ -133,6 +137,10 @@
                   </button>
                   <div class="period-picker__menu" data-period-menu hidden></div>
                 </div>
+              </div>
+              <div class="page-header__page-actions" data-page-actions hidden>
+                <button class="button button--secondary" type="button" data-attribution-action="export">Export settings</button>
+                <button class="button button--primary" type="button" data-attribution-action="save">Save changes</button>
               </div>
             </div>
           </header>
@@ -382,6 +390,123 @@
                 </div>
               </div>
             </section>
+          </section>
+
+          <section class="attribution-page" data-attribution-page hidden aria-labelledby="attribution-page-title">
+            <h2 id="attribution-page-title" class="sr-only">Attribution rules</h2>
+            <div class="attribution-top-grid">
+              <article class="attribution-card attribution-model-card">
+                <div class="attribution-card__header">
+                  <div>
+                    <h2>Attribution model</h2>
+                    <p>Choose how credit is assigned for each conversion.</p>
+                  </div>
+                </div>
+                <label class="attribution-select">
+                  <span class="sr-only">Choose attribution model</span>
+                  <select data-attribution-model aria-label="Choose attribution model"></select>
+                </label>
+                <div class="attribution-callout" data-attribution-callout role="status" aria-live="polite">
+                  <span class="attribution-callout__icon"></span>
+                  <span data-attribution-callout-copy></span>
+                </div>
+              </article>
+
+              <article class="attribution-card attribution-summary-card">
+                <div class="attribution-card__header">
+                  <div>
+                    <h2>Active model summary</h2>
+                  </div>
+                </div>
+                <div class="attribution-summary-metrics">
+                  <div class="attribution-summary-metric attribution-summary-metric--model">
+                    <strong data-attribution-active-model>Data-driven model</strong>
+                    <span><i class="status-dot status-dot--active"></i><span data-attribution-model-state>Active model</span></span>
+                  </div>
+                  <div class="attribution-summary-metric">
+                    <strong data-attribution-assisted-revenue>$128,430.76</strong>
+                    <span>Assisted revenue <button class="inline-info" type="button" data-attribution-action="assisted-info" aria-label="About assisted revenue"><svg><use href="#icon-info"></use></svg></button></span>
+                  </div>
+                  <div class="attribution-summary-metric">
+                    <strong data-attribution-coverage>88.7%</strong>
+                    <span>Tracking coverage <button class="inline-info" type="button" data-attribution-action="coverage-info" aria-label="About tracking coverage"><svg><use href="#icon-info"></use></svg></button></span>
+                  </div>
+                </div>
+                <button class="attribution-link" type="button" data-attribution-action="performance">
+                  View model performance
+                  <svg><use href="#icon-arrow"></use></svg>
+                </button>
+              </article>
+
+              <article class="attribution-card attribution-distribution-card">
+                <div class="attribution-card__header">
+                  <div>
+                    <h2>Channel credit distribution</h2>
+                    <p>Average credit assigned across all conversions.</p>
+                  </div>
+                </div>
+                <div class="attribution-distribution-list" data-attribution-distribution></div>
+              </article>
+            </div>
+
+            <div class="attribution-bottom-grid">
+              <article class="attribution-card attribution-rules-card">
+                <div class="attribution-section-header">
+                  <div>
+                    <h2>Attribution rules</h2>
+                    <p>Define rules for how conversions are attributed to publishers, influencers, and paid channels.</p>
+                  </div>
+                  <button class="button button--secondary attribution-add-rule" type="button" data-attribution-action="add-rule">
+                    <svg><use href="#icon-plus"></use></svg>
+                    Add rule
+                  </button>
+                </div>
+                <div class="attribution-table-scroll">
+                  <table class="attribution-table">
+                    <caption class="sr-only">Attribution rules</caption>
+                    <colgroup>
+                      <col class="attribution-col--name" />
+                      <col class="attribution-col--channel" />
+                      <col class="attribution-col--logic" />
+                      <col class="attribution-col--lookback" />
+                      <col class="attribution-col--priority" />
+                      <col class="attribution-col--status" />
+                      <col class="attribution-col--actions" />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th scope="col">Rule name</th>
+                        <th scope="col">Channel type</th>
+                        <th scope="col">Attribution logic</th>
+                        <th scope="col">Lookback window <button class="inline-info" type="button" data-attribution-action="lookback-info" aria-label="About lookback window"><svg><use href="#icon-info"></use></svg></button></th>
+                        <th scope="col">Priority <button class="inline-info" type="button" data-attribution-action="priority-info" aria-label="About rule priority"><svg><use href="#icon-info"></use></svg></button></th>
+                        <th scope="col">Status</th>
+                        <th scope="col"><span class="sr-only">Actions</span></th>
+                      </tr>
+                    </thead>
+                    <tbody data-attribution-rules></tbody>
+                  </table>
+                </div>
+                <div class="attribution-rules-footer">
+                  <svg><use href="#icon-grip"></use></svg>
+                  <span>Drag rows to reorder priority</span>
+                </div>
+              </article>
+
+              <article class="attribution-card attribution-audit-card">
+                <div class="attribution-card__header">
+                  <div>
+                    <h2>Audit history</h2>
+                    <p>See recent changes to your attribution rules.</p>
+                  </div>
+                </div>
+                <div class="attribution-audit-list" data-attribution-audit></div>
+                <button class="attribution-link attribution-audit-link" type="button" data-attribution-action="history">
+                  View full history
+                  <svg><use href="#icon-arrow"></use></svg>
+                </button>
+              </article>
+            </div>
           </section>
 
           <section class="module-placeholder card" data-module-placeholder hidden aria-live="polite">
