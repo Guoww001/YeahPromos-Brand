@@ -45,6 +45,31 @@ test('attribution rules reuses the README red navigation tokens', () => {
   assert.match(css, /nav-child\[data-nav-child="attribution-rules"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--attribution-selected-red\)/i);
 });
 
+test('commission rules has its own routed list and detail shell', () => {
+  assert.match(html, /data-commission-rules-page/);
+  assert.match(html, /Commission rules/);
+  assert.match(html, /data-commission-rules-summary/);
+  assert.match(html, /data-commission-rules-filter="status"/);
+  assert.match(html, /data-commission-rules-filter="partnerType"/);
+  assert.match(html, /data-commission-rules-filter="channel"/);
+  assert.match(html, /data-commission-rules-search/);
+  assert.match(html, /data-commission-rules-rows/);
+  assert.match(html, /data-commission-rules-detail/);
+  assert.match(appJs, /isCommissionRulesPage/);
+  assert.match(appJs, /renderCommissionRulesPage/);
+  assert.match(appJs, /getFilteredCommissionRules/);
+  assert.match(data, /commissionRulesPageData/);
+  assert.match(data, /standard-content-commission/);
+  assert.match(data, /scopeSummary/);
+});
+
+test('commission rules reuses the README red navigation tokens', () => {
+  assert.match(css, /body\.is-commission-rules-page[\s\S]*--commission-rules-red:\s*#e60000/i);
+  assert.match(css, /--commission-rules-soft-red:\s*#fde8e8/i);
+  assert.match(css, /--commission-rules-selected-red:\s*#ff312e/i);
+  assert.match(css, /nav-child\[data-nav-child="commission-rules-list"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--commission-rules-selected-red\)/i);
+});
+
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
   assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-1"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);

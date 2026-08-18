@@ -142,6 +142,12 @@
                 <button class="button button--secondary" type="button" data-attribution-action="export">Export settings</button>
                 <button class="button button--primary" type="button" data-attribution-action="save">Save changes</button>
               </div>
+              <div class="page-header__page-actions commission-rules-page-actions" data-commission-rules-actions hidden>
+                <button class="button button--primary" type="button" data-commission-action="create">
+                  <svg><use href="#icon-plus"></use></svg>
+                  Create rule
+                </button>
+              </div>
             </div>
           </header>
 
@@ -506,6 +512,134 @@
                   <svg><use href="#icon-arrow"></use></svg>
                 </button>
               </article>
+            </div>
+          </section>
+
+          <section class="commission-rules-page" data-commission-rules-page hidden aria-labelledby="commission-rules-page-title">
+            <h2 id="commission-rules-page-title" class="sr-only">Commission rules</h2>
+
+            <div class="commission-rules-summary-grid" data-commission-rules-summary></div>
+
+            <div class="commission-rules-layout">
+              <section class="commission-rules-card commission-rules-list-card" aria-labelledby="commission-rules-list-title">
+                <div class="commission-rules-card__header">
+                  <div>
+                    <span class="eyebrow">Commission management</span>
+                    <h2 id="commission-rules-list-title">Commission rules</h2>
+                    <p>Set base rates, bonuses, attribution windows, and partner conditions.</p>
+                  </div>
+                  <button class="icon-button commission-rules-settings" type="button" data-commission-rules-action="settings" aria-label="Configure commission rules table">
+                    <svg><use href="#icon-settings"></use></svg>
+                  </button>
+                </div>
+
+                <div class="commission-rules-toolbar" aria-label="Commission rule filters">
+                  <label class="commission-rules-filter commission-rules-filter--status">
+                    <span>Status</span>
+                    <select data-commission-rules-filter="status" aria-label="Filter by status">
+                      <option value="all">All statuses</option>
+                      <option value="Active">Active</option>
+                      <option value="Scheduled">Scheduled</option>
+                      <option value="Inactive">Inactive</option>
+                      <option value="Expired">Expired</option>
+                    </select>
+                  </label>
+                  <label class="commission-rules-filter">
+                    <span>Partner type</span>
+                    <select data-commission-rules-filter="partnerType" aria-label="Filter by partner type">
+                      <option value="all">All types</option>
+                      <option value="Content / Blog">Content / Blog</option>
+                      <option value="Technology">Technology</option>
+                      <option value="Email / Newsletter">Email / Newsletter</option>
+                      <option value="New partners">New partners</option>
+                      <option value="All partners">All partners</option>
+                    </select>
+                  </label>
+                  <label class="commission-rules-filter">
+                    <span>Channel</span>
+                    <select data-commission-rules-filter="channel" aria-label="Filter by channel">
+                      <option value="all">All channels</option>
+                      <option value="Affiliate">Affiliate</option>
+                      <option value="Publisher">Publisher</option>
+                      <option value="Email">Email</option>
+                    </select>
+                  </label>
+                  <label class="commission-rules-filter commission-rules-filter--date">
+                    <span>Effective date</span>
+                    <select data-commission-rules-filter="effectiveDate" aria-label="Filter by effective date">
+                      <option value="all">Select date range</option>
+                      <option value="30d">Last 30 days</option>
+                      <option value="90d">Last 90 days</option>
+                      <option value="2025">Year 2025</option>
+                    </select>
+                  </label>
+                  <button class="button button--secondary commission-rules-more-filters" type="button" data-commission-rules-action="more-filters">
+                    <svg><use href="#icon-filter"></use></svg>
+                    More filters
+                  </button>
+                  <label class="commission-rules-search">
+                    <span class="sr-only">Search rules</span>
+                    <svg><use href="#icon-search"></use></svg>
+                    <input type="search" data-commission-rules-search placeholder="Search rules..." autocomplete="off" />
+                  </label>
+                </div>
+
+                <div class="commission-rules-table-scroll">
+                  <table class="commission-rules-table">
+                    <caption class="sr-only">Commission rules</caption>
+                    <colgroup>
+                      <col class="commission-rules-col--check" />
+                      <col class="commission-rules-col--name" />
+                      <col class="commission-rules-col--scope" />
+                      <col class="commission-rules-col--base" />
+                      <col class="commission-rules-col--bonus" />
+                      <col class="commission-rules-col--attribution" />
+                      <col class="commission-rules-col--effective" />
+                      <col class="commission-rules-col--status" />
+                      <col class="commission-rules-col--actions" />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th scope="col">
+                          <label class="commission-rules-checkbox commission-rules-checkbox--header">
+                            <input type="checkbox" data-commission-rules-select-all aria-label="Select all visible commission rules" />
+                            <span aria-hidden="true"></span>
+                          </label>
+                        </th>
+                        <th scope="col">Rule name</th>
+                        <th scope="col">Scope</th>
+                        <th scope="col">Base commission</th>
+                        <th scope="col">Bonus</th>
+                        <th scope="col">Attribution window</th>
+                        <th scope="col">Effective date</th>
+                        <th scope="col">Status</th>
+                        <th scope="col"><span class="sr-only">Actions</span></th>
+                      </tr>
+                    </thead>
+                    <tbody data-commission-rules-rows></tbody>
+                  </table>
+                </div>
+
+                <div class="commission-rules-list-footer">
+                  <span data-commission-rules-result-count>Showing 1 to 8 of 8 rules</span>
+                  <div class="commission-rules-pagination" aria-label="Commission rules pagination">
+                    <button type="button" aria-label="Previous page" disabled>‹</button>
+                    <button type="button" class="is-current" aria-current="page" data-commission-rules-page-number="1">1</button>
+                    <button type="button" data-commission-rules-page-number="2">2</button>
+                    <button type="button" data-commission-rules-page-number="3">3</button>
+                    <button type="button" aria-label="Next page" data-commission-rules-action="next-page">›</button>
+                    <label>
+                      <span class="sr-only">Rows per page</span>
+                      <select aria-label="Rows per page">
+                        <option>10 / page</option>
+                        <option>25 / page</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+              </section>
+
+              <aside class="commission-rules-card commission-rules-detail-card" data-commission-rules-detail aria-labelledby="commission-rules-detail-title"></aside>
             </div>
           </section>
 
