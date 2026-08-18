@@ -70,6 +70,15 @@ const campaignStatusMeta = {
   Draft: { tone: 'draft' },
 };
 
+const campaignDateRangeDays = {
+  '7d': 7,
+  '30d': 30,
+  '90d': 90,
+};
+
+const campaignReferenceDate = Date.parse('2025-05-16T23:59:59Z');
+const campaignCurrentOwner = 'Taylor Morgan';
+
 const icon = (name, className = '') => `
   <svg class="${className}" aria-hidden="true">
     <use href="#icon-${name}"></use>
@@ -354,8 +363,23 @@ const getFilteredCampaigns = () => {
     const matchesChannel = campaignState.filters.channel === 'all' || campaign.channel === campaignState.filters.channel;
     const matchesStatus = campaignState.filters.status === 'all' || campaign.status === campaignState.filters.status;
     const matchesOwner = campaignState.filters.owner === 'all' || campaign.updatedBy === campaignState.filters.owner;
+    const rangeDays = campaignDateRangeDays[campaignState.filters.date] ?? 90;
+    const updatedAt = Date.parse(campaign.updated);
+    const matchesDate = !Number.isNaN(updatedAt)
+      && updatedAt <= campaignReferenceDate
+      && campaignReferenceDate - updatedAt <= rangeDays * 24 * 60 * 60 * 1000;
+    const matchesSavedView = campaignState.filters.savedView === 'all'
+      || (campaignState.filters.savedView === 'active' && campaign.status === 'Active')
+      || (campaignState.filters.savedView === 'owned' && campaign.updatedBy === campaignCurrentOwner);
 
-    return matchesTab && matchesQuery && matchesType && matchesChannel && matchesStatus && matchesOwner;
+    return matchesTab
+      && matchesQuery
+      && matchesType
+      && matchesChannel
+      && matchesStatus
+      && matchesOwner
+      && matchesDate
+      && matchesSavedView;
   });
 };
 
@@ -449,7 +473,9 @@ const renderCampaignRows = () => {
   if (campaignResultCount) {
     const total = campaignPageData.campaigns.length;
     const shown = filteredCampaigns.length;
-    campaignResultCount.textContent = shown ? `Showing 1 to ${shown} of ${shown} campaigns` : 'Showing 0 campaigns';
+    campaignResultCount.textContent = shown
+      ? `Showing 1 to ${shown} of ${total} campaigns`
+      : `Showing 0 of ${total} campaigns`;
     campaignResultCount.dataset.total = String(total);
   }
 };
