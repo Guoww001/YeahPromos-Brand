@@ -9,11 +9,11 @@ const sevenDaySnapshot = {
     { id: 'total-payout', label: 'Total payout', value: '$31,280.40', change: '+7.9%', note: 'commission + fees', tone: 'orange', icon: 'wallet' },
   ],
   partnerPerformance: [
-    { id: 'northstar', name: 'Northstar Media', type: 'Publisher', amount: '$6,845.20', percent: 100, trend: '+18.4%', orders: '214' },
-    { id: 'dealroom', name: 'The Dealroom', type: 'Publisher', amount: '$5,126.80', percent: 75, trend: '+12.1%', orders: '186' },
-    { id: 'shopper-edit', name: 'Shopper Edit', type: 'Influencer', amount: '$4,382.10', percent: 64, trend: '+7.8%', orders: '142' },
-    { id: 'tech-forward', name: 'Tech Forward', type: 'Publisher', amount: '$3,614.60', percent: 53, trend: '+4.6%', orders: '118' },
-    { id: 'daily-living', name: 'Daily Living', type: 'Influencer', amount: '$2,906.40', percent: 42, trend: '+2.9%', orders: '96' },
+    { id: 'northstar', name: 'Partner Alpha', type: 'Publisher', amount: '$6,845.20', percent: 100, trend: '+18.4%', orders: '214' },
+    { id: 'dealroom', name: 'Partner Beta', type: 'Publisher', amount: '$5,126.80', percent: 75, trend: '+12.1%', orders: '186' },
+    { id: 'shopper-edit', name: 'Partner Gamma', type: 'Influencer', amount: '$4,382.10', percent: 64, trend: '+7.8%', orders: '142' },
+    { id: 'tech-forward', name: 'Partner Delta', type: 'Publisher', amount: '$3,614.60', percent: 53, trend: '+4.6%', orders: '118' },
+    { id: 'daily-living', name: 'Partner Epsilon', type: 'Influencer', amount: '$2,906.40', percent: 42, trend: '+2.9%', orders: '96' },
   ],
   commission: {
     total: '$49.7K',
@@ -40,11 +40,11 @@ const thirtyDaySnapshot = {
     { id: 'total-payout', label: 'Total payout', value: '$121,840.50', change: '+10.6%', note: 'commission + fees', tone: 'orange', icon: 'wallet' },
   ],
   partnerPerformance: [
-    { id: 'northstar', name: 'Northstar Media', type: 'Publisher', amount: '$21,340.90', percent: 100, trend: '+20.6%', orders: '684' },
-    { id: 'dealroom', name: 'The Dealroom', type: 'Publisher', amount: '$16,820.40', percent: 79, trend: '+14.8%', orders: '596' },
-    { id: 'shopper-edit', name: 'Shopper Edit', type: 'Influencer', amount: '$13,280.10', percent: 62, trend: '+11.2%', orders: '452' },
-    { id: 'tech-forward', name: 'Tech Forward', type: 'Publisher', amount: '$10,460.80', percent: 49, trend: '+8.6%', orders: '390' },
-    { id: 'daily-living', name: 'Daily Living', type: 'Influencer', amount: '$8,620.30', percent: 40, trend: '+5.4%', orders: '316' },
+    { id: 'northstar', name: 'Partner Alpha', type: 'Publisher', amount: '$21,340.90', percent: 100, trend: '+20.6%', orders: '684' },
+    { id: 'dealroom', name: 'Partner Beta', type: 'Publisher', amount: '$16,820.40', percent: 79, trend: '+14.8%', orders: '596' },
+    { id: 'shopper-edit', name: 'Partner Gamma', type: 'Influencer', amount: '$13,280.10', percent: 62, trend: '+11.2%', orders: '452' },
+    { id: 'tech-forward', name: 'Partner Delta', type: 'Publisher', amount: '$10,460.80', percent: 49, trend: '+8.6%', orders: '390' },
+    { id: 'daily-living', name: 'Partner Epsilon', type: 'Influencer', amount: '$8,620.30', percent: 40, trend: '+5.4%', orders: '316' },
   ],
   commission: {
     total: '$194.2K',
@@ -71,11 +71,11 @@ const ninetyDaySnapshot = {
     { id: 'total-payout', label: 'Total payout', value: '$362.8K', change: '+18.1%', note: 'commission + fees', tone: 'orange', icon: 'wallet' },
   ],
   partnerPerformance: [
-    { id: 'northstar', name: 'Northstar Media', type: 'Publisher', amount: '$64,280.30', percent: 100, trend: '+24.2%', orders: '2,140' },
-    { id: 'dealroom', name: 'The Dealroom', type: 'Publisher', amount: '$51,620.40', percent: 80, trend: '+19.6%', orders: '1,864' },
-    { id: 'shopper-edit', name: 'Shopper Edit', type: 'Influencer', amount: '$42,180.10', percent: 66, trend: '+16.2%', orders: '1,420' },
-    { id: 'tech-forward', name: 'Tech Forward', type: 'Publisher', amount: '$32,460.80', percent: 50, trend: '+12.5%', orders: '1,080' },
-    { id: 'daily-living', name: 'Daily Living', type: 'Influencer', amount: '$26,820.30', percent: 42, trend: '+9.6%', orders: '860' },
+    { id: 'northstar', name: 'Partner Alpha', type: 'Publisher', amount: '$64,280.30', percent: 100, trend: '+24.2%', orders: '2,140' },
+    { id: 'dealroom', name: 'Partner Beta', type: 'Publisher', amount: '$51,620.40', percent: 80, trend: '+19.6%', orders: '1,864' },
+    { id: 'shopper-edit', name: 'Partner Gamma', type: 'Influencer', amount: '$42,180.10', percent: 66, trend: '+16.2%', orders: '1,420' },
+    { id: 'tech-forward', name: 'Partner Delta', type: 'Publisher', amount: '$32,460.80', percent: 50, trend: '+12.5%', orders: '1,080' },
+    { id: 'daily-living', name: 'Partner Epsilon', type: 'Influencer', amount: '$26,820.30', percent: 42, trend: '+9.6%', orders: '860' },
   ],
   commission: {
     total: '$582.8K',
@@ -94,9 +94,9 @@ const ninetyDaySnapshot = {
 export const dashboardData = {
   workspace: {
     organization: 'YeahPromos',
-    brand: 'Northstar Labs',
-    store: 'US Store',
-    role: 'Brand Admin',
+    brand: 'Demo Brand',
+    store: 'Demo Store',
+    role: 'Demo Admin',
     currency: 'USD',
     timezone: 'America/Los_Angeles',
   },
@@ -232,7 +232,7 @@ export const dashboardData = {
   partners: [
     {
       id: 'northstar',
-      name: 'Northstar Media',
+      name: 'Partner Alpha',
       type: 'Publisher',
       channel: 'Website / Content',
       status: 'Active',
@@ -270,7 +270,7 @@ export const campaignPageData = {
       nextAction: 'Review assets',
       nextActionIcon: 'calendar',
       updated: 'May 16, 2025',
-      updatedBy: 'Taylor Morgan',
+      updatedBy: 'Demo Owner A',
     },
     {
       id: 'tech-essentials-launch',
@@ -290,7 +290,7 @@ export const campaignPageData = {
       nextAction: 'Approve budget',
       nextActionIcon: 'users',
       updated: 'May 15, 2025',
-      updatedBy: 'Alex Rivera',
+      updatedBy: 'Demo Owner B',
     },
     {
       id: 'mothers-day-special',
@@ -310,7 +310,7 @@ export const campaignPageData = {
       nextAction: 'No action required',
       nextActionIcon: 'check',
       updated: 'May 10, 2025',
-      updatedBy: 'Taylor Morgan',
+      updatedBy: 'Demo Owner A',
     },
     {
       id: 'summer-sale-kickoff',
@@ -330,7 +330,7 @@ export const campaignPageData = {
       nextAction: 'Resume campaign',
       nextActionIcon: 'arrow',
       updated: 'May 9, 2025',
-      updatedBy: 'Alex Rivera',
+      updatedBy: 'Demo Owner B',
     },
     {
       id: 'back-to-school',
@@ -350,7 +350,7 @@ export const campaignPageData = {
       nextAction: 'Add campaign assets',
       nextActionIcon: 'bag',
       updated: 'May 8, 2025',
-      updatedBy: 'Jamie Lee',
+      updatedBy: 'Demo Owner C',
     },
     {
       id: 'holiday-gift-guide',
@@ -370,7 +370,7 @@ export const campaignPageData = {
       nextAction: 'No action required',
       nextActionIcon: 'check',
       updated: 'May 6, 2025',
-      updatedBy: 'Jamie Lee',
+      updatedBy: 'Demo Owner C',
     },
     {
       id: 'brand-awareness-q2',
@@ -390,7 +390,7 @@ export const campaignPageData = {
       nextAction: 'Confirm attendance',
       nextActionIcon: 'calendar',
       updated: 'May 5, 2025',
-      updatedBy: 'Taylor Morgan',
+      updatedBy: 'Demo Owner A',
     },
     {
       id: 'flash-sale-weekend',
@@ -410,7 +410,7 @@ export const campaignPageData = {
       nextAction: 'No action required',
       nextActionIcon: 'check',
       updated: 'May 4, 2025',
-      updatedBy: 'Alex Rivera',
+      updatedBy: 'Demo Owner B',
     },
   ],
 };
@@ -468,10 +468,10 @@ export const attributionPageData = {
     { id: 'paid-social-campaigns', name: 'Paid Social Campaigns', channelType: 'Paid', channelTone: 'paid', logic: 'Position-based (U-shape)', lookback: '7 days', priority: 6, status: 'Active' },
   ],
   audit: [
-    { id: 'lookback-update', date: 'May 12, 2025, 10:24 AM', title: 'Updated lookback window for Influencer Social Traffic', by: 'Demo1 Admin' },
-    { id: 'paid-social-rule', date: 'May 9, 2025, 3:18 PM', title: 'Added rule: Paid Social Campaigns', by: 'Demo1 Admin' },
-    { id: 'model-change', date: 'May 5, 2025, 9:41 AM', title: 'Changed attribution model to Data-driven', by: 'Demo1 Admin' },
-    { id: 'initial-rules', date: 'Apr 28, 2025, 2:11 PM', title: 'Initial attribution rules created', by: 'Demo1 Admin' },
+    { id: 'lookback-update', date: 'May 12, 2025, 10:24 AM', title: 'Updated lookback window for Influencer Social Traffic', by: 'Demo Admin' },
+    { id: 'paid-social-rule', date: 'May 9, 2025, 3:18 PM', title: 'Added rule: Paid Social Campaigns', by: 'Demo Admin' },
+    { id: 'model-change', date: 'May 5, 2025, 9:41 AM', title: 'Changed attribution model to Data-driven', by: 'Demo Admin' },
+    { id: 'initial-rules', date: 'Apr 28, 2025, 2:11 PM', title: 'Initial attribution rules created', by: 'Demo Admin' },
   ],
 };
 
@@ -676,7 +676,7 @@ export const commissionRulesPageData = {
       attributionType: 'Click',
       effectiveDate: 'May 01, 2025',
       lastUpdated: 'Apr 30, 2025',
-      updatedBy: 'Demo1 Admin',
+      updatedBy: 'Demo Admin',
       tiers: [
         { label: 'Tier 1', amount: '$0.00 – $199.99', base: '6.00%', bonus: '—' },
         { label: 'Tier 2', amount: '$200.00 – $499.99', base: '7.00%', bonus: '1.00%' },

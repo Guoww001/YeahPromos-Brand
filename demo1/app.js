@@ -97,7 +97,7 @@ const campaignDateRangeDays = {
 };
 
 const campaignReferenceDate = Date.parse('2025-05-16T23:59:59Z');
-const campaignCurrentOwner = 'Taylor Morgan';
+const campaignCurrentOwner = 'Demo Owner A';
 
 const attributionState = {
   activeModel: attributionPageData.activeModel,
@@ -718,7 +718,7 @@ const renderCommissionRulesDetail = () => {
     attributionType: rule.attributionType,
     effectiveDate: rule.effectiveDate,
     lastUpdated: rule.lastUpdated,
-    updatedBy: 'Demo1 Admin',
+    updatedBy: 'Demo Admin',
     tiers: [{ label: 'Base rate', amount: 'All sales', base: rule.baseCommission, bonus: rule.bonusRate }],
     conditions: ['Applies to eligible partner traffic', 'Excludes invalid or cancelled orders'],
     performance: { period: 'Selected period', clicks: '—', conversions: '—', commission: '—' },

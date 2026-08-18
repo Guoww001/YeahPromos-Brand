@@ -115,7 +115,7 @@ test('mobile date control stays readable beside the demo state selector', () => 
 
 test('merchant overview keeps task-oriented navigation and account context', () => {
   assert.match(html, /Merchant workspace/);
-  assert.match(html, /Brand Admin/);
+  assert.match(html, /Demo Admin/);
   assert.match(data, /Recruitment & Partners/);
   assert.match(data, /Products & Assets/);
   assert.match(data, /Data & Transactions/);
