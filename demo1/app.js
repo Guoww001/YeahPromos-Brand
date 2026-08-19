@@ -1,4 +1,4 @@
-import { apiCredentialsPageData, attributionPageData, bannersImagesPageData, brandIntegrationPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, couponsPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData, recruitmentPageSettingsData, teamAccountsPageData } from './data.mjs?v=merchant-reference-22';
+import { apiCredentialsPageData, attributionPageData, bannersImagesPageData, brandIntegrationPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, couponsPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData, recruitmentPageSettingsData, restrictionRulesPageData, teamAccountsPageData } from './data.mjs?v=merchant-reference-22';
 import {
   createDashboardState,
   isNavigationItemActive,
@@ -103,6 +103,14 @@ const commissionRulesSearch = document.querySelector('[data-commission-rules-sea
 const commissionRulesSelectAll = document.querySelector('[data-commission-rules-select-all]');
 const commissionRulesResultCount = document.querySelector('[data-commission-rules-result-count]');
 const commissionRulesDetail = document.querySelector('[data-commission-rules-detail]');
+const restrictionRulesPage = document.querySelector('[data-restriction-rules-page]');
+const restrictionRulesActions = document.querySelector('[data-restriction-rules-actions]');
+const restrictionRulesSummary = document.querySelector('[data-restriction-rules-summary]');
+const restrictionRulesRows = document.querySelector('[data-restriction-rules-rows]');
+const restrictionRulesSearch = document.querySelector('[data-restriction-rules-search]');
+const restrictionRulesSelectAll = document.querySelector('[data-restriction-rules-select-all]');
+const restrictionRulesResultCount = document.querySelector('[data-restriction-rules-result-count]');
+const restrictionRulesDetail = document.querySelector('[data-restriction-rules-detail]');
 const financePage = document.querySelector('[data-finance-page]');
 const financeActions = document.querySelector('[data-finance-actions]');
 const financeSummary = document.querySelector('[data-finance-summary]');
@@ -230,6 +238,19 @@ const commissionRulesState = {
     effectiveDate: 'all',
   },
   selectedIds: new Set([commissionRulesPageData.selectedRuleId]),
+};
+
+const restrictionRulesState = {
+  search: '',
+  selectedRuleId: restrictionRulesPageData.selectedRuleId,
+  filters: {
+    status: 'all',
+    policy: 'all',
+    channel: 'all',
+    region: 'all',
+    effectiveDate: 'all',
+  },
+  selectedIds: new Set([restrictionRulesPageData.selectedRuleId]),
 };
 
 const financeState = {
@@ -1530,6 +1551,190 @@ const renderCommissionRulesPage = () => {
   renderCommissionRulesDetail();
 };
 
+const getFilteredRestrictionRules = () => {
+  const { search, filters } = restrictionRulesState;
+  const normalizedSearch = search.trim().toLowerCase();
+  const referenceDate = Date.parse('2025-05-12T23:59:59Z');
+
+  return restrictionRulesPageData.rules.filter((rule) => {
+    const matchesSearch = !normalizedSearch || [
+      rule.name,
+      rule.ruleId,
+      rule.policy,
+      rule.termsSummary,
+      rule.keywordCount,
+      rule.channel,
+      rule.region,
+      rule.partnerScope,
+      rule.status,
+    ].some((value) => String(value ?? '').toLowerCase().includes(normalizedSearch));
+    const matchesStatus = filters.status === 'all' || rule.status === filters.status;
+    const matchesPolicy = filters.policy === 'all' || rule.policy === filters.policy;
+    const matchesChannel = filters.channel === 'all' || rule.channel === filters.channel;
+    const matchesRegion = filters.region === 'all' || rule.region === filters.region;
+    const effectiveDate = Date.parse(rule.effectiveAt);
+    const ageInDays = (referenceDate - effectiveDate) / 86400000;
+    const matchesEffectiveDate = filters.effectiveDate === 'all'
+      || (filters.effectiveDate === '30d' && ageInDays <= 30)
+      || (filters.effectiveDate === '90d' && ageInDays <= 90)
+      || (filters.effectiveDate === '2025' && new Date(effectiveDate).getUTCFullYear() === 2025);
+
+    return matchesSearch && matchesStatus && matchesPolicy && matchesChannel && matchesRegion && matchesEffectiveDate;
+  });
+};
+
+const renderRestrictionRulesSummary = () => {
+  if (!restrictionRulesSummary) return;
+
+  restrictionRulesSummary.innerHTML = restrictionRulesPageData.metrics
+    .map((metric) => `
+      <article class="restriction-rules-summary-card restriction-rules-summary-card--${metric.tone}">
+        <div class="restriction-rules-summary-card__copy">
+          <span>${escapeHtml(metric.label)}</span>
+          <strong>${escapeHtml(metric.value)}</strong>
+          <small>${escapeHtml(metric.note)}</small>
+        </div>
+        <span class="restriction-rules-summary-card__icon">${icon(metric.icon)}</span>
+      </article>
+    `)
+    .join('');
+};
+
+const updateRestrictionRulesSelection = () => {
+  const visibleIds = getFilteredRestrictionRules().map((rule) => rule.id);
+  const visibleSelected = visibleIds.filter((id) => restrictionRulesState.selectedIds.has(id));
+
+  if (restrictionRulesSelectAll) {
+    restrictionRulesSelectAll.checked = visibleIds.length > 0 && visibleSelected.length === visibleIds.length;
+    restrictionRulesSelectAll.indeterminate = visibleSelected.length > 0 && visibleSelected.length < visibleIds.length;
+  }
+};
+
+const renderRestrictionRulesRows = () => {
+  if (!restrictionRulesRows) return;
+
+  const filteredRules = getFilteredRestrictionRules();
+  restrictionRulesRows.innerHTML = filteredRules.length
+    ? filteredRules.map((rule) => `
+        <tr class="${rule.id === restrictionRulesState.selectedRuleId ? 'is-selected' : ''}" data-restriction-rules-row="${escapeHtml(rule.id)}" aria-selected="${rule.id === restrictionRulesState.selectedRuleId}">
+          <td class="restriction-rules-cell--check">
+            <label class="restriction-rules-checkbox">
+              <input type="checkbox" data-restriction-rules-select="${escapeHtml(rule.id)}" ${restrictionRulesState.selectedIds.has(rule.id) ? 'checked' : ''} aria-label="Select ${escapeHtml(rule.name)}" />
+              <span aria-hidden="true"></span>
+            </label>
+          </td>
+          <td class="restriction-rules-cell--name">
+            <strong>${escapeHtml(rule.name)}</strong>
+            <small>${escapeHtml(rule.ruleId)}</small>
+          </td>
+          <td><span class="restriction-rules-policy restriction-rules-policy--${escapeHtml(rule.policyTone)}"><i aria-hidden="true"></i>${escapeHtml(rule.policy)}</span></td>
+          <td class="restriction-rules-cell--terms">
+            <strong>${escapeHtml(rule.termsSummary)}</strong>
+            <small>${escapeHtml(rule.keywordCount)}</small>
+          </td>
+          <td class="restriction-rules-cell--channel">${escapeHtml(rule.channel)}</td>
+          <td class="restriction-rules-cell--region">${escapeHtml(rule.region)}</td>
+          <td class="restriction-rules-cell--scope">${escapeHtml(rule.partnerScope)}</td>
+          <td class="restriction-rules-cell--effective">${escapeHtml(rule.effectiveDate)}</td>
+          <td><span class="restriction-rules-status restriction-rules-status--${escapeHtml(rule.statusTone)}"><i aria-hidden="true"></i>${escapeHtml(rule.status)}</span></td>
+          <td class="restriction-rules-cell--actions">
+            <button type="button" data-restriction-rules-action="edit" data-restriction-rules-rule="${escapeHtml(rule.name)}" aria-label="Edit ${escapeHtml(rule.name)}">${icon('edit')}</button>
+            <button type="button" data-restriction-rules-action="row-menu" data-restriction-rules-rule="${escapeHtml(rule.name)}" aria-label="More actions for ${escapeHtml(rule.name)}">${icon('more')}</button>
+          </td>
+        </tr>
+      `).join('')
+    : '<tr><td class="restriction-rules-empty" colspan="10"><strong>No restriction rules found</strong><span>Try changing your search or filters.</span></td></tr>';
+
+  if (restrictionRulesResultCount) {
+    const total = restrictionRulesPageData.rules.length;
+    restrictionRulesResultCount.textContent = filteredRules.length
+      ? `Showing 1 to ${filteredRules.length} of ${total} rules`
+      : `Showing 0 of ${total} rules`;
+  }
+
+  updateRestrictionRulesSelection();
+};
+
+const renderRestrictionRulesDetail = () => {
+  if (!restrictionRulesDetail) return;
+
+  const rule = restrictionRulesPageData.rules.find((item) => item.id === restrictionRulesState.selectedRuleId);
+  if (!rule) {
+    restrictionRulesDetail.hidden = true;
+    restrictionRulesDetail.innerHTML = '';
+    restrictionRulesPage?.classList.add('is-detail-closed');
+    return;
+  }
+
+  const detail = restrictionRulesPageData.details[rule.id] ?? {
+    description: `Applies a ${rule.policy.toLowerCase()} policy to ${rule.termsSummary.toLowerCase()} for ${rule.partnerScope.toLowerCase()}.`,
+    enforcement: rule.policy === 'Block' ? 'Block and review' : rule.policy === 'Review' ? 'Review before approval' : 'Allow when conditions pass',
+    keywords: [rule.termsSummary],
+    channels: [rule.channel],
+    regions: rule.region,
+    partnerScope: rule.partnerScope,
+    effectiveDate: rule.effectiveDate,
+    lastUpdated: rule.lastUpdated,
+    updatedBy: 'Demo Admin',
+    violations: 'No flagged violations',
+    conditions: ['Applies only to the selected channel and region scope', 'Partner traffic is checked before attribution is applied'],
+  };
+
+  restrictionRulesDetail.hidden = false;
+  restrictionRulesPage?.classList.remove('is-detail-closed');
+  restrictionRulesDetail.innerHTML = `
+    <div class="restriction-rules-detail__header">
+      <div>
+        <span class="eyebrow">Selected restriction</span>
+        <h2 id="restriction-rules-detail-title">${escapeHtml(rule.name)}</h2>
+        <p>${escapeHtml(rule.ruleId)}</p>
+      </div>
+      <button class="icon-button" type="button" data-restriction-rules-action="close-detail" aria-label="Close restriction rule details">${icon('x')}</button>
+    </div>
+    <p class="restriction-rules-detail__description">${escapeHtml(detail.description)}</p>
+
+    <div class="restriction-rules-detail__facts">
+      <div><span>Policy</span><strong><span class="restriction-rules-policy restriction-rules-policy--${escapeHtml(rule.policyTone)}"><i aria-hidden="true"></i>${escapeHtml(rule.policy)}</span></strong></div>
+      <div><span>Enforcement</span><strong>${escapeHtml(detail.enforcement)}</strong></div>
+      <div><span>Channels</span><strong>${detail.channels.map((channel) => escapeHtml(channel)).join(', ')}</strong></div>
+      <div><span>Regions</span><strong>${escapeHtml(detail.regions)}</strong></div>
+      <div><span>Partner scope</span><strong>${escapeHtml(detail.partnerScope)}</strong></div>
+      <div><span>Effective date</span><strong>${escapeHtml(detail.effectiveDate)}</strong></div>
+      <div><span>Last updated</span><strong>${escapeHtml(detail.lastUpdated)} by ${escapeHtml(detail.updatedBy)}</strong></div>
+    </div>
+
+    <section class="restriction-rules-detail__section">
+      <div class="restriction-rules-detail__section-header">
+        <div><h3>Protected terms</h3><p>Keywords evaluated before partner paid traffic is approved.</p></div>
+        <button type="button" class="restriction-rules-detail__edit" data-restriction-rules-action="edit-terms">Edit</button>
+      </div>
+      <div class="restriction-rules-term-list">
+        ${detail.keywords.map((keyword) => `<span>${escapeHtml(keyword)}</span>`).join('')}
+      </div>
+    </section>
+
+    <section class="restriction-rules-detail__section restriction-rules-conditions">
+      <div class="restriction-rules-detail__section-header"><div><h3>Rule conditions</h3></div><button type="button" class="restriction-rules-detail__edit" data-restriction-rules-action="edit-conditions">Edit</button></div>
+      <ul>${detail.conditions.map((condition) => `<li>${escapeHtml(condition)}</li>`).join('')}</ul>
+    </section>
+
+    <section class="restriction-rules-detail__section restriction-rules-enforcement">
+      <div class="restriction-rules-detail__section-header"><div><h3>Enforcement activity</h3><p>Recent policy checks for this rule.</p></div><button type="button" class="restriction-rules-detail__edit" data-restriction-rules-action="view-violations">View all</button></div>
+      <div class="restriction-rules-enforcement-card">
+        <span class="restriction-rules-enforcement-card__icon">${icon('shield')}</span>
+        <div><strong>${escapeHtml(detail.violations)}</strong><span>Policy checks are recorded for audit review.</span></div>
+      </div>
+    </section>
+  `;
+};
+
+const renderRestrictionRulesPage = () => {
+  if (!restrictionRulesPage) return;
+  renderRestrictionRulesSummary();
+  renderRestrictionRulesRows();
+  renderRestrictionRulesDetail();
+};
+
 const renderFinanceSummary = () => {
   if (!financeSummary) return;
 
@@ -2681,6 +2886,7 @@ const renderPage = () => {
   const isCampaignPage = state.activeNavigationChild === 'all-campaigns';
   const isAttributionPage = state.activeNavigationChild === 'attribution-rules';
   const isCommissionRulesPage = state.activeNavigationChild === 'commission-rules-list';
+  const isRestrictionRulesPage = state.activeNavigationChild === 'restriction-rules';
   const isFinancePage = state.activeNavigationChild === 'balance-payments';
   const isInvoicesPage = state.activeNavigationChild === 'commission-invoices' || state.activeNavigationChild === 'invoices';
   const isHelpCenterPage = state.activeNavigationId === 'help-center';
@@ -2691,11 +2897,12 @@ const renderPage = () => {
   const isMessagesPage = ['all-messages', 'partner-messages', 'system-alerts', 'archived-messages'].includes(state.activeNavigationChild);
   const isCouponsPage = state.activeNavigationChild === 'coupons';
   const isProductsAssetsPage = state.activeNavigationChild === 'banners-images';
-  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage || isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage;
+  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isRestrictionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage || isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage;
 
   document.body.classList.toggle('is-campaign-page', isCampaignPage);
   document.body.classList.toggle('is-attribution-page', isAttributionPage);
   document.body.classList.toggle('is-commission-rules-page', isCommissionRulesPage);
+  document.body.classList.toggle('is-restriction-rules-page', isRestrictionRulesPage);
   document.body.classList.toggle('is-finance-page', isFinancePage);
   document.body.classList.toggle('is-invoices-page', isInvoicesPage);
   document.body.classList.toggle('is-commission-invoices-page', state.activeNavigationChild === 'commission-invoices');
@@ -2731,6 +2938,8 @@ const renderPage = () => {
         ? 'Configure how conversions are attributed across channels and partners.'
         : isCommissionRulesPage
           ? 'Manage base commission rates, bonuses, attribution windows, and rule conditions for your partners.'
+          : isRestrictionRulesPage
+            ? 'Control paid-search terms, channels, regions, and partner eligibility for your programs.'
           : isFinancePage
             ? 'Track your account balance, commissions, payouts, and payment methods.'
             : isInvoicesPage
@@ -2752,17 +2961,18 @@ const renderPage = () => {
             : isProductsAssetsPage
               ? 'Manage your creative assets and organize them into folders for easy access and use across campaigns.'
             : recruitmentPage?.description ?? operationsPage?.description ?? context.current.label + ' workspace preview for the current brand scope.';
-  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage
-    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isInvoicesPage ? 'Commission & Rules' : isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage ? 'Integrations & Settings' : isMessagesPage ? 'Messages & Notifications' : isCouponsPage || isProductsAssetsPage ? 'Products & Assets' : 'Finance')
+  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isRestrictionRulesPage || isFinancePage || isInvoicesPage || isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage
+    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isRestrictionRulesPage || isInvoicesPage ? 'Commission & Rules' : isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage ? 'Integrations & Settings' : isMessagesPage ? 'Messages & Notifications' : isCouponsPage || isProductsAssetsPage ? 'Products & Assets' : 'Finance')
     : isHelpCenterPage ? 'Help center'
     : isOverview ? t('shell.merchantWorkspace', 'Merchant workspace') : context.parent.label;
-  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isTeamAccountsPage ? 'Team accounts' : isRecruitmentSettingsPage ? 'Recruitment page' : isBrandIntegrationPage ? 'Brand integration' : isApiCredentialsPage ? 'API credentials' : isMessagesPage ? context.current.label : isCouponsPage ? 'Coupons' : isProductsAssetsPage ? 'Banners & images' : isOverview ? 'Overview' : context.current.label;
+  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isRestrictionRulesPage ? 'Restriction rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isTeamAccountsPage ? 'Team accounts' : isRecruitmentSettingsPage ? 'Recruitment page' : isBrandIntegrationPage ? 'Brand integration' : isApiCredentialsPage ? 'API credentials' : isMessagesPage ? context.current.label : isCouponsPage ? 'Coupons' : isProductsAssetsPage ? 'Banners & images' : isOverview ? 'Overview' : context.current.label;
   breadcrumbCurrent.setAttribute('aria-current', 'page');
   overviewPage.hidden = !isOverview;
   modulePage.hidden = isOverview || (!recruitmentPage && !operationsPage);
   campaignPage.hidden = !isCampaignPage;
   attributionPage.hidden = !isAttributionPage;
   commissionRulesPage.hidden = !isCommissionRulesPage;
+  restrictionRulesPage.hidden = !isRestrictionRulesPage;
   financePage.hidden = !isFinancePage;
   invoicesPage.hidden = !isInvoicesPage;
   helpCenterPage.hidden = !isHelpCenterPage;
@@ -2776,6 +2986,7 @@ const renderPage = () => {
   modulePlaceholder.hidden = isOverview || isMainPage || Boolean(recruitmentPage || operationsPage);
   if (pageActions) pageActions.hidden = !isAttributionPage;
   if (commissionRulesActions) commissionRulesActions.hidden = !isCommissionRulesPage;
+  if (restrictionRulesActions) restrictionRulesActions.hidden = !isRestrictionRulesPage;
   if (financeActions) financeActions.hidden = !isFinancePage;
   if (teamAccountsActions) teamAccountsActions.hidden = !isTeamAccountsPage;
   if (recruitmentPageSettingsActions) recruitmentPageSettingsActions.hidden = !isRecruitmentSettingsPage;
@@ -2795,6 +3006,7 @@ const renderPage = () => {
   if (isCampaignPage) renderCampaignPage();
   if (isAttributionPage) renderAttributionPage();
   if (isCommissionRulesPage) renderCommissionRulesPage();
+  if (isRestrictionRulesPage) renderRestrictionRulesPage();
   if (isFinancePage) renderFinancePage();
   if (isInvoicesPage) renderInvoicesPage();
   if (isHelpCenterPage) renderHelpCenterPage();
@@ -3258,6 +3470,72 @@ if (commissionRulesPage) {
     commissionRulesState.selectedRuleId = row.dataset.commissionRulesRow;
     renderCommissionRulesRows();
     renderCommissionRulesDetail();
+  });
+}
+
+if (restrictionRulesPage) {
+  restrictionRulesPage.addEventListener('input', (event) => {
+    if (!event.target.matches('[data-restriction-rules-search]')) return;
+    restrictionRulesState.search = event.target.value;
+    renderRestrictionRulesRows();
+  });
+
+  restrictionRulesPage.addEventListener('change', (event) => {
+    const filter = event.target.closest('[data-restriction-rules-filter]');
+    if (filter) {
+      restrictionRulesState.filters[filter.dataset.restrictionRulesFilter] = filter.value;
+      renderRestrictionRulesRows();
+      return;
+    }
+
+    const ruleCheckbox = event.target.closest('[data-restriction-rules-select]');
+    if (ruleCheckbox) {
+      if (ruleCheckbox.checked) restrictionRulesState.selectedIds.add(ruleCheckbox.dataset.restrictionRulesSelect);
+      else restrictionRulesState.selectedIds.delete(ruleCheckbox.dataset.restrictionRulesSelect);
+      updateRestrictionRulesSelection();
+      return;
+    }
+
+    if (event.target.matches('[data-restriction-rules-select-all]')) {
+      const visibleIds = getFilteredRestrictionRules().map((rule) => rule.id);
+      if (event.target.checked) visibleIds.forEach((id) => restrictionRulesState.selectedIds.add(id));
+      else visibleIds.forEach((id) => restrictionRulesState.selectedIds.delete(id));
+      renderRestrictionRulesRows();
+    }
+  });
+
+  restrictionRulesPage.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-restriction-rules-action]');
+    if (action) {
+      event.stopPropagation();
+      const actionName = action.dataset.restrictionRulesAction;
+      if (actionName === 'close-detail') {
+        restrictionRulesState.selectedRuleId = null;
+        renderRestrictionRulesRows();
+        renderRestrictionRulesDetail();
+      } else if (actionName === 'next-page' || actionName === 'more-filters' || actionName === 'settings') {
+        showToast(`${actionName.replace('-', ' ')} is ready for product integration`);
+      } else if (actionName === 'edit' || actionName === 'row-menu') {
+        showToast(`${action.dataset.restrictionRulesRule} ${actionName === 'edit' ? 'edit' : 'more actions'} is ready for product integration`);
+      } else if (actionName === 'edit-terms' || actionName === 'edit-conditions' || actionName === 'view-violations') {
+        showToast(`${actionName.replaceAll('-', ' ')} is ready for product integration`);
+      }
+      return;
+    }
+
+    const pageNumber = event.target.closest('[data-restriction-rules-page-number]');
+    if (pageNumber) {
+      event.stopPropagation();
+      showToast(`Restriction rules page ${pageNumber.dataset.restrictionRulesPageNumber} is ready for product integration`);
+      return;
+    }
+
+    const row = event.target.closest('[data-restriction-rules-row]');
+    if (!row || event.target.closest('input')) return;
+    event.stopPropagation();
+    restrictionRulesState.selectedRuleId = row.dataset.restrictionRulesRow;
+    renderRestrictionRulesRows();
+    renderRestrictionRulesDetail();
   });
 }
 
@@ -3912,6 +4190,13 @@ document.addEventListener('click', (event) => {
   if (commissionAction) {
     const action = commissionAction.dataset.commissionAction;
     if (action === 'create') showToast('Commission rule editor is ready for product integration');
+    return;
+  }
+
+  const restrictionRulesAction = event.target.closest('[data-restriction-rules-action]');
+  if (restrictionRulesAction && !restrictionRulesPage?.contains(restrictionRulesAction)) {
+    const action = restrictionRulesAction.dataset.restrictionRulesAction;
+    if (action === 'create') showToast('Restriction rule editor is ready for product integration');
     return;
   }
 

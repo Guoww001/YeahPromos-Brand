@@ -124,6 +124,41 @@ test('commission rules reuses the README red navigation tokens', () => {
   assert.match(css, /nav-child\[data-nav-child="commission-rules-list"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--commission-rules-selected-red\)/i);
 });
 
+test('restriction rules has its own routed PPC policy workspace', () => {
+  assert.match(html, /data-restriction-rules-page/);
+  assert.match(html, /Restriction rules/);
+  assert.match(html, /data-restriction-rules-summary/);
+  assert.match(html, /data-restriction-rules-filter="status"/);
+  assert.match(html, /data-restriction-rules-filter="policy"/);
+  assert.match(html, /data-restriction-rules-filter="channel"/);
+  assert.match(html, /data-restriction-rules-filter="region"/);
+  assert.match(html, /data-restriction-rules-filter="effectiveDate"/);
+  assert.match(html, /data-restriction-rules-search/);
+  assert.match(html, /data-restriction-rules-rows/);
+  assert.match(html, /Keywords \/ terms/);
+  assert.match(html, /data-restriction-rules-detail/);
+  assert.match(appJs, /isRestrictionRulesPage/);
+  assert.match(appJs, /renderRestrictionRulesPage/);
+  assert.match(appJs, /getFilteredRestrictionRules/);
+  assert.match(data, /restrictionRulesPageData/);
+  assert.match(data, /brand-search-protection/);
+  assert.match(data, /restriction-rules/);
+  assert.match(readme, /Commission & Rules > Restriction rules/);
+});
+
+test('restriction rules uses readable contrast-ready tokens and explicit policy semantics', () => {
+  assert.match(css, /body\.is-restriction-rules-page[\s\S]*--restriction-rules-text-strong:\s*#1f2937/i);
+  assert.match(css, /--restriction-rules-text:\s*#374151/);
+  assert.match(css, /--restriction-rules-text-muted:\s*#4b5563/);
+  assert.match(css, /nav-child\[data-nav-child="restriction-rules"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--restriction-rules-selected-red\)/i);
+  assert.match(css, /\.restriction-rules-table th[\s\S]*font-size:\s*11px/);
+  assert.match(css, /\.restriction-rules-table td[\s\S]*font-size:\s*12px/);
+  assert.match(css, /\.restriction-rules-policy--blocked[\s\S]*color:\s*#9b1c1c/);
+  assert.match(css, /\.restriction-rules-status--active[\s\S]*color:\s*#176b43/);
+  assert.match(readme, /Restriction rules 的关键词\/品牌词/);
+  assert.match(readme, /Restriction rules 使用 `#1F2937`/);
+});
+
 test('balance and payments has its own routed finance page shell', () => {
   assert.match(html, /data-finance-page/);
   assert.match(html, /Balance &amp; payments/);
