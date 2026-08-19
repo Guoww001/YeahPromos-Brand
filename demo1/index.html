@@ -9,7 +9,7 @@
       content="YeahPromos merchant business overview demo"
     />
     <title>Business Overview · YeahPromos</title>
-    <link rel="stylesheet" href="./styles.css?v=merchant-reference-21" />
+    <link rel="stylesheet" href="./styles.css?v=merchant-reference-22" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -176,6 +176,15 @@
                 <button class="button button--primary" type="button" data-team-accounts-action="create-account">
                   <svg><use href="#icon-users"></use></svg>
                   Create new account
+                </button>
+              </div>
+              <div class="page-header__page-actions recruitment-page-settings-actions" data-recruitment-page-actions hidden>
+                <button class="button button--secondary" type="button" data-recruitment-page-action="preview">
+                  <svg><use href="#icon-external"></use></svg>
+                  Preview page
+                </button>
+                <button class="button button--primary" type="button" data-recruitment-page-action="save">
+                  Save changes
                 </button>
               </div>
               <div class="page-header__page-actions brand-integration-page-actions" data-brand-integration-actions hidden>
@@ -981,6 +990,141 @@
             </section>
           </section>
 
+          <section class="recruitment-page-settings" data-recruitment-page-settings hidden aria-labelledby="recruitment-page-settings-title">
+            <h2 id="recruitment-page-settings-title" class="sr-only">Recruitment page settings</h2>
+
+            <div class="recruitment-page-settings-layout">
+              <div class="recruitment-page-settings-main">
+                <section class="recruitment-settings-card recruitment-settings-status-card" aria-labelledby="recruitment-settings-status-title">
+                  <div class="recruitment-settings-card__header">
+                    <div>
+                      <span class="recruitment-settings-eyebrow">Public page</span>
+                      <h2 id="recruitment-settings-status-title">Recruitment page status</h2>
+                      <p>Control whether partners can discover your program and submit an application.</p>
+                    </div>
+                    <span class="recruitment-settings-status-pill" data-recruitment-page-status-pill>Published</span>
+                  </div>
+                  <div class="recruitment-settings-status-row">
+                    <span class="recruitment-settings-status-icon"><svg><use href="#icon-globe"></use></svg></span>
+                    <div><strong>Accept new partner applications</strong><small>When enabled, anyone with the public link can view the page and apply.</small></div>
+                    <button class="recruitment-settings-switch is-enabled" type="button" role="switch" aria-pressed="true" data-recruitment-page-action="toggle-status" aria-label="Toggle recruitment page status">
+                      <span class="recruitment-settings-switch__track"><i></i></span>
+                      <span data-recruitment-page-status-label>Published</span>
+                    </button>
+                  </div>
+                  <div class="recruitment-settings-url-row">
+                    <label for="recruitment-page-url">Public page URL</label>
+                    <div class="recruitment-settings-url-control">
+                      <input id="recruitment-page-url" type="text" value="partners.yeahpromos.com/demo-brand" readonly aria-describedby="recruitment-page-url-note" />
+                      <button type="button" data-recruitment-page-action="copy-link" aria-label="Copy public recruitment page link"><svg><use href="#icon-copy"></use></svg>Copy link</button>
+                    </div>
+                    <small id="recruitment-page-url-note">Share this link with creators and publishers you want to invite.</small>
+                  </div>
+                </section>
+
+                <section class="recruitment-settings-card" aria-labelledby="recruitment-settings-routing-title">
+                  <div class="recruitment-settings-card__header">
+                    <div>
+                      <span class="recruitment-settings-eyebrow">Program setup</span>
+                      <h2 id="recruitment-settings-routing-title">Brand and application routing</h2>
+                      <p>Choose the brand shown on the page and where new applications should go.</p>
+                    </div>
+                  </div>
+                  <div class="recruitment-settings-form-grid">
+                    <label class="recruitment-settings-field">
+                      <span>Brand</span>
+                      <select data-recruitment-page-setting="brand">
+                        <option value="demo-brand">Demo Brand</option>
+                        <option value="partner-boost">PartnerBoost</option>
+                        <option value="northstar-demo">Northstar Demo</option>
+                      </select>
+                    </label>
+                    <label class="recruitment-settings-field">
+                      <span>Application queue</span>
+                      <select data-recruitment-page-setting="queue">
+                        <option value="new">New applications</option>
+                        <option value="under-review">Under review</option>
+                        <option value="custom">Custom review queue</option>
+                      </select>
+                    </label>
+                  </div>
+                </section>
+
+                <section class="recruitment-settings-card" aria-labelledby="recruitment-settings-content-title">
+                  <div class="recruitment-settings-card__header">
+                    <div>
+                      <span class="recruitment-settings-eyebrow">Page content</span>
+                      <h2 id="recruitment-settings-content-title">Make the invitation feel like your brand</h2>
+                      <p>Keep the message clear so the right partners know what to expect.</p>
+                    </div>
+                  </div>
+                  <div class="recruitment-settings-copy-fields">
+                    <label class="recruitment-settings-field">
+                      <span>Page headline</span>
+                      <input type="text" maxlength="80" data-recruitment-page-field="title" value="Partner with Demo Brand" />
+                      <small>Use a short, welcoming headline.</small>
+                    </label>
+                    <label class="recruitment-settings-field">
+                      <span>Introduction</span>
+                      <textarea rows="3" maxlength="180" data-recruitment-page-field="description">Share products you love, reach new customers, and grow with a partner program built for you.</textarea>
+                      <small>Shown below the headline on the public page.</small>
+                    </label>
+                    <label class="recruitment-settings-field recruitment-settings-field--short">
+                      <span>Primary button label</span>
+                      <input type="text" maxlength="32" data-recruitment-page-field="cta" value="Apply to partner" />
+                    </label>
+                  </div>
+                </section>
+
+                <section class="recruitment-settings-card" aria-labelledby="recruitment-settings-fields-title">
+                  <div class="recruitment-settings-card__header">
+                    <div>
+                      <span class="recruitment-settings-eyebrow">Application form</span>
+                      <h2 id="recruitment-settings-fields-title">What should applicants share?</h2>
+                      <p>Required fields help your team review applications without asking for unnecessary information.</p>
+                    </div>
+                  </div>
+                  <div class="recruitment-settings-field-list">
+                    <label class="recruitment-settings-field-row"><span class="recruitment-settings-field-row__icon"><svg><use href="#icon-users"></use></svg></span><span><strong>Full name</strong><small>Required · Applicant identity</small></span><input type="checkbox" data-recruitment-page-field-toggle="full-name" checked aria-label="Include full name field" /></label>
+                    <label class="recruitment-settings-field-row"><span class="recruitment-settings-field-row__icon"><svg><use href="#icon-message"></use></svg></span><span><strong>Email address</strong><small>Required · Application follow-up</small></span><input type="checkbox" data-recruitment-page-field-toggle="email" checked aria-label="Include email address field" /></label>
+                    <label class="recruitment-settings-field-row"><span class="recruitment-settings-field-row__icon"><svg><use href="#icon-globe"></use></svg></span><span><strong>Website or profile URL</strong><small>Optional · Primary partner profile</small></span><input type="checkbox" data-recruitment-page-field-toggle="website" checked aria-label="Include website or profile URL field" /></label>
+                    <label class="recruitment-settings-field-row"><span class="recruitment-settings-field-row__icon"><svg><use href="#icon-grid"></use></svg></span><span><strong>Primary platform</strong><small>Optional · Main channel</small></span><input type="checkbox" data-recruitment-page-field-toggle="platform" checked aria-label="Include primary platform field" /></label>
+                    <label class="recruitment-settings-field-row"><span class="recruitment-settings-field-row__icon"><svg><use href="#icon-chart"></use></svg></span><span><strong>Audience size</strong><small>Optional · Reach estimate</small></span><input type="checkbox" data-recruitment-page-field-toggle="audience-size" aria-label="Include audience size field" /></label>
+                    <label class="recruitment-settings-field-row"><span class="recruitment-settings-field-row__icon"><svg><use href="#icon-edit"></use></svg></span><span><strong>Why do you want to partner?</strong><small>Optional · Applicant note</small></span><input type="checkbox" data-recruitment-page-field-toggle="partner-note" aria-label="Include applicant note field" /></label>
+                  </div>
+                </section>
+              </div>
+
+              <aside class="recruitment-page-settings-aside" aria-label="Recruitment page preview and publishing status">
+                <section class="recruitment-settings-card recruitment-page-preview-card" aria-labelledby="recruitment-page-preview-title">
+                  <div class="recruitment-settings-card__header recruitment-settings-card__header--preview">
+                    <div>
+                      <span class="recruitment-settings-eyebrow">Live preview</span>
+                      <h2 id="recruitment-page-preview-title">Public recruitment page</h2>
+                    </div>
+                    <span class="recruitment-page-preview__live-dot"><i></i>Preview</span>
+                  </div>
+                  <div data-recruitment-page-preview></div>
+                </section>
+
+                <section class="recruitment-settings-card recruitment-publishing-card" aria-labelledby="recruitment-publishing-title">
+                  <div class="recruitment-settings-card__header">
+                    <div>
+                      <span class="recruitment-settings-eyebrow">Publishing checklist</span>
+                      <h2 id="recruitment-publishing-title">Ready to share</h2>
+                    </div>
+                  </div>
+                  <ul class="recruitment-publishing-list">
+                    <li><span><svg><use href="#icon-check"></use></svg></span><div><strong>Brand connected</strong><small>Demo Store is active</small></div></li>
+                    <li><span><svg><use href="#icon-check"></use></svg></span><div><strong>Application queue selected</strong><small>New applications</small></div></li>
+                    <li><span><svg><use href="#icon-check"></use></svg></span><div><strong>Public link available</strong><small>Ready to share with partners</small></div></li>
+                  </ul>
+                  <p class="recruitment-publishing-note"><svg><use href="#icon-info"></use></svg>Applications are demo-only and do not send email or create real partner records.</p>
+                </section>
+              </aside>
+            </div>
+          </section>
+
           <section class="brand-integration-page" data-brand-integration-page hidden aria-labelledby="brand-integration-page-title">
             <h2 id="brand-integration-page-title" class="sr-only">Brand integration</h2>
 
@@ -1534,6 +1678,6 @@
       <button type="button" data-toast-close aria-label="Dismiss notification"><svg><use href="#icon-x"></use></svg></button>
     </div>
 
-    <script type="module" src="./app.js?v=merchant-reference-21"></script>
+    <script type="module" src="./app.js?v=merchant-reference-22"></script>
   </body>
 </html>

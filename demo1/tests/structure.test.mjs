@@ -242,6 +242,36 @@ test('Team accounts reuses README red tokens and safe demo rules', () => {
   assert.match(readme, /Team accounts 使用 `#1F2937`/);
 });
 
+test('Recruitment page has its own Integrations & Settings configuration workspace', () => {
+  assert.match(html, /data-recruitment-page-settings/);
+  assert.match(html, /Recruitment page status/);
+  assert.match(html, /Public page URL/);
+  assert.match(html, /data-recruitment-page-action="toggle-status"/);
+  assert.match(html, /data-recruitment-page-setting="brand"/);
+  assert.match(html, /data-recruitment-page-setting="queue"/);
+  assert.match(html, /data-recruitment-page-field="title"/);
+  assert.match(html, /data-recruitment-page-field="description"/);
+  assert.match(html, /data-recruitment-page-field-toggle="full-name"/);
+  assert.match(html, /data-recruitment-page-preview/);
+  assert.match(html, /Publishing checklist/);
+  assert.match(appJs, /isRecruitmentSettingsPage/);
+  assert.match(appJs, /renderRecruitmentSettingsPage/);
+  assert.match(appJs, /renderRecruitmentPagePreview/);
+  assert.match(appJs, /recruitmentPageSettingsData/);
+  assert.match(data, /recruitmentPageSettingsData/);
+  assert.match(data, /partners\.yeahpromos\.com\/demo-brand/);
+  assert.match(data, /applicationFields/);
+  assert.match(readme, /Integrations & Settings > Recruitment page/);
+});
+
+test('Recruitment page reuses README red tokens and demo-only publishing rules', () => {
+  assert.match(css, /body\.is-recruitment-page-settings-page[\s\S]*--recruitment-settings-red:\s*#e60000/i);
+  assert.match(css, /--recruitment-settings-soft-red:\s*#fde8e8/i);
+  assert.match(css, /--recruitment-settings-selected-red:\s*#ff312e/i);
+  assert.match(css, /nav-child\[data-nav-child="recruitment-page"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--recruitment-settings-selected-red\)/i);
+  assert.match(readme, /不发布公开页面、不发送邮件、不创建真实申请/);
+  assert.match(readme, /Recruitment page 使用 `#1F2937`/);
+});
 test('messages and notifications has its own routed conversation workspace', () => {
   assert.match(html, /data-messages-page/);
   assert.match(html, /Messages &amp; Notifications/);
@@ -401,7 +431,7 @@ test('finance neutral text uses contrast-ready dark gray tokens', () => {
 });
 
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
-  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-21"><\/script>/);
+  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-22"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);
   assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
 });
@@ -427,8 +457,8 @@ test('overview follows the reference dashboard hierarchy', () => {
 });
 
 test('preview busts the entry cache for the reference dashboard skin', () => {
-  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-21"/);
-  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-21"/);
+  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-22"/);
+  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-22"/);
 });
 
 test('reference dashboard keeps flat cards and red action controls', () => {
