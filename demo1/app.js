@@ -1,4 +1,4 @@
-import { apiCredentialsPageData, attributionPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData } from './data.mjs?v=merchant-reference-19';
+import { apiCredentialsPageData, attributionPageData, bannersImagesPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData } from './data.mjs?v=merchant-reference-19';
 import {
   createDashboardState,
   isNavigationItemActive,
@@ -146,6 +146,16 @@ const messagesResultCount = document.querySelector('[data-messages-result-count]
 const messagesSelectAll = document.querySelector('[data-messages-select-all]');
 const messagesConversation = document.querySelector('[data-messages-conversation]');
 const messagesPartnerDetails = document.querySelector('[data-messages-partner-details]');
+const productsAssetsPage = document.querySelector('[data-products-assets-page]');
+const productsAssetsTabs = document.querySelector('[data-products-assets-tabs]');
+const productsAssetsGrid = document.querySelector('[data-products-assets-grid]');
+const productsAssetsDetail = document.querySelector('[data-products-assets-detail]');
+const productsAssetsSearch = document.querySelector('[data-products-assets-search]');
+const productsAssetsSearchForm = document.querySelector('[data-products-assets-search-form]');
+const productsAssetsResultCount = document.querySelector('[data-products-assets-result-count]');
+const productsAssetsPageLabel = document.querySelector('[data-products-assets-page-label]');
+const productsAssetsSort = document.querySelector('[data-products-assets-sort]');
+const productsAssetsPageSize = document.querySelector('[data-products-assets-page-size]');
 
 const campaignState = {
   activeTab: 'all',
@@ -234,6 +244,20 @@ const messagesState = {
   starredIds: new Set(),
   replyDraft: '',
   sentReplies: [],
+};
+
+const productsAssetsState = {
+  activeTab: 'all-assets',
+  search: '',
+  sort: 'newest',
+  view: 'grid',
+  pageSize: 12,
+  filters: {
+    folder: 'all',
+    campaign: 'all',
+    status: 'all',
+  },
+  selectedId: bannersImagesPageData.assets[0]?.id ?? null,
 };
 
 const icon = (name, className = '') => `
@@ -2092,6 +2116,180 @@ const handleMessagesAction = (action) => {
   return true;
 };
 
+const getFilteredProductsAssets = () => {
+  const query = productsAssetsState.search.trim().toLowerCase();
+  const filtered = bannersImagesPageData.assets.filter((asset) => {
+    const matchesTab = productsAssetsState.activeTab === 'all-assets' || asset.category === productsAssetsState.activeTab;
+    const matchesFolder = productsAssetsState.filters.folder === 'all' || asset.folderValue === productsAssetsState.filters.folder;
+    const matchesCampaign = productsAssetsState.filters.campaign === 'all' || asset.campaignValue === productsAssetsState.filters.campaign;
+    const matchesStatus = productsAssetsState.filters.status === 'all' || asset.status === productsAssetsState.filters.status;
+    const matchesQuery = !query || [asset.fileName, asset.title, asset.subtitle, asset.folder, asset.campaign, ...asset.tags]
+      .some((value) => value.toLowerCase().includes(query));
+    return matchesTab && matchesFolder && matchesCampaign && matchesStatus && matchesQuery;
+  });
+
+  if (productsAssetsState.sort === 'name') return [...filtered].sort((left, right) => left.fileName.localeCompare(right.fileName));
+  if (productsAssetsState.sort === 'oldest') return [...filtered].reverse();
+  return filtered;
+};
+
+const renderProductsAssetsMedia = (asset) => `
+  <div class="products-asset-card__media${asset.strip ? ' products-asset-card__media--strip' : ''}" data-tone="${asset.tone}">
+    <span class="products-assets-art products-assets-art--${asset.tone}" aria-hidden="true"></span>
+    <span class="products-asset-card__copy">
+      <strong>${escapeHtml(asset.title)}</strong>
+      <small>${escapeHtml(asset.subtitle)}</small>
+      ${asset.cta ? `<span class="products-assets-art__cta">${escapeHtml(asset.cta)}</span>` : ''}
+    </span>
+    <span class="products-asset-card__format">${escapeHtml(asset.dimensions)}</span>
+  </div>
+`;
+
+const renderProductsAssetsTabs = () => {
+  if (!productsAssetsTabs) return;
+  productsAssetsTabs.innerHTML = bannersImagesPageData.tabs.map((tab) => `
+    <button
+      class="products-assets-tab${productsAssetsState.activeTab === tab.id ? ' is-active' : ''}"
+      type="button"
+      role="tab"
+      aria-selected="${productsAssetsState.activeTab === tab.id}"
+      data-products-assets-tab="${tab.id}"
+    >${escapeHtml(tab.label)}</button>
+  `).join('');
+};
+
+const renderProductsAssetsFilters = () => {
+  if (!productsAssetsPage) return;
+  const filterMap = {
+    folder: bannersImagesPageData.filters.folders,
+    campaign: bannersImagesPageData.filters.campaigns,
+    status: bannersImagesPageData.filters.statuses,
+  };
+
+  Object.entries(filterMap).forEach(([key, options]) => {
+    const select = productsAssetsPage.querySelector(`[data-products-assets-filter="${key}"]`);
+    if (!select) return;
+    select.innerHTML = options.map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join('');
+    select.value = productsAssetsState.filters[key];
+  });
+
+  if (productsAssetsSearch) productsAssetsSearch.value = productsAssetsState.search;
+  if (productsAssetsSort) productsAssetsSort.value = productsAssetsState.sort;
+  if (productsAssetsPageSize) productsAssetsPageSize.value = String(productsAssetsState.pageSize);
+};
+
+const renderProductsAssetsGrid = (visibleAssets) => {
+  if (!productsAssetsGrid) return;
+  productsAssetsGrid.classList.toggle('is-list', productsAssetsState.view === 'list');
+  productsAssetsGrid.innerHTML = visibleAssets.length
+    ? visibleAssets.map((asset) => `
+        <button
+          class="products-asset-card${asset.id === productsAssetsState.selectedId ? ' is-selected' : ''}${asset.strip ? ' is-strip' : ''}"
+          type="button"
+          data-products-assets-asset-id="${asset.id}"
+          role="listitem"
+          aria-pressed="${asset.id === productsAssetsState.selectedId}"
+        >
+          ${renderProductsAssetsMedia(asset)}
+          <span class="products-asset-card__footer">
+            <span>
+              <strong>${escapeHtml(asset.fileName)}</strong>
+              <small>${escapeHtml(asset.dimensions)}</small>
+            </span>
+            <span class="products-asset-card__meta">
+              <small>${escapeHtml(asset.folder)}</small>
+              <span class="products-asset-card__status products-asset-card__status--${asset.statusTone}"><i aria-hidden="true"></i>${escapeHtml(asset.status)}</span>
+            </span>
+          </span>
+          <span class="products-asset-card__menu" aria-hidden="true">${icon('more')}</span>
+          ${asset.id === productsAssetsState.selectedId ? `<span class="products-asset-card__selected" title="Selected asset">${icon('check')}</span>` : ''}
+        </button>
+      `).join('')
+    : '<div class="products-assets-empty"><span aria-hidden="true">⌕</span><strong>No assets found</strong><p>Try another category, folder, status, or search term.</p></div>';
+};
+
+const renderProductsAssetsDetail = (visibleAssets) => {
+  if (!productsAssetsDetail) return;
+  const asset = visibleAssets.find((item) => item.id === productsAssetsState.selectedId)
+    ?? visibleAssets[0];
+
+  if (!asset) {
+    productsAssetsDetail.innerHTML = `
+      <div class="products-assets-detail__empty">
+        <span>${icon('image')}</span>
+        <strong>Select an asset</strong>
+        <p>Choose an asset from the library to review its details.</p>
+      </div>
+    `;
+    return;
+  }
+
+  productsAssetsState.selectedId = asset.id;
+  productsAssetsDetail.innerHTML = `
+    <div class="products-assets-detail__header">
+      <div>
+        <span class="eyebrow">Selected asset</span>
+        <h2 id="products-assets-detail-title">${escapeHtml(asset.fileName)}</h2>
+      </div>
+      <div class="products-assets-detail__header-actions">
+        <button class="products-assets-icon-button" type="button" data-products-assets-action="open-preview" aria-label="Open asset preview">${icon('external')}</button>
+        <button class="products-assets-icon-button" type="button" data-products-assets-action="close-detail" aria-label="Close asset details">${icon('x')}</button>
+      </div>
+    </div>
+    <div class="products-assets-detail__preview">
+      ${renderProductsAssetsMedia(asset)}
+    </div>
+    <div class="products-assets-detail__identity">
+      <strong>${escapeHtml(asset.fileName)}</strong>
+      <span class="products-asset-card__status products-asset-card__status--${asset.statusTone}"><i aria-hidden="true"></i>${escapeHtml(asset.status)}</span>
+    </div>
+    <dl class="products-assets-detail__facts">
+      <div><dt>Type</dt><dd>${escapeHtml(asset.type)}</dd></div>
+      <div><dt>Dimensions</dt><dd>${escapeHtml(asset.dimensions)}</dd></div>
+      <div><dt>File size</dt><dd>${escapeHtml(asset.fileSize)}</dd></div>
+      <div><dt>Uploaded</dt><dd>${escapeHtml(asset.uploaded)}</dd></div>
+      <div><dt>Uploaded by</dt><dd>${escapeHtml(asset.uploadedBy)}</dd></div>
+      <div><dt>Folder</dt><dd>${escapeHtml(asset.folder)}</dd></div>
+      <div><dt>Used in</dt><dd>${escapeHtml(asset.usedIn)}</dd></div>
+    </dl>
+    <div class="products-assets-detail__tags">
+      <span>Tags</span>
+      <div>${asset.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join('')}</div>
+    </div>
+    <p class="products-assets-detail__description">${escapeHtml(asset.description)}</p>
+    <div class="products-assets-detail__actions">
+      <button class="products-assets-button products-assets-button--primary products-assets-detail__edit" type="button" data-products-assets-action="edit">Edit asset</button>
+      <button class="products-assets-icon-button" type="button" data-products-assets-action="more" aria-label="More asset actions">${icon('more')}</button>
+    </div>
+  `;
+};
+
+const renderProductsAssetsPage = () => {
+  if (!productsAssetsPage) return;
+  renderProductsAssetsTabs();
+  renderProductsAssetsFilters();
+  const visibleAssets = getFilteredProductsAssets();
+  if (!visibleAssets.some((asset) => asset.id === productsAssetsState.selectedId)) {
+    productsAssetsState.selectedId = visibleAssets[0]?.id ?? null;
+  }
+  if (!productsAssetsPage.classList.contains('is-detail-closed')) productsAssetsDetail.hidden = false;
+  productsAssetsPage.querySelectorAll('[data-products-assets-view]').forEach((button) => {
+    const isActive = button.dataset.productsAssetsView === productsAssetsState.view;
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-pressed', String(isActive));
+  });
+  renderProductsAssetsGrid(visibleAssets);
+  renderProductsAssetsDetail(visibleAssets);
+  const isDefaultView = productsAssetsState.activeTab === 'all-assets'
+    && productsAssetsState.search === ''
+    && Object.values(productsAssetsState.filters).every((value) => value === 'all');
+  const count = isDefaultView ? bannersImagesPageData.totalCount : visibleAssets.length;
+  if (productsAssetsResultCount) productsAssetsResultCount.textContent = `${count} assets`;
+  if (productsAssetsPageLabel) productsAssetsPageLabel.textContent = isDefaultView
+    ? bannersImagesPageData.pageLabel
+    : `${visibleAssets.length} matching asset${visibleAssets.length === 1 ? '' : 's'}`;
+};
+
 const renderPage = () => {
   const context = findNavigationContext(state.activeNavigationChild ?? state.activeNavigationId);
   const isOverview = state.activeNavigationId === 'overview' && !state.activeNavigationChild;
@@ -2106,7 +2304,8 @@ const renderPage = () => {
   const isHelpCenterPage = state.activeNavigationId === 'help-center';
   const isApiCredentialsPage = state.activeNavigationChild === 'api-credentials';
   const isMessagesPage = ['all-messages', 'partner-messages', 'system-alerts', 'archived-messages'].includes(state.activeNavigationChild);
-  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage || isApiCredentialsPage || isMessagesPage;
+  const isProductsAssetsPage = state.activeNavigationChild === 'banners-images';
+  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage || isApiCredentialsPage || isMessagesPage || isProductsAssetsPage;
 
   document.body.classList.toggle('is-campaign-page', isCampaignPage);
   document.body.classList.toggle('is-attribution-page', isAttributionPage);
@@ -2118,6 +2317,7 @@ const renderPage = () => {
   document.body.classList.toggle('is-help-center-page', isHelpCenterPage);
   document.body.classList.toggle('is-api-credentials-page', isApiCredentialsPage);
   document.body.classList.toggle('is-messages-page', isMessagesPage);
+  document.body.classList.toggle('is-products-assets-page', isProductsAssetsPage);
   if (helpCenterUtility) {
     helpCenterUtility.classList.toggle('is-active', isHelpCenterPage);
     if (isHelpCenterPage) helpCenterUtility.setAttribute('aria-current', 'page');
@@ -2151,12 +2351,14 @@ const renderPage = () => {
               ? 'Create and manage API keys to authenticate and authorize access to the YeahPromos Merchant API. Keep your credentials secure and never share them publicly.'
             : isMessagesPage
               ? 'Stay connected with your partners and never miss an important update.'
+            : isProductsAssetsPage
+              ? 'Manage your creative assets and organize them into folders for easy access and use across campaigns.'
             : recruitmentPage?.description ?? operationsPage?.description ?? context.current.label + ' workspace preview for the current brand scope.';
-  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isApiCredentialsPage || isMessagesPage
-    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isInvoicesPage ? 'Commission & Rules' : isApiCredentialsPage ? 'Settings' : isMessagesPage ? 'Messages & Notifications' : 'Finance')
+  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isApiCredentialsPage || isMessagesPage || isProductsAssetsPage
+    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isInvoicesPage ? 'Commission & Rules' : isApiCredentialsPage ? 'Settings' : isMessagesPage ? 'Messages & Notifications' : isProductsAssetsPage ? 'Products & Assets' : 'Finance')
     : isHelpCenterPage ? 'Help center'
     : isOverview ? t('shell.merchantWorkspace', 'Merchant workspace') : context.parent.label;
-  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isApiCredentialsPage ? 'API credentials' : isMessagesPage ? context.current.label : isOverview ? 'Overview' : context.current.label;
+  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isApiCredentialsPage ? 'API credentials' : isMessagesPage ? context.current.label : isProductsAssetsPage ? 'Banners & images' : isOverview ? 'Overview' : context.current.label;
   breadcrumbCurrent.setAttribute('aria-current', 'page');
   overviewPage.hidden = !isOverview;
   modulePage.hidden = isOverview || (!recruitmentPage && !operationsPage);
@@ -2168,6 +2370,7 @@ const renderPage = () => {
   helpCenterPage.hidden = !isHelpCenterPage;
   apiCredentialsPage.hidden = !isApiCredentialsPage;
   messagesPage.hidden = !isMessagesPage;
+  productsAssetsPage.hidden = !isProductsAssetsPage;
   modulePlaceholder.hidden = isOverview || isMainPage || Boolean(recruitmentPage || operationsPage);
   if (pageActions) pageActions.hidden = !isAttributionPage;
   if (commissionRulesActions) commissionRulesActions.hidden = !isCommissionRulesPage;
@@ -2192,6 +2395,7 @@ const renderPage = () => {
   if (isHelpCenterPage) renderHelpCenterPage();
   if (isApiCredentialsPage) renderApiCredentialsPage();
   if (isMessagesPage) renderMessagesPage();
+  if (isProductsAssetsPage) renderProductsAssetsPage();
 };
 
 const renderAll = () => {
@@ -2910,6 +3114,94 @@ if (messagesPage) {
     if (!event.target.matches('[data-messages-reply-form]')) return;
     event.preventDefault();
     submitMessageReply();
+  });
+}
+
+if (productsAssetsPage) {
+  productsAssetsPage.addEventListener('input', (event) => {
+    if (!event.target.matches('[data-products-assets-search]')) return;
+    productsAssetsState.search = event.target.value;
+    renderProductsAssetsPage();
+    productsAssetsSearch?.focus();
+  });
+
+  productsAssetsPage.addEventListener('change', (event) => {
+    const filter = event.target.closest('[data-products-assets-filter]');
+    if (filter) {
+      productsAssetsState.filters[filter.dataset.productsAssetsFilter] = filter.value;
+      renderProductsAssetsPage();
+      showToast(`${filter.options[filter.selectedIndex].text} selected`);
+      return;
+    }
+
+    if (event.target.matches('[data-products-assets-sort]')) {
+      productsAssetsState.sort = event.target.value;
+      renderProductsAssetsPage();
+      showToast('Asset order updated');
+      return;
+    }
+
+    if (event.target.matches('[data-products-assets-page-size]')) {
+      productsAssetsState.pageSize = Number(event.target.value);
+      renderProductsAssetsPage();
+      showToast(`${event.target.options[event.target.selectedIndex].text} selected`);
+    }
+  });
+
+  productsAssetsPage.addEventListener('submit', (event) => {
+    if (!event.target.matches('[data-products-assets-search-form]')) return;
+    event.preventDefault();
+    renderProductsAssetsPage();
+    productsAssetsSearch?.focus();
+    showToast(productsAssetsState.search ? `Searching assets for “${productsAssetsState.search}”` : 'Asset search cleared');
+  });
+
+  productsAssetsPage.addEventListener('click', (event) => {
+    const tab = event.target.closest('[data-products-assets-tab]');
+    if (tab) {
+      productsAssetsState.activeTab = tab.dataset.productsAssetsTab;
+      productsAssetsPage.classList.remove('is-detail-closed');
+      renderProductsAssetsPage();
+      showToast(`${tab.textContent.trim()} selected`);
+      return;
+    }
+
+    const view = event.target.closest('[data-products-assets-view]');
+    if (view) {
+      productsAssetsState.view = view.dataset.productsAssetsView;
+      renderProductsAssetsPage();
+      return;
+    }
+
+    const asset = event.target.closest('[data-products-assets-asset-id]');
+    if (asset) {
+      productsAssetsState.selectedId = asset.dataset.productsAssetsAssetId;
+      productsAssetsPage.classList.remove('is-detail-closed');
+      renderProductsAssetsPage();
+      return;
+    }
+
+    const pageNumber = event.target.closest('[data-products-assets-page-number]');
+    if (pageNumber) {
+      showToast(`Assets page ${pageNumber.dataset.productsAssetsPageNumber} is ready for product integration`);
+      return;
+    }
+
+    const action = event.target.closest('[data-products-assets-action]');
+    if (!action) return;
+    const actionName = action.dataset.productsAssetsAction;
+    if (actionName === 'close-detail') {
+      productsAssetsPage.classList.add('is-detail-closed');
+      productsAssetsDetail.hidden = true;
+    } else if (actionName === 'upload') {
+      showToast('Upload asset flow is ready for product integration');
+    } else if (actionName === 'folder') {
+      showToast('Create folder flow is ready for product integration');
+    } else if (actionName === 'edit') {
+      showToast('Asset editor is ready for product integration');
+    } else {
+      showToast(`${actionName.replaceAll('-', ' ')} is ready for product integration`);
+    }
   });
 }
 

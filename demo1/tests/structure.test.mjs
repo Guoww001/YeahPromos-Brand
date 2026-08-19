@@ -218,6 +218,35 @@ test('messages and notifications uses readable contrast-ready tokens', () => {
   assert.match(readme, /Messages & Notifications 使用 `#1F2937`/);
 });
 
+test('products and assets banners page has its own routed asset workspace', () => {
+  assert.match(html, /data-products-assets-page/);
+  assert.match(html, /data-products-assets-tabs/);
+  assert.match(html, /data-products-assets-filter="folder"/);
+  assert.match(html, /data-products-assets-filter="campaign"/);
+  assert.match(html, /data-products-assets-filter="status"/);
+  assert.match(html, /data-products-assets-search/);
+  assert.match(html, /data-products-assets-grid/);
+  assert.match(html, /data-products-assets-detail/);
+  assert.match(appJs, /isProductsAssetsPage/);
+  assert.match(appJs, /renderProductsAssetsPage/);
+  assert.match(appJs, /getFilteredProductsAssets/);
+  assert.match(data, /bannersImagesPageData/);
+  assert.match(data, /workspace-sale-1200x628.jpg/);
+  assert.match(data, /Banners & images/);
+  assert.match(readme, /Products & Assets > Banners & images/);
+});
+
+test('banners page keeps asset states readable and keyboard-addressable', () => {
+  assert.match(css, /\.is-products-assets-page \.page-header__filters[\s\S]*display:\s*none/);
+  assert.match(css, /\.products-assets-grid[\s\S]*grid-template-columns:\s*repeat\(3/);
+  assert.match(css, /\.products-asset-card__status[\s\S]*font-size:\s*10px/);
+  assert.match(css, /\.products-assets-detail__facts dt[\s\S]*font-size:\s*10px/);
+  assert.match(css, /\.products-assets-detail__facts dd[\s\S]*color:\s*var\(--color-text-soft\)/);
+  assert.match(appJs, /aria-pressed/);
+  assert.match(readme, /Banners & images 的资产卡片、筛选器/);
+  assert.match(readme, /Banners & images 使用 `#1F2937`/);
+});
+
 test('finance page reuses the README red navigation tokens', () => {
   assert.match(css, /body\.is-finance-page[\s\S]*--finance-red:\s*#e60000/i);
   assert.match(css, /--finance-soft-red:\s*#fde8e8/i);
