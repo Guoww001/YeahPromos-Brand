@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createOperationsState, filterOperationsRecords, getOperationsPage, operationsPageIds, selectOperationsRecord, selectOperationsTab, updateOperationsFilter, updateOperationsSearch } from '../operations.mjs';
 
 test('data and transactions exposes its four routed workspace pages', () => {
-  assert.deepEqual(operationsPageIds, ['performance', 'performance-brand', 'transactions', 'amazon-brb']);
+  assert.deepEqual(operationsPageIds, ['performance', 'performance-brand', 'transactions', 'amazon-brb', 'affiliate-programs', 'influencer-campaigns']);
   assert.equal(getOperationsPage('performance').parent, 'Data & Transactions');
   assert.equal(getOperationsPage('performance-brand').title, 'Performance by brand');
   assert.equal(getOperationsPage('transactions').title, 'Transactions');
