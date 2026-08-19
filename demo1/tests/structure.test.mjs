@@ -110,6 +110,16 @@ test('finance typography preserves readability and lightweight chart annotations
   assert.match(readme, /主要正文、表格数据和表单控件文字不小于/);
 });
 
+test('finance neutral text uses contrast-ready dark gray tokens', () => {
+  assert.match(css, /body\.is-finance-page[\s\S]*--finance-text-strong:\s*#1f2937/);
+  assert.match(css, /body\.is-finance-page[\s\S]*--finance-text-secondary:\s*#374151/);
+  assert.match(css, /body\.is-finance-page[\s\S]*--finance-text-muted:\s*#4b5563/);
+  assert.match(css, /\.finance-table td[\s\S]*color:\s*var\(--finance-text-secondary\)/);
+  assert.match(css, /\.finance-chart__axis-y[\s\S]*color:\s*var\(--finance-text-muted\)/);
+  assert.match(css, /\.finance-paid-status[\s\S]*color:\s*var\(--finance-success-text\)/);
+  assert.match(readme, /对比度与灰阶/);
+});
+
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
   assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-3"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);
