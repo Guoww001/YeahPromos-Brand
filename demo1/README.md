@@ -38,6 +38,7 @@ http://127.0.0.1:8766/demo1/
 - `Integrations & Settings > Brand integration`：已连接品牌摘要、Shopify / WooCommerce / Amazon / Web Analytics 集成状态、同步健康摘要和近期活动；
 - `Messages & Notifications > All Messages`：消息分类、搜索/筛选、伙伴会话、附件、回复编辑器、伙伴详情和分页；
 - `Products & Assets > Banners & images`：资产分类、文件夹/活动/状态筛选、名称或标签搜索、网格/列表视图、资产选中态、详情面板和分页占位交互；
+- `Products & Assets > Coupons`：日期范围、状态、Permission、Category 和关键词筛选，优惠码表格、使用量、状态标签、选择、编辑/删除入口和分页占位交互；
 - 日期范围切换会同步切换整组模拟数据；
 - Demo state 切换：正常、空数据、加载错误、权限受限和同步中；
 - 伙伴详情右侧抽屉；
@@ -111,6 +112,7 @@ Demo 1 使用白、黑、红三色构成品牌视觉；旧蓝色不得继续作�
 - Brand integration 的连接状态、同步时间、数据范围、数据状态、Manage / Reconnect 与活动日志均提供文字、图标和语义标签，不只依赖颜色；品牌域名入口与 Add integration 入口保留键盘焦点。
 - Messages & Notifications 的消息列表、未读标记、状态标签、会话正文、附件和回复编辑器遵循以上字号与行高约束；未读状态同时提供文字、圆点和语义属性，不只依靠颜色。
 - Banners & images 的资产卡片、筛选器、搜索框、状态标签、分页和右侧详情面板遵循以上字号与行高约束；选中、Active、In use 和 Draft 状态同时提供文字、边框、圆点或语义属性，不只依靠颜色。
+- Coupons 的日期范围、筛选器、关键词搜索、优惠码表格、使用量、状态标签和操作按钮遵循以上字号与行高约束；Active、Scheduled、Expired 同时提供文字、圆点、边框或语义属性，不只依靠颜色。
 
 ### 对比度与灰阶 / Contrast & grayscale
 
@@ -123,6 +125,7 @@ Demo 1 使用白、黑、红三色构成品牌视觉；旧蓝色不得继续作�
 - Messages & Notifications 使用 `#1F2937` 承载标题和重要字段，`#374151` 承载正文与列表数据，`#4B5563` 承载辅助说明；红色只用于当前导航、未读提示、主操作和焦点，不用浅灰表达关键内容。
 - Brand integration 使用 `#1F2937` 承载品牌名、集成名称和关键数值，`#374151` 承载数据范围与活动信息，`#4B5563` 承载同步时间和字段说明；Connected / Warning 额外保留文字和状态点，避免只依靠颜色。
 - Banners & images 使用 `#1F2937` 承载资产名称和详情字段，`#374151` 承载文件信息，`#4B5563` 承载筛选器、文件夹和说明文字；Active、In use、Draft 使用深色文字配浅色背景，并保留文字标签和圆点语义。
+- Coupons 使用 `#1F2937` 承载优惠码和主要 Offer，`#374151` 承载分类、有效日期和使用量，`#4B5563` 承载筛选器、最低消费和辅助说明；Active、Scheduled、Expired 使用深色文字配浅色背景，并保留文字标签和圆点语义。
 
 ### 演示数据与支付安全
 
@@ -148,11 +151,11 @@ Demo 1 使用白、黑、红三色构成品牌视觉；旧蓝色不得继续作�
 
 | 文件 | 职责 |
 | --- | --- |
-| `index.html` | Merchant 页面语义骨架、SVG 图标库、抽屉、状态选择器、活动页、归因规则页、佣金规则页、发票页、财务页、Help center、Brand integration、API credentials、Messages & Notifications 和 Products & Assets 页面 |
+| `index.html` | Merchant 页面语义骨架、SVG 图标库、抽屉、状态选择器、活动页、归因规则页、佣金规则页、发票页、财务页、Help center、Brand integration、API credentials、Messages & Notifications、Coupons 和 Banners & images 页面 |
 | `styles.css` | 视觉 Token、布局、组件、状态、动效和响应式样式 |
-| `data.mjs` | 工作区、任务导航、时间范围快照、指标、伙伴、活动、归因规则、佣金规则、发票、财务、Help center、Brand integration、API credentials、Messages & Notifications 和 Banners & images 模拟数据 |
+| `data.mjs` | 工作区、任务导航、时间范围快照、指标、伙伴、活动、归因规则、佣金规则、发票、财务、Help center、Brand integration、API credentials、Messages & Notifications、Coupons 和 Banners & images 模拟数据 |
 | `app-core.mjs` | 不依赖 DOM 的状态函数 |
-| `app.js` | 数据渲染、模块导航、活动筛选、归因模型交互、佣金规则筛选/详情交互、发票筛选/下载交互、财务趋势/付款交互、Help center 搜索/文章交互、Brand integration 集成管理/重连/活动交互、API credentials 环境/筛选/复制/轮换交互、Messages & Notifications 标签/搜索/回复/伙伴交互、Banners & images 分类/筛选/搜索/详情交互、状态切换、抽屉和浏览器交互 |
+| `app.js` | 数据渲染、模块导航、活动筛选、归因模型交互、佣金规则筛选/详情交互、发票筛选/下载交互、财务趋势/付款交互、Help center 搜索/文章交互、Brand integration 集成管理/重连/活动交互、API credentials 环境/筛选/复制/轮换交互、Messages & Notifications 标签/搜索/回复/伙伴交互、Coupons 日期/筛选/搜索/选择交互、Banners & images 分类/筛选/搜索/详情交互、状态切换、抽屉和浏览器交互 |
 | `tests/app-core.test.mjs` | 时间范围、导航展开和 Demo 状态行为测试 |
 | `tests/structure.test.mjs` | Merchant 结构、字体、响应式和无障碍规则测试 |
 
