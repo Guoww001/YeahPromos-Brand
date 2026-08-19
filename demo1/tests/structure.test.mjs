@@ -111,7 +111,7 @@ test('finance typography preserves readability and lightweight chart annotations
 });
 
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
-  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-2"><\/script>/);
+  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-3"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);
   assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
 });
@@ -138,8 +138,8 @@ test('overview follows the reference dashboard hierarchy', () => {
 });
 
 test('preview busts the entry cache for the reference dashboard skin', () => {
-  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-2"/);
-  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-2"/);
+  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-3"/);
+  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-3"/);
 });
 
 test('reference dashboard keeps flat cards and red action controls', () => {
