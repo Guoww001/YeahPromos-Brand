@@ -31,6 +31,20 @@ test('app entry remains syntactically valid after conflict resolution', () => {
   assert.equal(syntax.status, 0, syntax.stderr || syntax.stdout);
 });
 
+test('page loads one module entry and keeps the global navigation in the sidebar', () => {
+  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-20"><\/script>/);
+  assert.match(html, /<aside[^>]+data-sidebar/);
+  assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
+  assert.match(html, /data-module-page/);
+  assert.match(appJs, /createRecruitmentState/);
+  assert.match(appJs, /renderRecruitmentPage/);
+  assert.match(appJs, /renderOverviewChart/);
+  assert.match(appJs, /operationsPageSet/);
+  assert.match(appJs, /renderOperationsPage/);
+  assert.match(appJs, /createOperationsState/);
+  assert.match(appJs, /aria-current="page"/);
+});
+
 test('attribution rules has its own routed page shell and controls', () => {
   assert.match(html, /data-attribution-page/);
   assert.match(html, /Attribution rules/);
@@ -212,9 +226,22 @@ test('finance neutral text uses contrast-ready dark gray tokens', () => {
 });
 
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
-  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-18"><\/script>/);
+  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-20"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);
   assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
+});
+
+test('recruitment search exposes an explicit submit and clear interaction', () => {
+  assert.match(appJs, /data-recruitment-search-submit/);
+  assert.match(appJs, /data-recruitment-clear/);
+  assert.match(css, /\.recruitment-search__submit\s*\{/);
+});
+
+test('recruitment invite updates the visible card before opening the composer', () => {
+  assert.match(appJs, /if \(actionId === 'invite'\) \{/);
+  assert.match(appJs, /recruitmentState = record \? applyRecruitmentAction\(recruitmentState, 'invite', record\.id\) : recruitmentState;/);
+  assert.match(appJs, /if \(record\) renderRecruitmentPage\(pageId\);/);
+  assert.match(appJs, /openRecruitmentDrawer\(record \?\? \{ id: 'invite-composer'/);
 });
 
 test('styles define the light red merchant-dashboard visual tokens', () => {
@@ -238,8 +265,8 @@ test('overview follows the reference dashboard hierarchy', () => {
 });
 
 test('preview busts the entry cache for the reference dashboard skin', () => {
-  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-18"/);
-  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-18"/);
+  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-20"/);
+  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-20"/);
 });
 
 test('reference dashboard keeps flat cards and red action controls', () => {

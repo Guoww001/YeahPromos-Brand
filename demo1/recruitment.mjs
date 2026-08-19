@@ -6,6 +6,12 @@ export const recruitmentPageIds = [
   'invite-history',
 ];
 
+export const recruitmentGroupOptions = [
+  'Premium publishers',
+  'Creator network',
+  'Seasonal partners',
+];
+
 const discoveryFilters = {
   influencer: [
     { id: 'category', label: 'Category', options: ['All', 'Beauty', 'Technology', 'Travel', 'Wellness'] },
@@ -211,6 +217,18 @@ export function createRecruitmentState() {
       'invite-history': 'all',
     },
     sort: 'relevance',
+    featuredOffsets: {
+      'discover-influencers': 0,
+      'discover-publishers': 0,
+    },
+    followedIds: [],
+    invitedIds: [],
+    resentIds: [],
+    groupAssignments: {},
+    applicationStatuses: {},
+    expandedMessageIds: [],
+    invitePage: 1,
+    invitePageSize: 5,
   };
 }
 
@@ -260,4 +278,117 @@ export function updateRecruitmentFilter(state, key, value) {
 
 export function updateRecruitmentSearch(state, search) {
   return { ...state, search };
+}
+
+const recruitmentFilterDefaults = new Set(['All', 'All status', 'All channels']);
+
+export function getRecruitmentActiveCriteria(state, page) {
+  const pageFilters = new Map((page?.filters ?? []).map((filter) => [filter.id, filter.label]));
+  const criteria = Object.entries(state.filters ?? [])
+    .filter(([key, value]) => pageFilters.has(key) && value && !recruitmentFilterDefaults.has(value))
+    .map(([key, value]) => ({ id: key, label: pageFilters.get(key), value: String(value) }));
+
+  const search = String(state.search ?? '').trim();
+  if (search) criteria.push({ id: 'search', label: 'Search', value: search });
+
+  return criteria;
+}
+
+export function clearRecruitmentCriterion(state, key) {
+  if (!key) return state;
+  if (key === 'search') return { ...state, search: '' };
+
+  const filters = { ...state.filters };
+  delete filters[key];
+  return { ...state, filters };
+}
+
+export function resetRecruitmentView(state) {
+  return {
+    ...state,
+    filters: {},
+    search: '',
+    sort: 'relevance',
+    invitePage: 1,
+  };
+}
+
+function toggleId(ids, id) {
+  return ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id];
+}
+
+export function applyRecruitmentAction(state, action, recordId) {
+  if (!recordId) return state;
+
+  if (action === 'follow') {
+    return { ...state, followedIds: toggleId(state.followedIds, recordId) };
+  }
+
+  if (action === 'invite') {
+    return { ...state, invitedIds: state.invitedIds.includes(recordId) ? state.invitedIds : [...state.invitedIds, recordId] };
+  }
+
+  if (action === 'resend') {
+    return { ...state, resentIds: state.resentIds.includes(recordId) ? state.resentIds : [...state.resentIds, recordId] };
+  }
+
+  if (action === 'approve' || action === 'decline') {
+    return {
+      ...state,
+      applicationStatuses: {
+        ...state.applicationStatuses,
+        [recordId]: action === 'approve' ? 'approved' : 'declined',
+      },
+    };
+  }
+
+  return state;
+}
+
+export function updateRecruitmentGroup(state, recordId, group) {
+  if (!recordId || !recruitmentGroupOptions.includes(group)) return state;
+  return {
+    ...state,
+    groupAssignments: {
+      ...state.groupAssignments,
+      [recordId]: group,
+    },
+  };
+}
+
+export function toggleRecruitmentMessage(state, recordId) {
+  if (!recordId) return state;
+  return { ...state, expandedMessageIds: toggleId(state.expandedMessageIds, recordId) };
+}
+
+export function getRecruitmentRecordStatus(state, record) {
+  if (state.applicationStatuses[record?.id]) return state.applicationStatuses[record.id];
+  if (record?.group && state.followedIds.includes(record.id)) return 'Followed';
+  return record?.status;
+}
+
+export function getRecruitmentRecordGroup(state, record) {
+  return state.groupAssignments[record?.id] ?? record?.group;
+}
+
+export function cycleRecruitmentFeatured(state, pageId, direction, total, visibleCount = 3) {
+  const maxOffset = Math.max(total - visibleCount, 0);
+  const current = state.featuredOffsets[pageId] ?? 0;
+  const nextOffset = Math.min(Math.max(current + (Number(direction) || 0), 0), maxOffset);
+
+  return {
+    ...state,
+    featuredOffsets: {
+      ...state.featuredOffsets,
+      [pageId]: nextOffset,
+    },
+  };
+}
+
+export function setRecruitmentInvitePage(state, page, pageSize = state.invitePageSize) {
+  return {
+    ...state,
+    invitePage: Math.max(Number.parseInt(page, 10) || 1, 1),
+    invitePageSize: Math.max(Number.parseInt(pageSize, 10) || 5, 1),
+  };
 }
