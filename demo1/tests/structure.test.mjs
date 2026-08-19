@@ -13,6 +13,7 @@ const appJs = readFileSync(resolve(demoDirectory, 'app.js'), 'utf8');
 const operationsRenderers = readFileSync(resolve(demoDirectory, 'operations-renderers.mjs'), 'utf8');
 const data = readFileSync(resolve(demoDirectory, 'data.mjs'), 'utf8');
 const readme = readFileSync(resolve(demoDirectory, 'README.md'), 'utf8');
+const latestPreview = readFileSync(resolve(demoDirectory, 'latest.html'), 'utf8');
 
 function cssBraceDepth(source) {
   let depth = 0;
@@ -612,6 +613,14 @@ test('overview follows the reference dashboard hierarchy', () => {
 test('preview busts the entry cache for the reference dashboard skin', () => {
   assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-26"/);
   assert.match(html, /src="\.\/app\.js\?v=merchant-reference-26"/);
+});
+
+test('latest preview resolves main to an immutable RawGitHack commit URL', () => {
+  assert.match(latestPreview, /api\.github\.com\/repos\/\$\{repository\}\/commits\/main/);
+  assert.match(latestPreview, /raw\.githack\.com\/\$\{repository\}\/\$\{commit\}\/demo1\/index\.html/);
+  assert.match(latestPreview, /commitPattern\s*=\s*\/\^\[0-9a-f\]\{40\}\$\/i/);
+  assert.doesNotMatch(latestPreview, /raw\.githack\.com\/Yeahpromos\/YeahPromos-Brand\/main\/demo1\/index\.html/);
+  assert.match(readme, /demo1\/latest\.html/);
 });
 
 test('reference dashboard keeps flat cards and red action controls', () => {

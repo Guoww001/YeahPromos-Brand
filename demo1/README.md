@@ -20,6 +20,14 @@ http://127.0.0.1:8766/demo1/
 
 不要直接双击 `index.html`，浏览器可能会限制本地 ES Module 加载。
 
+### 在线预览
+
+在线查看最新 `main` 时，使用 `demo1/latest.html` 作为入口。该页面会先从 GitHub 读取当前 `main` 的完整提交号，再打开对应的不可变 RawGitHack 地址，避免直接使用 `/main/demo1/index.html` 时混入旧 HTML、CSS 或 ES Module 缓存。
+
+- 不把 RawGitHack 的分支 URL 当成可持续的“最新版”链接。
+- 需要固定评审版本时，直接使用包含 40 位提交号的 RawGitHack URL。
+- 页面入口、样式表、主模块和模块依赖的缓存版本必须同时更新，不能只刷新其中一个文件。
+
 ## 已实现内容
 
 - Merchant workspace 账户上下文：品牌、店铺、币种、角色；
