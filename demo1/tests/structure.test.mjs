@@ -75,7 +75,7 @@ test('app entry remains syntactically valid after conflict resolution', () => {
 });
 
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
-  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-23"><\/script>/);
+  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-25"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);
   assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
   assert.match(html, /data-module-page/);
@@ -113,6 +113,37 @@ test('attribution rules reuses the README red navigation tokens', () => {
   assert.match(css, /nav-child\[data-nav-child="attribution-rules"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--attribution-selected-red\)/i);
 });
 
+test('coupon attribution has its own routed rules workspace', () => {
+  assert.match(html, /data-coupon-attribution-page/);
+  assert.match(html, /Coupon attribution/);
+  assert.match(html, /data-coupon-attribution-summary/);
+  assert.match(html, /data-coupon-attribution-filter="status"/);
+  assert.match(html, /data-coupon-attribution-filter="couponScope"/);
+  assert.match(html, /data-coupon-attribution-filter="matchType"/);
+  assert.match(html, /data-coupon-attribution-filter="conflict"/);
+  assert.match(html, /data-coupon-attribution-search/);
+  assert.match(html, /data-coupon-attribution-rows/);
+  assert.match(html, /data-coupon-attribution-detail/);
+  assert.match(appJs, /isCouponAttributionPage/);
+  assert.match(appJs, /renderCouponAttributionPage/);
+  assert.match(appJs, /getFilteredCouponAttributionRules/);
+  assert.match(data, /couponAttributionPageData/);
+  assert.match(data, /partner-owned-code/);
+  assert.match(data, /Two or more partner-owned codes/);
+  assert.match(readme, /Commission & Rules > Coupon attribution/);
+});
+
+test('coupon attribution keeps business rules readable and contrast-ready', () => {
+  assert.match(css, /body\.is-coupon-attribution-page[\s\S]*--coupon-attribution-red:\s*#e60000/i);
+  assert.match(css, /--coupon-attribution-soft-red:\s*#fde8e8/i);
+  assert.match(css, /--coupon-attribution-selected-red:\s*#ff312e/i);
+  assert.match(css, /\.coupon-attribution-table th[\s\S]*font-size:\s*10px/);
+  assert.match(css, /\.coupon-attribution-table td[\s\S]*font-size:\s*11px/);
+  assert.match(appJs, /Coupon precedence: owned code/);
+  assert.match(readme, /100% 的伙伴佣金归优惠码所有者/);
+  assert.match(readme, /两个或以上伙伴专属优惠码同时匹配时进入人工复核/);
+});
+
 test('commission rules has its own routed list and detail shell', () => {
   assert.match(html, /data-commission-rules-page/);
   assert.match(html, /Commission rules/);
@@ -138,9 +169,9 @@ test('commission rules reuses the README red navigation tokens', () => {
   assert.match(css, /nav-child\[data-nav-child="commission-rules-list"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--commission-rules-selected-red\)/i);
 });
 
-test('restriction rules has its own routed PPC policy workspace', () => {
+test('Restriction rules keeps its original routed workspace', () => {
   assert.match(html, /data-restriction-rules-page/);
-  assert.match(html, /Restriction rules/);
+  assert.match(html, />Restriction rules<\/h2>/);
   assert.match(html, /data-restriction-rules-summary/);
   assert.match(html, /data-restriction-rules-filter="status"/);
   assert.match(html, /data-restriction-rules-filter="policy"/);
@@ -160,17 +191,43 @@ test('restriction rules has its own routed PPC policy workspace', () => {
   assert.match(readme, /Commission & Rules > Restriction rules/);
 });
 
-test('restriction rules uses readable contrast-ready tokens and explicit policy semantics', () => {
+test('PPC has its own routed business-rules workspace', () => {
+  assert.match(html, /data-ppc-page/);
+  assert.match(html, />PPC<\/h2>/);
+  assert.match(html, /data-ppc-summary/);
+  assert.match(html, /data-ppc-filter="status"/);
+  assert.match(html, /data-ppc-filter="policy"/);
+  assert.match(html, /data-ppc-filter="channel"/);
+  assert.match(html, /data-ppc-filter="region"/);
+  assert.match(html, /data-ppc-filter="effectiveDate"/);
+  assert.match(html, /data-ppc-search/);
+  assert.match(html, /data-ppc-rows/);
+  assert.match(html, /data-ppc-detail/);
+  assert.match(appJs, /isPpcPage/);
+  assert.match(appJs, /renderPpcPage/);
+  assert.match(appJs, /getFilteredPpcRules/);
+  assert.match(data, /ppcPageData/);
+  assert.match(data, /businessRules/);
+  assert.match(data, /Most specific match wins/);
+  assert.match(readme, /Commission & Rules > PPC/);
+});
+
+test('Restriction rules and PPC use readable contrast-ready tokens and explicit policy semantics', () => {
   assert.match(css, /body\.is-restriction-rules-page[\s\S]*--restriction-rules-text-strong:\s*#1f2937/i);
   assert.match(css, /--restriction-rules-text:\s*#374151/);
   assert.match(css, /--restriction-rules-text-muted:\s*#4b5563/);
   assert.match(css, /nav-child\[data-nav-child="restriction-rules"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--restriction-rules-selected-red\)/i);
+  assert.match(css, /body\.is-ppc-page[\s\S]*--restriction-rules-text-strong:\s*#1f2937/i);
+  assert.match(css, /nav-child\[data-nav-child="ppc"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--restriction-rules-selected-red\)/i);
   assert.match(css, /\.restriction-rules-table th[\s\S]*font-size:\s*11px/);
   assert.match(css, /\.restriction-rules-table td[\s\S]*font-size:\s*12px/);
   assert.match(css, /\.restriction-rules-policy--blocked[\s\S]*color:\s*#9b1c1c/);
   assert.match(css, /\.restriction-rules-status--active[\s\S]*color:\s*#176b43/);
-  assert.match(readme, /Restriction rules 的关键词\/品牌词/);
-  assert.match(readme, /Restriction rules 使用 `#1F2937`/);
+  assert.match(html, /Specific match → Block → Review → Allow/);
+  assert.match(appJs, /Violation action/);
+  assert.match(appJs, /Decision priority/);
+  assert.match(readme, /PPC 的关键词\/品牌词/);
+  assert.match(readme, /PPC 使用 `#1F2937`/);
 });
 
 test('balance and payments has its own routed finance page shell', () => {
@@ -454,7 +511,7 @@ test('transaction history reuses readable Finance tokens and safe demo actions',
   assert.match(readme, /不提交真实交易、不导出业务数据/);
 });
 
-test('commission rules invoices has its own routed, filterable table shell', () => {
+test('invoices has its own routed, filterable table shell', () => {
   assert.match(html, /data-invoices-page/);
   assert.match(html, /Invoices \(73\)/);
   assert.match(html, /data-invoices-date-range/);
@@ -469,7 +526,7 @@ test('commission rules invoices has its own routed, filterable table shell', () 
   assert.match(appJs, /isInvoicesPage/);
   assert.match(appJs, /renderInvoicesPage/);
   assert.match(appJs, /getFilteredInvoices/);
-  assert.match(data, /commission-invoices/);
+  assert.doesNotMatch(data, /id:\s*'commission-invoices'/);
   assert.match(data, /commissionInvoicesPageData/);
 });
 
@@ -513,7 +570,7 @@ test('finance neutral text uses contrast-ready dark gray tokens', () => {
 });
 
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
-  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-23"><\/script>/);
+  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-25"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);
   assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
 });
@@ -552,8 +609,8 @@ test('overview follows the reference dashboard hierarchy', () => {
 });
 
 test('preview busts the entry cache for the reference dashboard skin', () => {
-  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-23"/);
-  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-23"/);
+  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-25"/);
+  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-25"/);
 });
 
 test('reference dashboard keeps flat cards and red action controls', () => {

@@ -373,11 +373,33 @@ Amazon 自动同步商品以外部来源为权威。素材明确提示：不要�
 
 ### RUL-03 优惠券归因
 
-`P1 · R`。菜单入口可见，但字段、优先级、与跟踪链接的冲突规则均需业务提供。
+**规则对象：** Coupon scope、Match type、Priority、Fallback、Lookback、Conflict outcome、Status、Last Updated。
+
+**归因顺序：**
+
+- 先校验优惠券有效期、活动/商品范围、伙伴所有权和订单状态；取消或全额退款订单不产生伙伴归因。
+- 有效且唯一匹配的伙伴专属优惠码优先级最高，100% primary commission 归优惠码所有者。
+- 伙伴优惠码与有效跟踪链接同时存在时，优惠码获得 primary credit，跟踪链接只记录 assisted touch，不叠加第二笔 primary commission。
+- 公共优惠码没有伙伴所有权时不直接产生伙伴佣金；存在 30 天 click lookback 内的有效点击时回退到最近一次有效点击。
+- 无效/过期优惠码忽略并记录 fallback reason；两个或以上伙伴专属优惠码同时匹配时进入人工复核，在决策前不最终结算佣金。
+
+**审计字段：** Order ID、Coupon code、Partner UID、匹配类型、命中规则、回退原因、操作者、时间和最终决定。
+
+`P1 · R + P`
 
 ### RUL-04 PPC 限制规则
 
-`P1 · R`。需定义关键词/品牌词、搜索引擎/渠道、地区、禁止或允许方式、违规处理、有效期和伙伴范围。
+**规则对象：** Keyword / Brand term、Match type、Search engine / Channel、Region、Partner scope、Landing page、Policy（Block / Allow / Review）、Violation action、Effective date、Status。
+
+**冲突与默认规则：**
+
+- 最具体的伙伴 + 活动 + 地区范围优先；同等范围下 `Block` 覆盖 `Allow`，证据不完整时进入 `Review`。
+- 品牌词和竞品词默认 `Block`；未被显式允许的新品牌词不自动放行，伙伴不得通过 paid search 绕过批准的链接或落地页。
+- Generic keyword 只有在渠道、地区、伙伴范围和落地页均满足条件时才 `Allow`；Coupon / promo 词按专门规则进入 `Review` 或 `Block`。
+- `Block` 阻断流量并记录关键词、渠道、地区、伙伴、落地页和规则 ID；`Review` 暂停最终批准并创建人工复核项；`Allow` 仍保留检查记录。
+- 缺少落地页、关键词证据或伙伴授权信息时不得自动批准；所有决策、优先级和违规处理结果写入 PPC 审计记录。
+
+`P1 · R + P`
 
 ### RUL-05 链接参数
 
