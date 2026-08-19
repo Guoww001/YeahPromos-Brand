@@ -9552,6 +9552,9 @@ body {
 }
 
 .overview-shortcuts-panel .quick-action > span svg {
+  width: 15px;
+  height: 15px;
+}
 
 
 /* Campaigns / All campaigns only */
@@ -10763,6 +10766,9 @@ body {
   align-items: center;
   gap: 5px;
   color: var(--color-text-soft);
+  font-size: 10px;
+  font-weight: 600;
+}
 
 .campaign-checkbox {
   position: relative;
@@ -10890,6 +10896,13 @@ body {
 }
 
 .products-status i {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
 
 .campaign-table tbody tr:last-child td {
   border-bottom: 0;
@@ -12773,6 +12786,9 @@ body.is-attribution-page {
 }
 
 .campaign-support-search button svg {
+  width: 14px;
+  height: 14px;
+}
 
 .attribution-distribution-list {
   display: grid;
@@ -13312,6 +13328,7 @@ body.is-attribution-page {
 @media (max-width: 479px) {
   .page-header__utility { justify-content: flex-start; }
   .language-toggle { margin-left: auto; }
+}
 
 .attribution-channel-icon--coral {
   background: #ffe5e6;
