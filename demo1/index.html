@@ -38,8 +38,22 @@
       <symbol id="icon-check" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="m8 12 3 3 6-7" /></symbol>
       <symbol id="icon-send" viewBox="0 0 24 24"><path d="m3 4 18 8-18 8 3-8-3-8ZM6 12h15" /></symbol>
       <symbol id="icon-tag" viewBox="0 0 24 24"><path d="M4 5v6l9 9 7-7-9-9H4Z" /><circle cx="8" cy="8" r="1" /></symbol>
+      <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" /></symbol>
+      <symbol id="icon-edit" viewBox="0 0 24 24"><path d="m4 16 10.5-10.5a2.1 2.1 0 0 1 3 3L7 19H4v-3Z" /><path d="m13 7 4 4M4 21h16" /></symbol>
+      <symbol id="icon-archive" viewBox="0 0 24 24"><path d="M4 7h16v13H4zM3 4h18v3H3zM9 11h6" /></symbol>
+      <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" /></symbol>
+      <symbol id="icon-bookmark" viewBox="0 0 24 24"><path d="M6 4h12v16l-6-3-6 3V4Z" /></symbol>
+      <symbol id="icon-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4" /></symbol>
+      <symbol id="icon-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="19" cy="12" r="1.2" /></symbol>
       <symbol id="icon-x" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" /></symbol>
       <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5" /></symbol>
+      <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></symbol>
+      <symbol id="icon-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 10v6M12 7h.01" /></symbol>
+      <symbol id="icon-star" viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z" /></symbol>
+      <symbol id="icon-grip" viewBox="0 0 24 24"><circle cx="8" cy="6" r="1" /><circle cx="16" cy="6" r="1" /><circle cx="8" cy="12" r="1" /><circle cx="16" cy="12" r="1" /><circle cx="8" cy="18" r="1" /><circle cx="16" cy="18" r="1" /></symbol>
+      <symbol id="icon-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 10h18M7 15h4" /></symbol>
+      <symbol id="icon-bank" viewBox="0 0 24 24"><path d="m3 9 9-6 9 6M5 10v8M9 10v8M15 10v8M19 10v8M3 20h18" /></symbol>
+      <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></symbol>
     </svg>
 
     <div class="app-shell">
@@ -69,10 +83,10 @@
           </div>
 
           <button class="account-card" type="button" data-demo-action="Account menu">
-            <span class="account-card__avatar">G</span>
+            <span class="account-card__avatar">D</span>
             <span class="account-card__copy">
-              <strong>Guowv</strong>
-              <small>Brand Admin · US Store</small>
+              <strong>Demo Admin</strong>
+              <small>Demo Admin · Demo Store</small>
             </span>
             <svg><use href="#icon-chevron"></use></svg>
           </button>
@@ -130,6 +144,22 @@
                   </button>
                   <div class="period-picker__menu" data-period-menu hidden></div>
                 </div>
+              </div>
+              <div class="page-header__page-actions" data-page-actions hidden>
+                <button class="button button--secondary" type="button" data-attribution-action="export">Export settings</button>
+                <button class="button button--primary" type="button" data-attribution-action="save">Save changes</button>
+              </div>
+              <div class="page-header__page-actions commission-rules-page-actions" data-commission-rules-actions hidden>
+                <button class="button button--primary" type="button" data-commission-action="create">
+                  <svg><use href="#icon-plus"></use></svg>
+                  Create rule
+                </button>
+              </div>
+              <div class="page-header__page-actions finance-page-actions" data-finance-actions hidden>
+                <button class="button button--primary" type="button" data-finance-action="deposit">
+                  <svg><use href="#icon-plus"></use></svg>
+                  Deposit funds
+                </button>
               </div>
             </div>
           </header>
@@ -216,7 +246,526 @@
 
         <section class="module-page" data-module-page hidden aria-live="polite"></section>
 
-        <section class="module-placeholder card" data-module-placeholder hidden aria-live="polite">
+          <section class="campaign-page" data-campaign-page hidden aria-labelledby="campaign-page-title">
+            <div class="campaign-metrics-grid" data-campaign-metrics></div>
+
+            <section class="campaign-workspace" aria-label="All campaigns management">
+              <div class="campaign-toolbar">
+                <label class="campaign-search">
+                  <span class="sr-only">Search campaigns</span>
+                  <svg><use href="#icon-search"></use></svg>
+                  <input type="search" data-campaign-search placeholder="Search campaigns..." autocomplete="off" />
+                </label>
+
+                <label class="campaign-filter">
+                  <span>Type</span>
+                  <select data-campaign-filter="type" aria-label="Filter by type">
+                    <option value="all">All selected (4)</option>
+                    <option value="Co-op">Co-op</option>
+                    <option value="MDF">MDF</option>
+                    <option value="Event">Event</option>
+                    <option value="Enablement">Enablement</option>
+                  </select>
+                </label>
+
+                <label class="campaign-filter">
+                  <span>Channel</span>
+                  <select data-campaign-filter="channel" aria-label="Filter by channel">
+                    <option value="all">All selected (3)</option>
+                    <option value="Affiliate">Affiliate</option>
+                    <option value="Influencer">Influencer</option>
+                    <option value="Publisher">Publisher</option>
+                  </select>
+                </label>
+
+                <label class="campaign-filter">
+                  <span>Status</span>
+                  <select data-campaign-filter="status" aria-label="Filter by status">
+                    <option value="all">All selected (7)</option>
+                    <option value="Active">Active</option>
+                    <option value="Draft">Draft</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Paused">Paused</option>
+                    <option value="Closed">Closed</option>
+                  </select>
+                </label>
+
+                <label class="campaign-filter">
+                  <span>Owner</span>
+                  <select data-campaign-filter="owner" aria-label="Filter by owner">
+                    <option value="all">All owners</option>
+                    <option value="Demo Owner A">Demo Owner A</option>
+                    <option value="Demo Owner B">Demo Owner B</option>
+                    <option value="Demo Owner C">Demo Owner C</option>
+                  </select>
+                </label>
+
+                <label class="campaign-filter">
+                  <span>Date</span>
+                  <select data-campaign-filter="date" aria-label="Filter by date">
+                    <option value="90d">Last 90 days</option>
+                    <option value="30d">Last 30 days</option>
+                    <option value="7d">Last 7 days</option>
+                  </select>
+                </label>
+
+                <label class="campaign-filter">
+                  <span>Saved view</span>
+                  <select data-campaign-filter="savedView" aria-label="Choose saved view">
+                    <option value="all">All campaigns</option>
+                    <option value="active">Active campaigns</option>
+                    <option value="owned">My campaigns</option>
+                  </select>
+                </label>
+
+                <button class="button button--primary campaign-create-button" type="button" data-campaign-action="create">
+                  <span aria-hidden="true">+</span>
+                  Create campaign
+                </button>
+              </div>
+
+              <div class="campaign-tabs" role="tablist" aria-label="Campaign status views" data-campaign-tabs></div>
+
+              <div class="campaign-table-shell">
+                <div class="campaign-bulk-toolbar" data-campaign-bulk-toolbar>
+                  <div class="campaign-bulk-selection">
+                    <label class="campaign-checkbox campaign-checkbox--header">
+                      <input type="checkbox" data-campaign-select-all aria-label="Select all visible campaigns" />
+                      <span aria-hidden="true"></span>
+                    </label>
+                    <strong data-campaign-selection-count>1 selected</strong>
+                  </div>
+                  <div class="campaign-bulk-actions">
+                    <button type="button" class="campaign-bulk-action" data-campaign-action="edit">
+                      <svg><use href="#icon-edit"></use></svg>
+                      Edit
+                    </button>
+                    <button type="button" class="campaign-bulk-action" data-campaign-action="assign">
+                      <svg><use href="#icon-users"></use></svg>
+                      Assign
+                    </button>
+                    <button type="button" class="campaign-bulk-action" data-campaign-action="change-status">
+                      <svg><use href="#icon-tag"></use></svg>
+                      Change status
+                      <svg class="campaign-bulk-action__chevron"><use href="#icon-chevron"></use></svg>
+                    </button>
+                    <button type="button" class="campaign-bulk-action" data-campaign-action="archive">
+                      <svg><use href="#icon-archive"></use></svg>
+                      Archive
+                    </button>
+                    <button type="button" class="campaign-bulk-action" data-campaign-action="delete">
+                      <svg><use href="#icon-trash"></use></svg>
+                      Delete
+                    </button>
+                  </div>
+                  <button type="button" class="campaign-clear-selection" data-campaign-action="clear">
+                    Clear selection
+                    <svg><use href="#icon-x"></use></svg>
+                  </button>
+                </div>
+
+                <div class="campaign-table-scroll">
+                  <table class="campaign-table">
+                    <caption class="sr-only">All campaigns</caption>
+                    <colgroup>
+                      <col class="campaign-col--check" />
+                      <col class="campaign-col--campaign" />
+                      <col class="campaign-col--type" />
+                      <col class="campaign-col--channel" />
+                      <col class="campaign-col--status" />
+                      <col class="campaign-col--stage" />
+                      <col class="campaign-col--partners" />
+                      <col class="campaign-col--sales" />
+                      <col class="campaign-col--progress" />
+                      <col class="campaign-col--next" />
+                      <col class="campaign-col--updated" />
+                      <col class="campaign-col--actions" />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th scope="col">
+                          <span class="sr-only">Select</span>
+                        </th>
+                        <th scope="col">Campaign <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">Type <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">Channel <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">Status <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">Stage <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">Partners <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">Sales <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">Progress <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">Next action <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">Updated <span class="campaign-sort" aria-hidden="true">↕</span></th>
+                        <th scope="col">
+                          <span class="sr-only">Actions</span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody data-campaign-rows></tbody>
+                  </table>
+                </div>
+
+                <div class="campaign-table-footer">
+                  <span data-campaign-result-count>Showing 1 to 8 of 8 campaigns</span>
+                  <div class="campaign-pagination">
+                    <label>Rows per page
+                      <select data-campaign-page-size aria-label="Rows per page">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                      </select>
+                    </label>
+                    <button type="button" aria-label="First page" disabled>‹‹</button>
+                    <button type="button" aria-label="Previous page" disabled>‹</button>
+                    <button type="button" class="is-current" aria-current="page">1</button>
+                    <button type="button" aria-label="Next page" disabled>›</button>
+                    <button type="button" aria-label="Last page" disabled>››</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <section class="attribution-page" data-attribution-page hidden aria-labelledby="attribution-page-title">
+            <h2 id="attribution-page-title" class="sr-only">Attribution rules</h2>
+            <div class="attribution-top-grid">
+              <article class="attribution-card attribution-model-card">
+                <div class="attribution-card__header">
+                  <div>
+                    <h2>Attribution model</h2>
+                    <p>Choose how credit is assigned for each conversion.</p>
+                  </div>
+                </div>
+                <label class="attribution-select">
+                  <span class="sr-only">Choose attribution model</span>
+                  <select data-attribution-model aria-label="Choose attribution model"></select>
+                </label>
+                <div class="attribution-callout" data-attribution-callout role="status" aria-live="polite">
+                  <span class="attribution-callout__icon"></span>
+                  <span data-attribution-callout-copy></span>
+                </div>
+              </article>
+
+              <article class="attribution-card attribution-summary-card">
+                <div class="attribution-card__header">
+                  <div>
+                    <h2>Active model summary</h2>
+                  </div>
+                </div>
+                <div class="attribution-summary-metrics">
+                  <div class="attribution-summary-metric attribution-summary-metric--model">
+                    <strong data-attribution-active-model>Data-driven model</strong>
+                    <span><i class="status-dot status-dot--active"></i><span data-attribution-model-state>Active model</span></span>
+                  </div>
+                  <div class="attribution-summary-metric">
+                    <strong data-attribution-assisted-revenue>$128,430.76</strong>
+                    <span>Assisted revenue <button class="inline-info" type="button" data-attribution-action="assisted-info" aria-label="About assisted revenue"><svg><use href="#icon-info"></use></svg></button></span>
+                  </div>
+                  <div class="attribution-summary-metric">
+                    <strong data-attribution-coverage>88.7%</strong>
+                    <span>Tracking coverage <button class="inline-info" type="button" data-attribution-action="coverage-info" aria-label="About tracking coverage"><svg><use href="#icon-info"></use></svg></button></span>
+                  </div>
+                </div>
+                <button class="attribution-link" type="button" data-attribution-action="performance">
+                  View model performance
+                  <svg><use href="#icon-arrow"></use></svg>
+                </button>
+              </article>
+
+              <article class="attribution-card attribution-distribution-card">
+                <div class="attribution-card__header">
+                  <div>
+                    <h2>Channel credit distribution</h2>
+                    <p>Average credit assigned across all conversions.</p>
+                  </div>
+                </div>
+                <div class="attribution-distribution-list" data-attribution-distribution></div>
+              </article>
+            </div>
+
+            <div class="attribution-bottom-grid">
+              <article class="attribution-card attribution-rules-card">
+                <div class="attribution-section-header">
+                  <div>
+                    <h2>Attribution rules</h2>
+                    <p>Define rules for how conversions are attributed to publishers, influencers, and paid channels.</p>
+                  </div>
+                  <button class="button button--secondary attribution-add-rule" type="button" data-attribution-action="add-rule">
+                    <svg><use href="#icon-plus"></use></svg>
+                    Add rule
+                  </button>
+                </div>
+                <div class="attribution-table-scroll">
+                  <table class="attribution-table">
+                    <caption class="sr-only">Attribution rules</caption>
+                    <colgroup>
+                      <col class="attribution-col--name" />
+                      <col class="attribution-col--channel" />
+                      <col class="attribution-col--logic" />
+                      <col class="attribution-col--lookback" />
+                      <col class="attribution-col--priority" />
+                      <col class="attribution-col--status" />
+                      <col class="attribution-col--actions" />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th scope="col">Rule name</th>
+                        <th scope="col">Channel type</th>
+                        <th scope="col">Attribution logic</th>
+                        <th scope="col">Lookback window <button class="inline-info" type="button" data-attribution-action="lookback-info" aria-label="About lookback window"><svg><use href="#icon-info"></use></svg></button></th>
+                        <th scope="col">Priority <button class="inline-info" type="button" data-attribution-action="priority-info" aria-label="About rule priority"><svg><use href="#icon-info"></use></svg></button></th>
+                        <th scope="col">Status</th>
+                        <th scope="col"><span class="sr-only">Actions</span></th>
+                      </tr>
+                    </thead>
+                    <tbody data-attribution-rules></tbody>
+                  </table>
+                </div>
+                <div class="attribution-rules-footer">
+                  <svg><use href="#icon-grip"></use></svg>
+                  <span>Drag rows to reorder priority</span>
+                </div>
+              </article>
+
+              <article class="attribution-card attribution-audit-card">
+                <div class="attribution-card__header">
+                  <div>
+                    <h2>Audit history</h2>
+                    <p>See recent changes to your attribution rules.</p>
+                  </div>
+                </div>
+                <div class="attribution-audit-list" data-attribution-audit></div>
+                <button class="attribution-link attribution-audit-link" type="button" data-attribution-action="history">
+                  View full history
+                  <svg><use href="#icon-arrow"></use></svg>
+                </button>
+              </article>
+            </div>
+          </section>
+
+          <section class="commission-rules-page" data-commission-rules-page hidden aria-labelledby="commission-rules-page-title">
+            <h2 id="commission-rules-page-title" class="sr-only">Commission rules</h2>
+
+            <div class="commission-rules-summary-grid" data-commission-rules-summary></div>
+
+            <div class="commission-rules-layout">
+              <section class="commission-rules-card commission-rules-list-card" aria-labelledby="commission-rules-list-title">
+                <div class="commission-rules-card__header">
+                  <div>
+                    <span class="eyebrow">Commission management</span>
+                    <h2 id="commission-rules-list-title">Commission rules</h2>
+                    <p>Set base rates, bonuses, attribution windows, and partner conditions.</p>
+                  </div>
+                  <button class="icon-button commission-rules-settings" type="button" data-commission-rules-action="settings" aria-label="Configure commission rules table">
+                    <svg><use href="#icon-settings"></use></svg>
+                  </button>
+                </div>
+
+                <div class="commission-rules-toolbar" aria-label="Commission rule filters">
+                  <label class="commission-rules-filter commission-rules-filter--status">
+                    <span>Status</span>
+                    <select data-commission-rules-filter="status" aria-label="Filter by status">
+                      <option value="all">All statuses</option>
+                      <option value="Active">Active</option>
+                      <option value="Scheduled">Scheduled</option>
+                      <option value="Inactive">Inactive</option>
+                      <option value="Expired">Expired</option>
+                    </select>
+                  </label>
+                  <label class="commission-rules-filter">
+                    <span>Partner type</span>
+                    <select data-commission-rules-filter="partnerType" aria-label="Filter by partner type">
+                      <option value="all">All types</option>
+                      <option value="Content / Blog">Content / Blog</option>
+                      <option value="Technology">Technology</option>
+                      <option value="Email / Newsletter">Email / Newsletter</option>
+                      <option value="New partners">New partners</option>
+                      <option value="All partners">All partners</option>
+                    </select>
+                  </label>
+                  <label class="commission-rules-filter">
+                    <span>Channel</span>
+                    <select data-commission-rules-filter="channel" aria-label="Filter by channel">
+                      <option value="all">All channels</option>
+                      <option value="Affiliate">Affiliate</option>
+                      <option value="Publisher">Publisher</option>
+                      <option value="Email">Email</option>
+                    </select>
+                  </label>
+                  <label class="commission-rules-filter commission-rules-filter--date">
+                    <span>Effective date</span>
+                    <select data-commission-rules-filter="effectiveDate" aria-label="Filter by effective date">
+                      <option value="all">Select date range</option>
+                      <option value="30d">Last 30 days</option>
+                      <option value="90d">Last 90 days</option>
+                      <option value="2025">Year 2025</option>
+                    </select>
+                  </label>
+                  <button class="button button--secondary commission-rules-more-filters" type="button" data-commission-rules-action="more-filters">
+                    <svg><use href="#icon-filter"></use></svg>
+                    More filters
+                  </button>
+                  <label class="commission-rules-search">
+                    <span class="sr-only">Search rules</span>
+                    <svg><use href="#icon-search"></use></svg>
+                    <input type="search" data-commission-rules-search placeholder="Search rules..." autocomplete="off" />
+                  </label>
+                </div>
+
+                <div class="commission-rules-table-scroll">
+                  <table class="commission-rules-table">
+                    <caption class="sr-only">Commission rules</caption>
+                    <colgroup>
+                      <col class="commission-rules-col--check" />
+                      <col class="commission-rules-col--name" />
+                      <col class="commission-rules-col--scope" />
+                      <col class="commission-rules-col--base" />
+                      <col class="commission-rules-col--bonus" />
+                      <col class="commission-rules-col--attribution" />
+                      <col class="commission-rules-col--effective" />
+                      <col class="commission-rules-col--status" />
+                      <col class="commission-rules-col--actions" />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th scope="col">
+                          <label class="commission-rules-checkbox commission-rules-checkbox--header">
+                            <input type="checkbox" data-commission-rules-select-all aria-label="Select all visible commission rules" />
+                            <span aria-hidden="true"></span>
+                          </label>
+                        </th>
+                        <th scope="col">Rule name</th>
+                        <th scope="col">Scope</th>
+                        <th scope="col">Base commission</th>
+                        <th scope="col">Bonus</th>
+                        <th scope="col">Attribution window</th>
+                        <th scope="col">Effective date</th>
+                        <th scope="col">Status</th>
+                        <th scope="col"><span class="sr-only">Actions</span></th>
+                      </tr>
+                    </thead>
+                    <tbody data-commission-rules-rows></tbody>
+                  </table>
+                </div>
+
+                <div class="commission-rules-list-footer">
+                  <span data-commission-rules-result-count>Showing 1 to 8 of 8 rules</span>
+                  <div class="commission-rules-pagination" aria-label="Commission rules pagination">
+                    <button type="button" aria-label="Previous page" disabled>‹</button>
+                    <button type="button" class="is-current" aria-current="page" data-commission-rules-page-number="1">1</button>
+                    <button type="button" data-commission-rules-page-number="2">2</button>
+                    <button type="button" data-commission-rules-page-number="3">3</button>
+                    <button type="button" aria-label="Next page" data-commission-rules-action="next-page">›</button>
+                    <label>
+                      <span class="sr-only">Rows per page</span>
+                      <select aria-label="Rows per page">
+                        <option>10 / page</option>
+                        <option>25 / page</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+              </section>
+
+              <aside class="commission-rules-card commission-rules-detail-card" data-commission-rules-detail aria-labelledby="commission-rules-detail-title"></aside>
+            </div>
+          </section>
+
+          <section class="finance-page" data-finance-page hidden aria-labelledby="finance-page-title">
+            <h2 id="finance-page-title" class="sr-only">Balance &amp; payments</h2>
+
+            <div class="finance-summary-grid" data-finance-summary></div>
+
+            <div class="finance-main-grid">
+              <article class="finance-card finance-trend-card" aria-labelledby="finance-trend-title">
+                <div class="finance-card__header">
+                  <div>
+                    <h2 id="finance-trend-title">Balance trend <button class="inline-info finance-info" type="button" data-finance-action="trend-info" aria-label="About balance trend"><svg><use href="#icon-info"></use></svg></button></h2>
+                  </div>
+                  <label class="finance-period-select">
+                    <span class="sr-only">Choose balance trend period</span>
+                    <select data-finance-period aria-label="Choose balance trend period">
+                      <option value="30d">Last 30 days</option>
+                      <option value="90d">Last 90 days</option>
+                      <option value="year">This year</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="finance-chart" data-finance-chart aria-label="Balance trend chart"></div>
+                <div class="finance-trend-summary" data-finance-trend-summary></div>
+              </article>
+
+              <article class="finance-card finance-payout-card" aria-labelledby="finance-payout-title">
+                <div class="finance-card__header">
+                  <h2 id="finance-payout-title">Payout schedule <button class="inline-info finance-info" type="button" data-finance-action="payout-info" aria-label="About payout schedule"><svg><use href="#icon-info"></use></svg></button></h2>
+                </div>
+                <div class="finance-payout-list" data-finance-payout-schedule></div>
+                <div class="finance-card__footer">Estimated payout cycle: Every 2 weeks <button class="inline-info finance-info" type="button" data-finance-action="cycle-info" aria-label="About estimated payout cycle"><svg><use href="#icon-info"></use></svg></button></div>
+              </article>
+
+              <article class="finance-card finance-methods-card" aria-labelledby="finance-methods-title">
+                <div class="finance-card__header">
+                  <h2 id="finance-methods-title">Payment methods</h2>
+                  <button class="button button--secondary finance-manage-button" type="button" data-finance-action="manage-methods">Manage</button>
+                </div>
+                <div class="finance-methods-list" data-finance-payment-methods></div>
+                <div class="finance-card__footer finance-methods-footer">
+                  <span>Add or manage your payout methods securely.</span>
+                  <button class="finance-add-method" type="button" data-finance-action="add-method"><svg><use href="#icon-plus"></use></svg> Add method</button>
+                </div>
+              </article>
+            </div>
+
+            <section class="finance-card finance-activity-card" aria-labelledby="finance-activity-title">
+              <div class="finance-section-header">
+                <div>
+                  <h2 id="finance-activity-title">Recent payout activity</h2>
+                  <p>Review recent completed payouts and their references.</p>
+                </div>
+                <button class="button button--secondary finance-view-all" type="button" data-finance-action="view-all">View all</button>
+              </div>
+              <div class="finance-table-scroll">
+                <table class="finance-table">
+                  <caption class="sr-only">Recent payout activity</caption>
+                  <colgroup>
+                    <col class="finance-col--id" />
+                    <col class="finance-col--date" />
+                    <col class="finance-col--amount" />
+                    <col class="finance-col--method" />
+                    <col class="finance-col--status" />
+                    <col class="finance-col--description" />
+                    <col class="finance-col--reference" />
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th scope="col">Payout ID</th>
+                      <th scope="col">Date</th>
+                      <th scope="col">Amount</th>
+                      <th scope="col">Method</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Description</th>
+                      <th scope="col">Reference</th>
+                    </tr>
+                  </thead>
+                  <tbody data-finance-payout-rows></tbody>
+                </table>
+              </div>
+              <div class="finance-activity-footer">
+                <span data-finance-result-count>Showing 1 to 5 of 24 results</span>
+                <div class="finance-pagination" aria-label="Payout activity pagination">
+                  <button type="button" aria-label="Previous page" disabled>‹</button>
+                  <button type="button" class="is-current" aria-current="page" data-finance-action="page" data-finance-page-number="1">1</button>
+                  <button type="button" data-finance-action="page" data-finance-page-number="2">2</button>
+                  <button type="button" data-finance-action="page" data-finance-page-number="3">3</button>
+                  <span>…</span>
+                  <button type="button" data-finance-action="page" data-finance-page-number="5">5</button>
+                  <button type="button" aria-label="Next page" data-finance-action="page" data-finance-page-number="2">›</button>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <section class="module-placeholder card" data-module-placeholder hidden aria-live="polite">
             <div class="module-placeholder__mark">◎</div>
             <span class="eyebrow" data-module-parent>Workspace</span>
             <h2 data-module-title>Module preview</h2>

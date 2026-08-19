@@ -1,4 +1,4 @@
-import { dashboardData } from './data.mjs?v=merchant-reference-18';
+import { attributionPageData, campaignPageData, commissionRulesPageData, dashboardData, financeBalancePageData } from './data.mjs?v=merchant-reference-18';
 import {
   createDashboardState,
   isNavigationItemActive,
@@ -75,6 +75,97 @@ const sidebar = document.querySelector('[data-sidebar]');
 const sidebarBackdrop = document.querySelector('[data-sidebar-backdrop]');
 const sidebarOpenButton = document.querySelector('[data-sidebar-open]');
 const sidebarCloseButton = document.querySelector('[data-sidebar-close]');
+const campaignPage = document.querySelector('[data-campaign-page]');
+const campaignMetrics = document.querySelector('[data-campaign-metrics]');
+const campaignTabs = document.querySelector('[data-campaign-tabs]');
+const campaignRows = document.querySelector('[data-campaign-rows]');
+const campaignSearch = document.querySelector('[data-campaign-search]');
+const campaignSelectionCount = document.querySelector('[data-campaign-selection-count]');
+const campaignSelectAll = document.querySelector('[data-campaign-select-all]');
+const campaignResultCount = document.querySelector('[data-campaign-result-count]');
+const pageActions = document.querySelector('[data-page-actions]');
+const attributionPage = document.querySelector('[data-attribution-page]');
+const attributionModelSelect = document.querySelector('[data-attribution-model]');
+const attributionCalloutIcon = document.querySelector('.attribution-callout__icon');
+const attributionCalloutCopy = document.querySelector('[data-attribution-callout-copy]');
+const attributionActiveModel = document.querySelector('[data-attribution-active-model]');
+const attributionModelState = document.querySelector('[data-attribution-model-state]');
+const attributionAssistedRevenue = document.querySelector('[data-attribution-assisted-revenue]');
+const attributionCoverage = document.querySelector('[data-attribution-coverage]');
+const attributionDistribution = document.querySelector('[data-attribution-distribution]');
+const attributionRules = document.querySelector('[data-attribution-rules]');
+const attributionAudit = document.querySelector('[data-attribution-audit]');
+const commissionRulesPage = document.querySelector('[data-commission-rules-page]');
+const commissionRulesActions = document.querySelector('[data-commission-rules-actions]');
+const commissionRulesSummary = document.querySelector('[data-commission-rules-summary]');
+const commissionRulesRows = document.querySelector('[data-commission-rules-rows]');
+const commissionRulesSearch = document.querySelector('[data-commission-rules-search]');
+const commissionRulesSelectAll = document.querySelector('[data-commission-rules-select-all]');
+const commissionRulesResultCount = document.querySelector('[data-commission-rules-result-count]');
+const commissionRulesDetail = document.querySelector('[data-commission-rules-detail]');
+const financePage = document.querySelector('[data-finance-page]');
+const financeActions = document.querySelector('[data-finance-actions]');
+const financeSummary = document.querySelector('[data-finance-summary]');
+const financeChart = document.querySelector('[data-finance-chart]');
+const financeTrendSummary = document.querySelector('[data-finance-trend-summary]');
+const financePeriodSelect = document.querySelector('[data-finance-period]');
+const financePayoutSchedule = document.querySelector('[data-finance-payout-schedule]');
+const financePaymentMethods = document.querySelector('[data-finance-payment-methods]');
+const financePayoutRows = document.querySelector('[data-finance-payout-rows]');
+const financeResultCount = document.querySelector('[data-finance-result-count]');
+
+const campaignState = {
+  activeTab: 'all',
+  search: '',
+  filters: {
+    type: 'all',
+    channel: 'all',
+    status: 'all',
+    owner: 'all',
+    date: '90d',
+    savedView: 'all',
+  },
+  selectedIds: new Set(['spring-collection-promo']),
+};
+
+const campaignStatusMeta = {
+  Active: { tone: 'active' },
+  Pending: { tone: 'pending' },
+  Completed: { tone: 'completed' },
+  Paused: { tone: 'paused' },
+  Closed: { tone: 'closed' },
+  Draft: { tone: 'draft' },
+};
+
+const campaignDateRangeDays = {
+  '7d': 7,
+  '30d': 30,
+  '90d': 90,
+};
+
+const campaignReferenceDate = Date.parse('2025-05-16T23:59:59Z');
+const campaignCurrentOwner = 'Demo Owner A';
+
+const attributionState = {
+  activeModel: attributionPageData.activeModel,
+  isDirty: false,
+};
+
+const commissionRulesState = {
+  search: '',
+  selectedRuleId: commissionRulesPageData.selectedRuleId,
+  filters: {
+    status: 'all',
+    partnerType: 'all',
+    channel: 'all',
+    effectiveDate: 'all',
+  },
+  selectedIds: new Set([commissionRulesPageData.selectedRuleId]),
+};
+
+const financeState = {
+  trendPeriod: '30d',
+};
 
 const icon = (name, className = '') => `
   <svg class="${className}" aria-hidden="true">
@@ -83,6 +174,8 @@ const icon = (name, className = '') => `
 `;
 
 const localizedNavigationLabel = (item) => item.label;
+const t = (_key, fallback = _key) => fallback;
+const localizedPageTitle = (_pageId, fallback) => fallback;
 
 
 const findNavigationContext = (navigationId) => {
@@ -872,6 +965,549 @@ const renderUtilityNavigationState = () => {
     if (isActive) utility.setAttribute('aria-current', 'page');
     else utility.removeAttribute('aria-current');
   });
+
+
+const getFilteredCampaigns = () => {
+  const query = campaignState.search.trim().toLowerCase();
+  return campaignPageData.campaigns.filter((campaign) => {
+    const matchesTab = campaignState.activeTab === 'all' || campaign.status === campaignState.activeTab;
+    const matchesQuery = !query || [
+      campaign.name,
+      campaign.code,
+      campaign.type,
+      campaign.channel,
+      campaign.status,
+      campaign.stage,
+      campaign.nextAction,
+      campaign.updatedBy,
+    ].some((value) => value.toLowerCase().includes(query));
+    const matchesType = campaignState.filters.type === 'all' || campaign.type === campaignState.filters.type;
+    const matchesChannel = campaignState.filters.channel === 'all' || campaign.channel === campaignState.filters.channel;
+    const matchesStatus = campaignState.filters.status === 'all' || campaign.status === campaignState.filters.status;
+    const matchesOwner = campaignState.filters.owner === 'all' || campaign.updatedBy === campaignState.filters.owner;
+    const rangeDays = campaignDateRangeDays[campaignState.filters.date] ?? 90;
+    const updatedAt = Date.parse(campaign.updated);
+    const matchesDate = !Number.isNaN(updatedAt)
+      && updatedAt <= campaignReferenceDate
+      && campaignReferenceDate - updatedAt <= rangeDays * 24 * 60 * 60 * 1000;
+    const matchesSavedView = campaignState.filters.savedView === 'all'
+      || (campaignState.filters.savedView === 'active' && campaign.status === 'Active')
+      || (campaignState.filters.savedView === 'owned' && campaign.updatedBy === campaignCurrentOwner);
+
+    return matchesTab
+      && matchesQuery
+      && matchesType
+      && matchesChannel
+      && matchesStatus
+      && matchesOwner
+      && matchesDate
+      && matchesSavedView;
+  });
+};
+
+const renderCampaignMetrics = () => {
+  if (!campaignMetrics) return;
+  campaignMetrics.innerHTML = campaignPageData.metrics.map((metric) => `
+    <article class="campaign-metric">
+      <span class="campaign-metric__icon">${icon(metric.icon)}</span>
+      <div class="campaign-metric__copy">
+        <span class="campaign-metric__label">${metric.label}</span>
+        <strong>${metric.value}</strong>
+        <span class="campaign-metric__meta"><b>${metric.change}</b><span>${metric.note}</span></span>
+      </div>
+      <svg class="campaign-metric__sparkline" viewBox="0 0 100 34" role="img" aria-label="${metric.label} trend">
+        <polyline points="${metric.sparkline}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
+      </svg>
+    </article>
+  `).join('');
+};
+
+const renderCampaignTabs = () => {
+  if (!campaignTabs) return;
+  const tabs = [
+    ['all', 'All'],
+    ['Active', 'Active'],
+    ['Draft', 'Draft'],
+    ['Completed', 'Completed'],
+    ['Pending', 'Pending'],
+    ['Paused', 'Paused'],
+    ['Closed', 'Closed'],
+  ];
+  campaignTabs.innerHTML = tabs.map(([value, label]) => `
+    <button class="campaign-tab${campaignState.activeTab === value ? ' is-active' : ''}" type="button" role="tab" aria-selected="${campaignState.activeTab === value}" data-campaign-tab="${value}">${label}</button>
+  `).join('');
+};
+
+const renderCampaignRows = () => {
+  if (!campaignRows) return;
+  const filteredCampaigns = getFilteredCampaigns();
+  if (!filteredCampaigns.length) {
+    campaignRows.innerHTML = '<tr><td class="campaign-empty" colspan="12"><strong>No campaigns found</strong><span>Try changing your search or filters.</span></td></tr>';
+  } else {
+    campaignRows.innerHTML = filteredCampaigns.map((campaign) => {
+      const statusTone = campaignStatusMeta[campaign.status]?.tone ?? 'draft';
+      return `
+        <tr data-campaign-row="${campaign.id}">
+          <td class="campaign-cell--check">
+            <label class="campaign-checkbox">
+              <input type="checkbox" data-campaign-select="${campaign.id}" ${campaignState.selectedIds.has(campaign.id) ? 'checked' : ''} aria-label="Select ${campaign.name}" />
+              <span aria-hidden="true"></span>
+            </label>
+          </td>
+          <td class="campaign-cell--campaign">
+            <strong>${campaign.name}</strong>
+            <small>${campaign.code}</small>
+          </td>
+          <td class="campaign-cell--type">
+            <span class="campaign-cell__icon">${icon(campaign.typeIcon)}</span>
+            <span>${campaign.type}</span>
+          </td>
+          <td class="campaign-cell--channel">
+            <span class="campaign-cell__icon">${icon(campaign.channelIcon)}</span>
+            <span>${campaign.channel}</span>
+          </td>
+          <td class="campaign-cell--status">
+            <span class="campaign-status campaign-status--${statusTone}">
+              <span class="campaign-status__top"><i></i><strong>${campaign.status}</strong></span>
+              <small>${campaign.statusDetail}</small>
+            </span>
+          </td>
+          <td>${campaign.stage}</td>
+          <td class="campaign-cell--number">${campaign.partners}</td>
+          <td class="campaign-cell--sales"><strong>${campaign.sales}</strong><small>${campaign.orders}</small></td>
+          <td class="campaign-cell--progress">
+            <strong>${campaign.progress}%</strong>
+            <span class="campaign-progress__track"><i style="width:${campaign.progress}%"></i></span>
+          </td>
+          <td class="campaign-cell--next">
+            <span class="campaign-cell__icon">${icon(campaign.nextActionIcon)}</span>
+            <span>${campaign.nextAction}</span>
+          </td>
+          <td class="campaign-cell--updated"><span>${campaign.updated}</span><small>by ${campaign.updatedBy}</small></td>
+          <td class="campaign-cell--actions">
+            <button type="button" class="campaign-row-action" data-campaign-action="row" data-campaign-id="${campaign.id}" aria-label="More actions for ${campaign.name}">${icon('more')}</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  if (campaignResultCount) {
+    const total = campaignPageData.campaigns.length;
+    const shown = filteredCampaigns.length;
+    campaignResultCount.textContent = shown
+      ? `Showing 1 to ${shown} of ${total} campaigns`
+      : `Showing 0 of ${total} campaigns`;
+    campaignResultCount.dataset.total = String(total);
+  }
+};
+
+const updateCampaignSelection = () => {
+  const visibleIds = getFilteredCampaigns().map((campaign) => campaign.id);
+  const visibleSelected = visibleIds.filter((id) => campaignState.selectedIds.has(id));
+  if (campaignSelectionCount) campaignSelectionCount.textContent = `${visibleSelected.length} selected`;
+  if (campaignSelectAll) {
+    campaignSelectAll.checked = visibleIds.length > 0 && visibleSelected.length === visibleIds.length;
+    campaignSelectAll.indeterminate = visibleSelected.length > 0 && visibleSelected.length < visibleIds.length;
+  }
+};
+
+const renderCampaignPage = () => {
+  if (!campaignPage) return;
+  renderCampaignMetrics();
+  renderCampaignTabs();
+  renderCampaignRows();
+  updateCampaignSelection();
+};
+
+const renderAttributionPage = () => {
+  if (!attributionPage) return;
+
+  const model = attributionPageData.models.find((item) => item.id === attributionState.activeModel) ?? attributionPageData.models[0];
+
+  attributionModelSelect.innerHTML = attributionPageData.models
+    .map((item) => `<option value="${item.id}" ${item.id === model.id ? 'selected' : ''}>${item.label}</option>`)
+    .join('');
+  attributionActiveModel.textContent = model.summaryLabel;
+  attributionModelState.textContent = attributionState.isDirty ? 'Unsaved changes' : 'Active model';
+  attributionAssistedRevenue.textContent = attributionPageData.summary.assistedRevenue;
+  attributionCoverage.textContent = attributionPageData.summary.trackingCoverage;
+  attributionCalloutIcon.innerHTML = icon('check');
+  attributionCalloutCopy.textContent = model.description;
+
+  attributionDistribution.innerHTML = attributionPageData.distribution
+    .map((channel) => `
+      <div class="attribution-distribution-row">
+        <div class="attribution-distribution-label">
+          <span class="attribution-channel-icon attribution-channel-icon--${channel.tone}">${icon(channel.icon)}</span>
+          <span>${channel.label}</span>
+        </div>
+        <span class="attribution-distribution-bar"><i style="width:${channel.value}%"></i></span>
+        <strong>${channel.value}%</strong>
+      </div>
+    `)
+    .join('');
+
+  attributionRules.innerHTML = attributionPageData.rules
+    .map((rule) => `
+      <tr data-attribution-rule="${rule.id}">
+        <td class="attribution-cell--name"><strong>${rule.name}</strong></td>
+        <td><span class="attribution-channel-chip attribution-channel-chip--${rule.channelTone}">${rule.channelType}</span></td>
+        <td>${rule.logic}</td>
+        <td>${rule.lookback}</td>
+        <td class="attribution-cell--priority">${rule.priority}</td>
+        <td><span class="attribution-status"><i></i>${rule.status}</span></td>
+        <td class="attribution-cell--actions">
+          <button type="button" data-attribution-action="edit-rule" data-attribution-rule="${rule.name}" aria-label="Edit ${rule.name}">${icon('edit')}</button>
+          <button type="button" data-attribution-action="rule-menu" data-attribution-rule="${rule.name}" aria-label="More actions for ${rule.name}">${icon('more')}</button>
+        </td>
+      </tr>
+    `)
+    .join('');
+
+  attributionAudit.innerHTML = attributionPageData.audit
+    .map((entry) => `
+      <div class="attribution-audit-entry">
+        <span class="attribution-audit-entry__marker" aria-hidden="true"></span>
+        <div>
+          <time>${entry.date}</time>
+          <strong>${entry.title}</strong>
+          <small>by ${entry.by}</small>
+        </div>
+      </div>
+    `)
+    .join('');
+};
+
+const getFilteredCommissionRules = () => {
+  const { search, filters } = commissionRulesState;
+  const normalizedSearch = search.trim().toLowerCase();
+  const referenceDate = Date.parse('2025-05-12T23:59:59Z');
+
+  return commissionRulesPageData.rules.filter((rule) => {
+    const matchesSearch = !normalizedSearch || [
+      rule.name,
+      rule.ruleId,
+      rule.scopePrimary,
+      rule.scopeSecondary,
+      rule.scopeSummary,
+      rule.status,
+      rule.baseCommission,
+    ].some((value) => value.toLowerCase().includes(normalizedSearch));
+    const matchesStatus = filters.status === 'all' || rule.status === filters.status;
+    const matchesPartnerType = filters.partnerType === 'all' || rule.partnerType === filters.partnerType;
+    const matchesChannel = filters.channel === 'all' || rule.channel === filters.channel;
+    const effectiveDate = Date.parse(rule.effectiveAt);
+    const ageInDays = (referenceDate - effectiveDate) / 86400000;
+    const matchesEffectiveDate = filters.effectiveDate === 'all'
+      || (filters.effectiveDate === '30d' && ageInDays <= 30)
+      || (filters.effectiveDate === '90d' && ageInDays <= 90)
+      || (filters.effectiveDate === '2025' && new Date(effectiveDate).getUTCFullYear() === 2025);
+
+    return matchesSearch && matchesStatus && matchesPartnerType && matchesChannel && matchesEffectiveDate;
+  });
+};
+
+const renderCommissionRulesSummary = () => {
+  if (!commissionRulesSummary) return;
+
+  commissionRulesSummary.innerHTML = commissionRulesPageData.metrics
+    .map((metric) => `
+      <article class="commission-rules-summary-card commission-rules-summary-card--${metric.tone}">
+        <div class="commission-rules-summary-card__copy">
+          <span>${metric.label}</span>
+          <strong>${metric.value}</strong>
+          <small>${metric.note}</small>
+        </div>
+        <span class="commission-rules-summary-card__icon">${icon(metric.icon)}</span>
+      </article>
+    `)
+    .join('');
+};
+
+const updateCommissionRulesSelection = () => {
+  const visibleIds = getFilteredCommissionRules().map((rule) => rule.id);
+  const visibleSelected = visibleIds.filter((id) => commissionRulesState.selectedIds.has(id));
+
+  if (commissionRulesSelectAll) {
+    commissionRulesSelectAll.checked = visibleIds.length > 0 && visibleSelected.length === visibleIds.length;
+    commissionRulesSelectAll.indeterminate = visibleSelected.length > 0 && visibleSelected.length < visibleIds.length;
+  }
+};
+
+const renderCommissionRulesRows = () => {
+  if (!commissionRulesRows) return;
+
+  const filteredRules = getFilteredCommissionRules();
+  commissionRulesRows.innerHTML = filteredRules.length
+    ? filteredRules.map((rule) => `
+        <tr class="${rule.id === commissionRulesState.selectedRuleId ? 'is-selected' : ''}" data-commission-rules-row="${rule.id}">
+          <td class="commission-rules-cell--check">
+            <label class="commission-rules-checkbox">
+              <input type="checkbox" data-commission-rules-select="${rule.id}" ${commissionRulesState.selectedIds.has(rule.id) ? 'checked' : ''} aria-label="Select ${rule.name}" />
+              <span aria-hidden="true"></span>
+            </label>
+          </td>
+          <td class="commission-rules-cell--name">
+            <strong>${rule.name}</strong>
+            <small>${rule.ruleId}</small>
+          </td>
+          <td class="commission-rules-cell--scope">
+            <strong>${rule.scopePrimary}</strong>
+            <small>${rule.scopeSecondary}</small>
+          </td>
+          <td class="commission-rules-cell--rate"><strong>${rule.baseCommission}</strong><small>${rule.unit} rate</small></td>
+          <td class="commission-rules-cell--bonus">
+            <strong>${rule.bonusRate}</strong>
+            <small>${rule.bonusThreshold || 'No bonus'}</small>
+          </td>
+          <td class="commission-rules-cell--attribution">
+            <strong>${rule.attributionWindow}</strong>
+            <small>${rule.attributionType}</small>
+          </td>
+          <td class="commission-rules-cell--effective"><strong>${rule.effectiveDate}</strong></td>
+          <td><span class="commission-rules-status commission-rules-status--${rule.statusTone}"><i></i>${rule.status}</span></td>
+          <td class="commission-rules-cell--actions">
+            <button type="button" data-commission-rules-action="edit" data-commission-rules-rule="${rule.name}" aria-label="Edit ${rule.name}">${icon('edit')}</button>
+            <button type="button" data-commission-rules-action="row-menu" data-commission-rules-rule="${rule.name}" aria-label="More actions for ${rule.name}">${icon('more')}</button>
+          </td>
+        </tr>
+      `).join('')
+    : '<tr><td class="commission-rules-empty" colspan="9"><strong>No commission rules found</strong><span>Try changing your search or filters.</span></td></tr>';
+
+  if (commissionRulesResultCount) {
+    const total = commissionRulesPageData.rules.length;
+    commissionRulesResultCount.textContent = filteredRules.length
+      ? `Showing 1 to ${filteredRules.length} of ${total} rules`
+      : `Showing 0 of ${total} rules`;
+  }
+
+  updateCommissionRulesSelection();
+};
+
+const renderCommissionRulesDetail = () => {
+  if (!commissionRulesDetail) return;
+
+  const rule = commissionRulesPageData.rules.find((item) => item.id === commissionRulesState.selectedRuleId);
+  if (!rule) {
+    commissionRulesDetail.hidden = true;
+    commissionRulesDetail.innerHTML = '';
+    commissionRulesPage?.classList.add('is-detail-closed');
+    return;
+  }
+
+  const detail = commissionRulesPageData.details[rule.id] ?? {
+    description: `Applies to ${rule.scopePrimary.toLowerCase()} across ${rule.scopeSecondary.toLowerCase()}.`,
+    scope: `${rule.scopePrimary} · ${rule.scopeSecondary}`,
+    attributionWindow: rule.attributionWindow,
+    attributionType: rule.attributionType,
+    effectiveDate: rule.effectiveDate,
+    lastUpdated: rule.lastUpdated,
+    updatedBy: 'Demo Admin',
+    tiers: [{ label: 'Base rate', amount: 'All sales', base: rule.baseCommission, bonus: rule.bonusRate }],
+    conditions: ['Applies to eligible partner traffic', 'Excludes invalid or cancelled orders'],
+    performance: { period: 'Selected period', clicks: '—', conversions: '—', commission: '—' },
+  };
+
+  commissionRulesDetail.hidden = false;
+  commissionRulesPage?.classList.remove('is-detail-closed');
+  commissionRulesDetail.innerHTML = `
+    <div class="commission-rules-detail__header">
+      <div>
+        <span class="eyebrow">Selected rule</span>
+        <h2 id="commission-rules-detail-title">${rule.name}</h2>
+        <p>${rule.ruleId}</p>
+      </div>
+      <button class="icon-button" type="button" data-commission-rules-action="close-detail" aria-label="Close rule details">${icon('x')}</button>
+    </div>
+    <p class="commission-rules-detail__description">${detail.description}</p>
+
+    <div class="commission-rules-detail__facts">
+      <div><span>Scope</span><strong>${detail.scope}</strong></div>
+      <div><span>Attribution window</span><strong>${detail.attributionWindow} <small>(${detail.attributionType})</small></strong></div>
+      <div><span>Effective date</span><strong>${detail.effectiveDate}</strong></div>
+      <div><span>Last updated</span><strong>${detail.lastUpdated} by ${detail.updatedBy}</strong></div>
+    </div>
+
+    <section class="commission-rules-detail__section">
+      <div class="commission-rules-detail__section-header">
+        <div><h3>Commission structure</h3><p>Rates are applied by qualifying sales amount.</p></div>
+        <button type="button" class="commission-rules-detail__edit" data-commission-rules-action="edit-rates">Edit rates</button>
+      </div>
+      <div class="commission-rules-tier-table">
+        <div class="commission-rules-tier-row commission-rules-tier-row--header"><span>Tier</span><span>Sales amount (USD)</span><span>Base commission</span><span>Bonus</span><span class="sr-only">Actions</span></div>
+        ${detail.tiers.map((tier) => `
+          <div class="commission-rules-tier-row">
+            <strong>${tier.label}</strong>
+            <span>${tier.amount}</span>
+            <span>${tier.base}</span>
+            <span>${tier.bonus}</span>
+            <span class="commission-rules-tier-actions">
+              <button type="button" data-commission-rules-action="edit-tier" aria-label="Edit ${tier.label}">${icon('edit')}</button>
+              <button type="button" data-commission-rules-action="delete-tier" aria-label="Delete ${tier.label}">${icon('trash')}</button>
+            </span>
+          </div>
+        `).join('')}
+      </div>
+    </section>
+
+    <section class="commission-rules-detail__section commission-rules-conditions">
+      <div class="commission-rules-detail__section-header"><div><h3>Conditions</h3></div><button type="button" class="commission-rules-detail__edit" data-commission-rules-action="edit-conditions">Edit</button></div>
+      <ul>${detail.conditions.map((condition) => `<li>${condition}</li>`).join('')}</ul>
+    </section>
+
+    <section class="commission-rules-detail__section commission-rules-performance">
+      <div class="commission-rules-detail__section-header"><div><h3>Rule performance</h3><p>${detail.performance.period}</p></div></div>
+      <div class="commission-rules-performance-grid">
+        <div><span>Clicks</span><strong>${detail.performance.clicks}</strong></div>
+        <div><span>Conversions</span><strong>${detail.performance.conversions}</strong></div>
+        <div><span>Commission</span><strong>${detail.performance.commission}</strong></div>
+      </div>
+    </section>
+  `;
+};
+
+const renderCommissionRulesPage = () => {
+  if (!commissionRulesPage) return;
+  renderCommissionRulesSummary();
+  renderCommissionRulesRows();
+  renderCommissionRulesDetail();
+};
+
+const renderFinanceSummary = () => {
+  if (!financeSummary) return;
+
+  financeSummary.innerHTML = financeBalancePageData.summary
+    .map((metric) => `
+      <article class="finance-summary-card finance-summary-card--${metric.tone}">
+        <div class="finance-summary-card__copy">
+          <span>${metric.label} <button class="inline-info finance-info" type="button" data-finance-action="summary-info" data-finance-label="${metric.label}" aria-label="About ${metric.label}"><svg><use href="#icon-info"></use></svg></button></span>
+          <strong>${metric.value}</strong>
+          <small class="finance-summary-card__note finance-summary-card__note--${metric.noteTone}">${metric.note}</small>
+        </div>
+        <span class="finance-summary-card__icon">${icon(metric.icon)}</span>
+      </article>
+    `)
+    .join('');
+};
+
+const renderFinanceTrend = () => {
+  if (!financeChart || !financeTrendSummary) return;
+
+  const trend = financeBalancePageData.trend;
+  const period = trend.periods[financeState.trendPeriod] ?? trend.periods['30d'];
+  const chartWidth = 680;
+  const chartHeight = 164;
+  const chartPaddingX = 9;
+  const chartPaddingY = 13;
+  const maxValue = 25000;
+  const usableWidth = chartWidth - chartPaddingX * 2;
+  const usableHeight = chartHeight - chartPaddingY * 2;
+  const points = period.points.map((point, index) => ({
+    ...point,
+    x: chartPaddingX + (usableWidth * index) / Math.max(1, period.points.length - 1),
+    y: chartPaddingY + usableHeight * (1 - point.value / maxValue),
+  }));
+  const linePath = points.map((point, index) => `${index ? 'L' : 'M'} ${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ');
+  const areaPath = `${linePath} L ${points.at(-1).x.toFixed(1)} ${chartHeight - chartPaddingY} L ${points[0].x.toFixed(1)} ${chartHeight - chartPaddingY} Z`;
+  const tooltipPoint = points[period.tooltip.index] ?? points[Math.floor(points.length / 2)];
+  const tooltipX = Math.min(Math.max(tooltipPoint.x - 43, 2), chartWidth - 88);
+  const tooltipY = Math.max(2, tooltipPoint.y - 51);
+
+  if (financePeriodSelect) financePeriodSelect.value = financeState.trendPeriod;
+  financeChart.innerHTML = `
+    <div class="finance-chart__axis-y" aria-hidden="true">${period.yAxis.map((label) => `<span>${label}</span>`).join('')}</div>
+    <div class="finance-chart__plot">
+      <svg viewBox="0 0 ${chartWidth} ${chartHeight}" role="img" aria-label="${period.label} account balance trend">
+        <defs>
+          <linearGradient id="finance-trend-fill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ff4c4c" stop-opacity=".2" />
+            <stop offset="100%" stop-color="#ff4c4c" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        <g class="finance-chart__grid" aria-hidden="true">
+          ${period.yAxis.map((_, index) => {
+            const y = chartPaddingY + (usableHeight * index) / Math.max(1, period.yAxis.length - 1);
+            return `<line x1="${chartPaddingX}" y1="${y.toFixed(1)}" x2="${chartWidth - chartPaddingX}" y2="${y.toFixed(1)}" />`;
+          }).join('')}
+        </g>
+        <path class="finance-chart__area" d="${areaPath}" />
+        <path class="finance-chart__line" d="${linePath}" />
+        <circle class="finance-chart__point" cx="${tooltipPoint.x.toFixed(1)}" cy="${tooltipPoint.y.toFixed(1)}" r="4.5" />
+        <g class="finance-chart__tooltip" transform="translate(${tooltipX.toFixed(1)} ${tooltipY.toFixed(1)})">
+          <rect width="86" height="42" rx="4" />
+          <text x="43" y="15">${period.points[period.tooltip.index]?.label ?? 'Selected date'}</text>
+          <text class="finance-chart__tooltip-value" x="43" y="32">${period.tooltip.value}</text>
+        </g>
+      </svg>
+      <div class="finance-chart__axis-x" aria-hidden="true">${period.xAxis.map((label) => `<span>${label}</span>`).join('')}</div>
+    </div>
+  `;
+
+  financeTrendSummary.innerHTML = [
+    ['Opening balance', trend.openingBalance, 'neutral'],
+    ['Total credits', trend.totalCredits, 'positive'],
+    ['Total debits', trend.totalDebits, 'negative'],
+    ['Closing balance', trend.closingBalance, 'neutral'],
+  ].map(([label, value, tone]) => `<div class="finance-trend-stat"><span>${label}</span><strong class="finance-trend-stat--${tone}">${value}</strong></div>`).join('');
+};
+
+const renderFinancePayoutSchedule = () => {
+  if (!financePayoutSchedule) return;
+
+  financePayoutSchedule.innerHTML = financeBalancePageData.payoutSchedule
+    .map((payout) => `
+      <div class="finance-payout-row">
+        <div><strong>${payout.date}</strong><small>${payout.relative}</small></div>
+        <div><strong>${payout.amount}</strong><span class="finance-schedule-status finance-schedule-status--${payout.tone}">${payout.status}</span></div>
+      </div>
+    `)
+    .join('');
+};
+
+const renderFinancePaymentMethods = () => {
+  if (!financePaymentMethods) return;
+
+  financePaymentMethods.innerHTML = financeBalancePageData.paymentMethods
+    .map((method) => `
+      <div class="finance-method-row">
+        <span class="finance-method-brand finance-method-brand--${method.brandTone}">
+          ${method.brandTone === 'visa' ? 'VISA' : method.brandTone === 'mastercard' ? '<i></i><i></i>' : icon('bank')}
+        </span>
+        <div class="finance-method-copy"><strong>${method.brand} ending in ${method.masked.replace('•••• ', '')} ${method.primary ? '<em>Primary</em>' : ''}</strong><small>${method.expiry}</small></div>
+        <button type="button" class="finance-method-menu" data-finance-action="method-menu" data-finance-method="${method.brand}" aria-label="More actions for ${method.brand}">${icon('more')}</button>
+      </div>
+    `)
+    .join('');
+};
+
+const renderFinancePayoutRows = () => {
+  if (!financePayoutRows) return;
+
+  financePayoutRows.innerHTML = financeBalancePageData.recentPayouts
+    .map((payout) => `
+      <tr>
+        <td><strong>${payout.id}</strong></td>
+        <td>${payout.date}</td>
+        <td><strong>${payout.amount}</strong></td>
+        <td><span class="finance-table-method finance-table-method--${payout.methodTone}">${payout.method}</span></td>
+        <td><span class="finance-paid-status"><i></i>${payout.status}</span></td>
+        <td>${payout.description}</td>
+        <td>${payout.reference}</td>
+      </tr>
+    `)
+    .join('');
+
+  if (financeResultCount) financeResultCount.textContent = `Showing 1 to ${financeBalancePageData.recentPayouts.length} of 24 results`;
+};
+
+const renderFinancePage = () => {
+  if (!financePage) return;
+  renderFinanceSummary();
+  renderFinanceTrend();
+  renderFinancePayoutSchedule();
+  renderFinancePaymentMethods();
+  renderFinancePayoutRows();
 };
 
 const renderPage = () => {
@@ -880,26 +1516,78 @@ const renderPage = () => {
   const activePageId = state.activeNavigationChild ?? state.activeNavigationId;
   const recruitmentPage = recruitmentPageSet.has(activePageId) ? getRecruitmentPage(activePageId) : null;
   const operationsPage = operationsPageSet.has(activePageId) ? getOperationsPage(activePageId) : null;
+  const isCampaignPage = state.activeNavigationChild === 'all-campaigns';
+  const isAttributionPage = state.activeNavigationChild === 'attribution-rules';
+  const isCommissionRulesPage = state.activeNavigationChild === 'commission-rules-list';
+  const isFinancePage = state.activeNavigationChild === 'balance-payments';
+  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage;
+
+  document.body.classList.toggle('is-campaign-page', isCampaignPage);
+  document.body.classList.toggle('is-attribution-page', isAttributionPage);
+  document.body.classList.toggle('is-commission-rules-page', isCommissionRulesPage);
+  document.body.classList.toggle('is-finance-page', isFinancePage);
 
   const currentPageTitle = recruitmentPage?.title ?? operationsPage?.title ?? context.current.label;
-  pageTitle.textContent = isOverview ? t('page.overview.title') : localizedPageTitle(activePageId, currentPageTitle);
+  pageTitle.textContent = isOverview
+    ? t('page.overview.title', 'Business overview')
+    : isMainPage
+      ? context.current.label
+      : localizedPageTitle(activePageId, currentPageTitle);
   pageDescription.textContent = isOverview
-    ? t('page.overview.description')
-    : recruitmentPage?.description ?? operationsPage?.description ?? `${context.current.label} workspace preview for the current brand scope.`;
-  breadcrumbParent.textContent = isOverview ? t('shell.merchantWorkspace') : context.parent.label;
-  breadcrumbCurrent.textContent = isOverview ? t('page.overview.title') : localizedPageTitle(activePageId, currentPageTitle);
+    ? t('page.overview.description', 'Monitor your affiliate program performance and partner activity.')
+    : isCampaignPage
+      ? 'View, manage, and analyze all your campaigns in one place.'
+      : isAttributionPage
+        ? 'Configure how conversions are attributed across channels and partners.'
+        : isCommissionRulesPage
+          ? 'Manage base commission rates, bonuses, attribution windows, and rule conditions for your partners.'
+          : isFinancePage
+            ? 'Track your account balance, commissions, payouts, and payment methods.'
+            : recruitmentPage?.description ?? operationsPage?.description ?? context.current.label + ' workspace preview for the current brand scope.';
+  breadcrumbParent.textContent = isOverview
+    ? t('shell.merchantWorkspace', 'Merchant workspace')
+    : isMainPage
+      ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage ? 'Commission & Rules' : 'Finance')
+      : context.parent.label;
+  breadcrumbCurrent.textContent = isCampaignPage
+    ? 'All campaigns'
+    : isAttributionPage
+      ? 'Attribution rules'
+      : isCommissionRulesPage
+        ? 'Commission rules'
+        : isFinancePage
+          ? 'Balance & payments'
+          : isOverview
+            ? t('page.overview.title', 'Overview')
+            : localizedPageTitle(activePageId, currentPageTitle);
+  breadcrumbCurrent.setAttribute('aria-current', 'page');
   overviewPage.hidden = !isOverview;
   modulePage.hidden = isOverview || (!recruitmentPage && !operationsPage);
-  modulePlaceholder.hidden = isOverview || Boolean(recruitmentPage || operationsPage);
+  campaignPage.hidden = !isCampaignPage;
+  attributionPage.hidden = !isAttributionPage;
+  commissionRulesPage.hidden = !isCommissionRulesPage;
+  financePage.hidden = !isFinancePage;
+  modulePlaceholder.hidden = isOverview || isMainPage || Boolean(recruitmentPage || operationsPage);
+  if (pageActions) pageActions.hidden = !isAttributionPage;
+  if (commissionRulesActions) commissionRulesActions.hidden = !isCommissionRulesPage;
+  if (financeActions) financeActions.hidden = !isFinancePage;
 
   if (recruitmentPage) {
     renderRecruitmentPage(recruitmentPage.id);
   } else if (operationsPage) {
     renderWorkspacePage(operationsPage.id);
-  } else if (!isOverview) {
+  } else if (!isOverview && !isMainPage) {
     modulePlaceholder.querySelector('[data-module-title]').textContent = context.current.label;
     modulePlaceholder.querySelector('[data-module-parent]').textContent = context.parent.label;
   }
+    modulePlaceholder.querySelector('[data-module-title]').textContent = context.current.label;
+    modulePlaceholder.querySelector('[data-module-parent]').textContent = context.parent.label;
+  }
+
+  if (isCampaignPage) renderCampaignPage();
+  if (isAttributionPage) renderAttributionPage();
+  if (isCommissionRulesPage) renderCommissionRulesPage();
+  if (isFinancePage) renderFinancePage();
 };
 
 const renderAll = () => {
@@ -938,12 +1626,13 @@ const closePeriodMenu = () => {
 
 const navigateTo = (navigationId) => {
   const context = findNavigationContext(navigationId);
+  const activeNavigationChild = context.current.id === context.parent.id ? null : context.current.id;
   state = {
     ...state,
     activeNavigationId: context.parent.id,
-    activeNavigationChild: context.current.id === context.parent.id ? null : context.current.id,
-    expandedGroups: context.parent.children && !state.expandedGroups.includes(context.parent.id)
-      ? [...state.expandedGroups, context.parent.id]
+    activeNavigationChild,
+    expandedGroups: context.parent.children?.length
+      ? [...new Set([...state.expandedGroups, context.parent.id])]
       : state.expandedGroups,
   };
   renderPage();
@@ -1221,6 +1910,177 @@ demoStateSelect.addEventListener('change', (event) => {
   renderAll();
 });
 
+
+if (campaignPage) {
+  campaignPage.addEventListener('input', (event) => {
+    if (event.target.matches('[data-campaign-search]')) {
+      campaignState.search = event.target.value;
+      renderCampaignRows();
+      updateCampaignSelection();
+    }
+  });
+
+  campaignPage.addEventListener('change', (event) => {
+    const filter = event.target.closest('[data-campaign-filter]');
+    if (filter) {
+      campaignState.filters[filter.dataset.campaignFilter] = filter.value;
+      renderCampaignRows();
+      updateCampaignSelection();
+      return;
+    }
+
+    const rowCheckbox = event.target.closest('[data-campaign-select]');
+    if (rowCheckbox) {
+      if (rowCheckbox.checked) campaignState.selectedIds.add(rowCheckbox.dataset.campaignSelect);
+      else campaignState.selectedIds.delete(rowCheckbox.dataset.campaignSelect);
+      updateCampaignSelection();
+      return;
+    }
+
+    if (event.target.matches('[data-campaign-select-all]')) {
+      const visibleIds = getFilteredCampaigns().map((campaign) => campaign.id);
+      if (event.target.checked) visibleIds.forEach((id) => campaignState.selectedIds.add(id));
+      else visibleIds.forEach((id) => campaignState.selectedIds.delete(id));
+      renderCampaignRows();
+      updateCampaignSelection();
+    }
+  });
+
+  campaignPage.addEventListener('click', (event) => {
+    const tab = event.target.closest('[data-campaign-tab]');
+    if (tab) {
+      campaignState.activeTab = tab.dataset.campaignTab;
+      renderCampaignTabs();
+      renderCampaignRows();
+      updateCampaignSelection();
+      return;
+    }
+
+    const action = event.target.closest('[data-campaign-action]');
+    if (!action) return;
+    const actionName = action.dataset.campaignAction;
+
+    if (actionName === 'clear') {
+      campaignState.selectedIds.clear();
+      renderCampaignRows();
+      updateCampaignSelection();
+      return;
+    }
+
+    const selectedCount = campaignState.selectedIds.size;
+    if (actionName === 'create') {
+      showToast('Create campaign is ready for product integration');
+    } else if (actionName === 'row') {
+      showToast('Campaign actions are ready for product integration');
+    } else {
+      showToast(`${actionName.replace('-', ' ')} is ready for product integration (${selectedCount} selected)`);
+    }
+  });
+}
+
+if (commissionRulesPage) {
+  commissionRulesPage.addEventListener('input', (event) => {
+    if (!event.target.matches('[data-commission-rules-search]')) return;
+    commissionRulesState.search = event.target.value;
+    renderCommissionRulesRows();
+  });
+
+  commissionRulesPage.addEventListener('change', (event) => {
+    const filter = event.target.closest('[data-commission-rules-filter]');
+    if (filter) {
+      commissionRulesState.filters[filter.dataset.commissionRulesFilter] = filter.value;
+      renderCommissionRulesRows();
+      return;
+    }
+
+    const ruleCheckbox = event.target.closest('[data-commission-rules-select]');
+    if (ruleCheckbox) {
+      if (ruleCheckbox.checked) commissionRulesState.selectedIds.add(ruleCheckbox.dataset.commissionRulesSelect);
+      else commissionRulesState.selectedIds.delete(ruleCheckbox.dataset.commissionRulesSelect);
+      updateCommissionRulesSelection();
+      return;
+    }
+
+    if (event.target.matches('[data-commission-rules-select-all]')) {
+      const visibleIds = getFilteredCommissionRules().map((rule) => rule.id);
+      if (event.target.checked) visibleIds.forEach((id) => commissionRulesState.selectedIds.add(id));
+      else visibleIds.forEach((id) => commissionRulesState.selectedIds.delete(id));
+      renderCommissionRulesRows();
+    }
+  });
+
+  commissionRulesPage.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-commission-rules-action]');
+    if (action) {
+      event.stopPropagation();
+      const actionName = action.dataset.commissionRulesAction;
+      if (actionName === 'close-detail') {
+        commissionRulesState.selectedRuleId = null;
+        renderCommissionRulesDetail();
+      } else if (actionName === 'next-page' || actionName === 'more-filters' || actionName === 'settings') {
+        showToast(`${actionName.replace('-', ' ')} is ready for product integration`);
+      } else if (actionName === 'edit' || actionName === 'row-menu') {
+        showToast(`${action.dataset.commissionRulesRule} ${actionName === 'edit' ? 'edit' : 'more actions'} is ready for product integration`);
+      } else if (actionName === 'edit-rates' || actionName === 'edit-conditions' || actionName === 'edit-tier' || actionName === 'delete-tier') {
+        showToast(`${actionName.replaceAll('-', ' ')} is ready for product integration`);
+      }
+      return;
+    }
+
+    const pageNumber = event.target.closest('[data-commission-rules-page-number]');
+    if (pageNumber) {
+      event.stopPropagation();
+      showToast(`Commission rules page ${pageNumber.dataset.commissionRulesPageNumber} is ready for product integration`);
+      return;
+    }
+
+    const row = event.target.closest('[data-commission-rules-row]');
+    if (!row || event.target.closest('input')) return;
+    event.stopPropagation();
+    commissionRulesState.selectedRuleId = row.dataset.commissionRulesRow;
+    renderCommissionRulesRows();
+    renderCommissionRulesDetail();
+  });
+}
+
+if (financePage) {
+  financePage.addEventListener('change', (event) => {
+    if (!event.target.matches('[data-finance-period]')) return;
+    financeState.trendPeriod = event.target.value;
+    renderFinanceTrend();
+    showToast(`Balance trend updated to ${event.target.options[event.target.selectedIndex].text}`);
+  });
+
+  financePage.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-finance-action]');
+    if (!action) return;
+    event.stopPropagation();
+
+    const actionName = action.dataset.financeAction;
+    if (actionName === 'page') {
+      showToast(`Payout activity page ${action.dataset.financePageNumber} is ready for product integration`);
+    } else if (actionName === 'method-menu') {
+      showToast(`${action.dataset.financeMethod} payment method actions are ready for product integration`);
+    } else if (actionName === 'summary-info') {
+      showToast(`${action.dataset.financeLabel} details are ready for product integration`);
+    } else if (actionName === 'deposit') {
+      showToast('Deposit flow is ready for product integration');
+    } else {
+      showToast(`${actionName.replaceAll('-', ' ')} is ready for product integration`);
+    }
+  });
+}
+
+if (attributionPage) {
+  attributionPage.addEventListener('change', (event) => {
+    if (!event.target.matches('[data-attribution-model]')) return;
+    attributionState.activeModel = event.target.value;
+    attributionState.isDirty = true;
+    renderAttributionPage();
+    showToast('Attribution model updated. Save changes to apply.');
+  });
+}
+
 document.addEventListener('click', (event) => {
   if (!event.target.closest('.period-picker')) closePeriodMenu();
   const actionNavigation = event.target.closest('[data-action-navigation]');
@@ -1232,6 +2092,45 @@ document.addEventListener('click', (event) => {
   const partnerView = event.target.closest('[data-partner-view]');
   if (partnerView) {
     openPartnerDrawer(partnerView.dataset.partnerView, partnerView);
+    return;
+  }
+
+  const commissionAction = event.target.closest('[data-commission-action]');
+  if (commissionAction) {
+    const action = commissionAction.dataset.commissionAction;
+    if (action === 'create') showToast('Commission rule editor is ready for product integration');
+    return;
+  }
+
+  const financeAction = event.target.closest('[data-finance-action]');
+  if (financeAction) {
+    const action = financeAction.dataset.financeAction;
+    if (action === 'deposit') showToast('Deposit flow is ready for product integration');
+    return;
+  }
+
+  const attributionAction = event.target.closest('[data-attribution-action]');
+  if (attributionAction) {
+    const action = attributionAction.dataset.attributionAction;
+    if (action === 'save') {
+      attributionState.isDirty = false;
+      renderAttributionPage();
+      showToast('Attribution settings saved');
+    } else if (action === 'export') {
+      showToast('Attribution settings export is ready for download');
+    } else if (action === 'add-rule') {
+      showToast('Rule editor is ready for product integration');
+    } else if (action === 'performance') {
+      showToast('Model performance is ready for product integration');
+    } else if (action === 'history') {
+      showToast('Full audit history is ready for product integration');
+    } else if (action === 'edit-rule') {
+      showToast(`Edit ${attributionAction.dataset.attributionRule} is ready for product integration`);
+    } else if (action === 'rule-menu') {
+      showToast(`More actions for ${attributionAction.dataset.attributionRule} are ready for product integration`);
+    } else {
+      showToast('This attribution metric is ready for product integration');
+    }
     return;
   }
 
