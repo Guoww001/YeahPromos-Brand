@@ -36,6 +36,7 @@ http://127.0.0.1:8766/demo1/
 - `Help center > Help center`：帮助分类、热门文章搜索、联系客服、工单入口和系统状态摘要；
 - `Integrations & Settings > API credentials`：Live/Test 环境切换、掩码 API 凭证表、状态筛选、Webhook endpoint 管理和安全提示；
 - `Messages & Notifications > All Messages`：消息分类、搜索/筛选、伙伴会话、附件、回复编辑器、伙伴详情和分页；
+- `Products & Assets > Banners & images`：资产分类、文件夹/活动/状态筛选、名称或标签搜索、网格/列表视图、资产选中态、详情面板和分页占位交互；
 - 日期范围切换会同步切换整组模拟数据；
 - Demo state 切换：正常、空数据、加载错误、权限受限和同步中；
 - 伙伴详情右侧抽屉；
@@ -107,6 +108,7 @@ Demo 1 使用白、黑、红三色构成品牌视觉；旧蓝色不得继续作�
 - Help center 的搜索框支持键盘 `/` 快捷键；文章、分类、支持入口和系统状态均提供可读文本，不把颜色作为唯一状态线索。
 - API credentials 的搜索、状态筛选、环境切换、复制、轮换和撤销入口均保留文字标签、键盘焦点和 `aria-label`；密钥与 Webhook 地址只展示掩码占位符，不展示可用凭证。
 - Messages & Notifications 的消息列表、未读标记、状态标签、会话正文、附件和回复编辑器遵循以上字号与行高约束；未读状态同时提供文字、圆点和语义属性，不只依靠颜色。
+- Banners & images 的资产卡片、筛选器、搜索框、状态标签、分页和右侧详情面板遵循以上字号与行高约束；选中、Active、In use 和 Draft 状态同时提供文字、边框、圆点或语义属性，不只依靠颜色。
 
 ### 对比度与灰阶 / Contrast & grayscale
 
@@ -117,6 +119,7 @@ Demo 1 使用白、黑、红三色构成品牌视觉；旧蓝色不得继续作�
 - 成功、信息等语义色也必须使用较深的文字色，并搭配浅色背景、文字或图标，不能只依靠颜色区分状态。
 - 新增 Finance 组件不得重新引入 `#69758C`、`#748198`、`#7C889C`、`#8994A7` 等低对比度灰色作为可读文字。
 - Messages & Notifications 使用 `#1F2937` 承载标题和重要字段，`#374151` 承载正文与列表数据，`#4B5563` 承载辅助说明；红色只用于当前导航、未读提示、主操作和焦点，不用浅灰表达关键内容。
+- Banners & images 使用 `#1F2937` 承载资产名称和详情字段，`#374151` 承载文件信息，`#4B5563` 承载筛选器、文件夹和说明文字；Active、In use、Draft 使用深色文字配浅色背景，并保留文字标签和圆点语义。
 ### 演示数据与支付安全
 
 - Demo 页面只能使用明确标注为演示用途的合成数据，不放入真实用户姓名、联系方式、账号凭证或业务导出数据。
@@ -140,11 +143,11 @@ Demo 1 使用白、黑、红三色构成品牌视觉；旧蓝色不得继续作�
 
 | 文件 | 职责 |
 | --- | --- |
-| `index.html` | Merchant 页面语义骨架、SVG 图标库、抽屉、状态选择器、活动页、归因规则页、佣金规则页、发票页、财务页、Help center 页面、API credentials 页面和 Messages & Notifications 页面 |
+| `index.html` | Merchant 页面语义骨架、SVG 图标库、抽屉、状态选择器、活动页、归因规则页、佣金规则页、发票页、财务页、Help center 页面、API credentials 页面、Messages & Notifications 页面和 Products & Assets 页面 |
 | `styles.css` | 视觉 Token、布局、组件、状态、动效和响应式样式 |
-| `data.mjs` | 工作区、任务导航、时间范围快照、指标、伙伴、活动、归因规则、佣金规则、发票、财务、Help center、API credentials 和 Messages & Notifications 模拟数据 |
+| `data.mjs` | 工作区、任务导航、时间范围快照、指标、伙伴、活动、归因规则、佣金规则、发票、财务、Help center、API credentials、Messages & Notifications 和 Banners & images 模拟数据 |
 | `app-core.mjs` | 不依赖 DOM 的状态函数 |
-| `app.js` | 数据渲染、模块导航、活动筛选、归因模型交互、佣金规则筛选/详情交互、发票筛选/下载交互、财务趋势/付款交互、Help center 搜索/文章交互、API credentials 环境/筛选/复制/轮换交互、Messages & Notifications 标签/搜索/回复/伙伴交互、状态切换、抽屉和浏览器交互 |
+| `app.js` | 数据渲染、模块导航、活动筛选、归因模型交互、佣金规则筛选/详情交互、发票筛选/下载交互、财务趋势/付款交互、Help center 搜索/文章交互、API credentials 环境/筛选/复制/轮换交互、Messages & Notifications 标签/搜索/回复/伙伴交互、Banners & images 分类/筛选/搜索/详情交互、状态切换、抽屉和浏览器交互 |
 | `tests/app-core.test.mjs` | 时间范围、导航展开和 Demo 状态行为测试 |
 | `tests/structure.test.mjs` | Merchant 结构、字体、响应式和无障碍规则测试 |
 
