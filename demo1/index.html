@@ -164,6 +164,16 @@
                   Deposit funds
                 </button>
               </div>
+              <div class="page-header__page-actions messages-page-actions" data-messages-page-actions hidden>
+                <button class="button button--primary" type="button" data-messages-action="compose">
+                  <svg><use href="#icon-edit"></use></svg>
+                  Compose Message
+                </button>
+                <button class="messages-preferences" type="button" data-messages-action="preferences">
+                  <svg><use href="#icon-settings"></use></svg>
+                  Notification preferences
+                </button>
+              </div>
             </div>
           </header>
 
@@ -951,6 +961,65 @@
                 </div>
               </div>
             </section>
+          </section>
+
+          <section class="messages-page" data-messages-page hidden aria-labelledby="messages-page-title">
+            <h2 id="messages-page-title" class="sr-only">Messages &amp; Notifications</h2>
+
+            <div class="messages-tabs" data-messages-tabs role="tablist" aria-label="Message categories"></div>
+
+            <div class="messages-toolbar" aria-label="Message filters">
+              <label class="messages-search">
+                <span class="sr-only">Search messages</span>
+                <svg aria-hidden="true"><use href="#icon-search"></use></svg>
+                <input type="search" data-messages-search placeholder="Search messages..." autocomplete="off" />
+              </label>
+              <label class="messages-filter">
+                <span class="sr-only">Filter messages</span>
+                <svg aria-hidden="true"><use href="#icon-filter"></use></svg>
+                <select data-messages-filter aria-label="Filter messages">
+                  <option value="all">Filter</option>
+                  <option value="unread">Unread only</option>
+                  <option value="partner">Partner messages</option>
+                  <option value="system">System alerts</option>
+                </select>
+                <svg class="messages-filter__chevron" aria-hidden="true"><use href="#icon-chevron"></use></svg>
+              </label>
+            </div>
+
+            <div class="messages-layout">
+              <section class="messages-list-card" aria-label="Message list">
+                <div class="messages-list__header">
+                  <label class="messages-checkbox messages-checkbox--header">
+                    <input type="checkbox" data-messages-select-all aria-label="Select all visible messages" />
+                    <span aria-hidden="true"></span>
+                  </label>
+                  <label class="messages-sort">
+                    <span>Sort by:</span>
+                    <select data-messages-sort aria-label="Sort messages">
+                      <option value="newest">Newest</option>
+                      <option value="oldest">Oldest</option>
+                    </select>
+                    <svg aria-hidden="true"><use href="#icon-chevron"></use></svg>
+                  </label>
+                  <button class="messages-sort-direction" type="button" data-messages-action="sort-direction" aria-label="Change sort direction">↕</button>
+                </div>
+                <div class="messages-list" data-messages-list role="listbox" aria-label="Messages"></div>
+                <div class="messages-list__footer">
+                  <span data-messages-result-count>Showing 1 to 8 of 38 messages</span>
+                  <nav class="messages-pagination" aria-label="Messages pagination">
+                    <button type="button" class="is-current" aria-current="page" data-messages-action="page" data-messages-page-number="1">1</button>
+                    <button type="button" data-messages-action="page" data-messages-page-number="2">2</button>
+                    <button type="button" data-messages-action="page" data-messages-page-number="3">3</button>
+                    <button type="button" aria-label="Next page" data-messages-action="page" data-messages-page-number="2">›</button>
+                  </nav>
+                </div>
+              </section>
+
+              <section class="messages-conversation-card" data-messages-conversation aria-label="Conversation"></section>
+
+              <aside class="messages-details" data-messages-partner-details aria-label="Partner details"></aside>
+            </div>
           </section>
 
           <section class="module-placeholder card" data-module-placeholder hidden aria-live="polite">

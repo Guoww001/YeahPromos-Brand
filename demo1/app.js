@@ -1,4 +1,4 @@
-import { attributionPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, dashboardData, financeBalancePageData, helpCenterPageData } from './data.mjs?v=merchant-reference-18';
+import { attributionPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData } from './data.mjs?v=merchant-reference-18';
 import {
   createDashboardState,
   isNavigationItemActive,
@@ -125,6 +125,17 @@ const helpCenterSearch = document.querySelector('[data-help-center-search]');
 const helpCenterLoadMore = document.querySelector('[data-help-center-action="load-more-articles"]');
 const helpCenterStatus = document.querySelector('[data-help-center-status]');
 const helpCenterUtility = document.querySelector('[data-help-center-utility]');
+const messagesPage = document.querySelector('[data-messages-page]');
+const messagesPageActions = document.querySelector('[data-messages-page-actions]');
+const messagesTabs = document.querySelector('[data-messages-tabs]');
+const messagesSearch = document.querySelector('[data-messages-search]');
+const messagesFilter = document.querySelector('[data-messages-filter]');
+const messagesSort = document.querySelector('[data-messages-sort]');
+const messagesList = document.querySelector('[data-messages-list]');
+const messagesResultCount = document.querySelector('[data-messages-result-count]');
+const messagesSelectAll = document.querySelector('[data-messages-select-all]');
+const messagesConversation = document.querySelector('[data-messages-conversation]');
+const messagesPartnerDetails = document.querySelector('[data-messages-partner-details]');
 
 const campaignState = {
   activeTab: 'all',
@@ -194,6 +205,19 @@ const invoicesState = {
 const helpCenterState = {
   search: '',
   visibleArticleCount: 5,
+};
+
+const messagesState = {
+  activeTab: 'all-messages',
+  search: '',
+  filter: 'all',
+  sort: 'newest',
+  selectedId: messagesPageData.conversation.messageId,
+  selectedIds: new Set(),
+  readIds: new Set(),
+  starredIds: new Set(),
+  replyDraft: '',
+  sentReplies: [],
 };
 
 const icon = (name, className = '') => `
@@ -1672,6 +1696,296 @@ const renderHelpCenterPage = () => {
   `).join('');
 };
 
+const messageIsUnread = (message) => message.unread && !messagesState.readIds.has(message.id);
+
+const getFilteredMessages = () => {
+  const query = messagesState.search.trim().toLowerCase();
+  const filtered = messagesPageData.messages.filter((message) => {
+    const matchesTab = messagesState.activeTab === 'all-messages'
+      || (messagesState.activeTab === 'partner-messages' && message.category === 'partner')
+      || (messagesState.activeTab === 'system-alerts' && message.category === 'system')
+      || (messagesState.activeTab === 'archived-messages' && message.category === 'archived');
+    const matchesFilter = messagesState.filter === 'all'
+      || (messagesState.filter === 'unread' && messageIsUnread(message))
+      || (messagesState.filter === 'partner' && message.category === 'partner')
+      || (messagesState.filter === 'system' && message.category === 'system');
+    const matchesQuery = !query || [message.sender, message.subject, message.preview, message.kind]
+      .some((value) => value.toLowerCase().includes(query));
+
+    return matchesTab && matchesFilter && matchesQuery;
+  });
+
+  return messagesState.sort === 'oldest' ? [...filtered].reverse() : filtered;
+};
+
+const getSelectedMessage = (visibleMessages = getFilteredMessages()) => {
+  return visibleMessages.find((message) => message.id === messagesState.selectedId)
+    ?? visibleMessages[0]
+    ?? messagesPageData.messages.find((message) => message.id === messagesState.selectedId)
+    ?? messagesPageData.messages[0];
+};
+
+const messageAvatar = (person, className = '') => `
+  <span class="messages-avatar messages-avatar--${person.avatarTone ?? 'slate'} ${className}" aria-hidden="true">${escapeHtml(person.initials ?? person.name?.slice(0, 2) ?? '?')}</span>
+`;
+
+const updateMessagesSelection = () => {
+  const visibleIds = getFilteredMessages().map((message) => message.id);
+  const selectedCount = visibleIds.filter((id) => messagesState.selectedIds.has(id)).length;
+  if (messagesSelectAll) {
+    messagesSelectAll.checked = visibleIds.length > 0 && selectedCount === visibleIds.length;
+    messagesSelectAll.indeterminate = selectedCount > 0 && selectedCount < visibleIds.length;
+  }
+};
+
+const renderMessagesTabs = () => {
+  if (!messagesTabs) return;
+  messagesTabs.innerHTML = messagesPageData.tabs.map((tab) => `
+    <button
+      class="messages-tab${messagesState.activeTab === tab.id ? ' is-active' : ''}"
+      type="button"
+      role="tab"
+      aria-selected="${messagesState.activeTab === tab.id}"
+      data-messages-tab="${tab.id}"
+    >
+      <span>${tab.label}</span>
+      ${tab.count === null ? '' : `<strong>${tab.count}</strong>`}
+    </button>
+  `).join('');
+};
+
+const renderMessagesRows = (visibleMessages) => {
+  if (!messagesList) return;
+  messagesList.innerHTML = visibleMessages.length
+    ? visibleMessages.map((message) => `
+        <div
+          class="messages-list-row${message.id === messagesState.selectedId ? ' is-selected' : ''}${messageIsUnread(message) ? ' is-unread' : ''}"
+          data-messages-row="${message.id}"
+          role="option"
+          aria-selected="${message.id === messagesState.selectedId}"
+          tabindex="0"
+        >
+          <label class="messages-checkbox messages-list-row__checkbox">
+            <input type="checkbox" data-messages-select="${message.id}" ${messagesState.selectedIds.has(message.id) ? 'checked' : ''} aria-label="Select message from ${escapeHtml(message.sender)}" />
+            <span aria-hidden="true"></span>
+          </label>
+          ${messageAvatar(message)}
+          <span class="messages-list-row__copy">
+            <strong>${escapeHtml(message.sender)}</strong>
+            <span>${escapeHtml(message.subject)}</span>
+            <small>${escapeHtml(message.preview)}</small>
+          </span>
+          <time datetime="${message.date}">${escapeHtml(message.time)}</time>
+          ${messageIsUnread(message) ? '<i class="messages-unread-dot" title="Unread message">Unread</i>' : ''}
+        </div>
+      `).join('')
+    : '<div class="messages-empty"><strong>No messages found</strong><span>Try changing the search or filter.</span></div>';
+
+  const total = 38;
+  messagesResultCount.textContent = visibleMessages.length
+    ? `Showing 1 to ${visibleMessages.length} of ${total} messages`
+    : `Showing 0 of ${total} messages`;
+  updateMessagesSelection();
+};
+
+const getConversationForMessage = (message) => {
+  if (message.id === messagesPageData.conversation.messageId) return messagesPageData.conversation;
+  return {
+    messageId: message.id,
+    subject: message.subject,
+    kind: message.kind,
+    sender: {
+      name: message.sender,
+      initials: message.initials,
+      avatarTone: message.avatarTone,
+      email: `${message.sender.toLowerCase().replaceAll(' ', '')} contact [at] partner.example`,
+    },
+    recipient: messagesPageData.conversation.recipient,
+    sent: `${message.date} ${message.time}`,
+    body: [
+      `Hi Demo1 team,`,
+      message.preview.replace(/\.\.\.$/, '.') + ' Please review this update when you have a moment.',
+      'Reply to this conversation when you are ready, or use the actions above to manage it.',
+    ],
+    attachments: [],
+    replies: [],
+  };
+};
+
+const renderMessagesConversation = (visibleMessages) => {
+  if (!messagesConversation) return;
+  if (!visibleMessages.length) {
+    messagesConversation.innerHTML = `
+      <div class="messages-conversation-empty">
+        <span class="messages-conversation-empty__icon">${icon('message')}</span>
+        <strong>Select a message to read it</strong>
+        <p>Choose a different search or filter to see available conversations.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const message = getSelectedMessage(visibleMessages);
+  messagesState.selectedId = message.id;
+  const conversation = getConversationForMessage(message);
+  const replies = [...conversation.replies, ...messagesState.sentReplies.filter((reply) => reply.messageId === message.id)];
+  const body = conversation.body.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('');
+
+  messagesConversation.innerHTML = `
+    <div class="messages-conversation__header">
+      <div class="messages-conversation__heading">
+        <h2>${escapeHtml(conversation.subject)}</h2>
+        <span class="messages-kind messages-kind--${message.category}">${escapeHtml(conversation.kind)}</span>
+      </div>
+      <div class="messages-conversation__actions" aria-label="Conversation actions">
+        <button type="button" class="messages-icon-button${messagesState.starredIds?.has(message.id) ? ' is-selected' : ''}" data-messages-action="star" aria-label="Star conversation">${icon('star')}</button>
+        <button type="button" class="messages-icon-button" data-messages-action="archive" aria-label="Archive conversation">${icon('archive')}</button>
+        <button type="button" class="messages-icon-button" data-messages-action="more" aria-label="More conversation actions">${icon('more')}</button>
+      </div>
+    </div>
+    <div class="messages-conversation__meta">
+      <div class="messages-person-meta">
+        ${messageAvatar(conversation.sender)}
+        <span><strong>From</strong><b>${escapeHtml(conversation.sender.name)}</b><small>${escapeHtml(conversation.sender.email)}</small></span>
+      </div>
+      <div class="messages-person-meta">
+        ${messageAvatar(conversation.recipient)}
+        <span><strong>To</strong><b>${escapeHtml(conversation.recipient.name)}</b><small>${escapeHtml(conversation.recipient.email)}</small></span>
+      </div>
+      <span class="messages-sent-meta"><strong>Sent</strong><span>${escapeHtml(conversation.sent)}</span></span>
+    </div>
+    <article class="messages-message-body">
+      ${body}
+    </article>
+    ${conversation.attachments.length ? `
+      <section class="messages-attachments" aria-labelledby="messages-attachments-title">
+        <h3 id="messages-attachments-title">Attachments <span>${conversation.attachments.length}</span></h3>
+        <div class="messages-attachment-list">
+          ${conversation.attachments.map((attachment) => `
+            <button type="button" class="messages-attachment" data-messages-action="download-attachment" data-messages-file="${escapeHtml(attachment.name)}">
+              <span class="messages-attachment__icon messages-attachment__icon--${attachment.tone}">${icon(attachment.icon)}</span>
+              <span><strong>${escapeHtml(attachment.name)}</strong><small>${escapeHtml(attachment.type)} · ${escapeHtml(attachment.size)}</small></span>
+              ${icon('download')}
+            </button>
+          `).join('')}
+        </div>
+      </section>
+    ` : ''}
+    <section class="messages-replies" aria-labelledby="messages-replies-title">
+      <h3 id="messages-replies-title">Replies <span>${replies.length}</span></h3>
+      ${replies.length ? replies.map((reply) => `
+        <article class="messages-reply">
+          ${messageAvatar(reply)}
+          <div><header><strong>${escapeHtml(reply.sender)}</strong><time>${escapeHtml(reply.time)}</time></header><p>${escapeHtml(reply.body).replaceAll('\n', '<br />')}</p></div>
+        </article>
+      `).join('') : '<p class="messages-replies__empty">No replies yet. Start the conversation below.</p>'}
+    </section>
+    <form class="messages-reply-form" data-messages-reply-form>
+      <label for="messages-reply-input">Reply to ${escapeHtml(conversation.sender.name)}</label>
+      <textarea id="messages-reply-input" data-messages-reply rows="3" placeholder="Write a reply...">${escapeHtml(messagesState.replyDraft)}</textarea>
+      <div class="messages-reply-form__footer">
+        <span>Demo interaction · replies are not sent</span>
+        <button class="button button--primary" type="submit" data-messages-action="send-reply">${icon('send')} Send reply</button>
+      </div>
+    </form>
+  `;
+};
+
+const renderMessagesPartnerDetails = () => {
+  if (!messagesPartnerDetails) return;
+  const details = messagesPageData.partnerDetails;
+  messagesPartnerDetails.innerHTML = `
+    <section class="messages-detail-card messages-partner-card">
+      <div class="messages-detail-card__header"><span>Partner</span><button type="button" class="messages-icon-button" data-messages-action="partner-menu" aria-label="Partner actions">${icon('more')}</button></div>
+      <div class="messages-partner-card__identity">${messageAvatar(details, 'messages-avatar--large')}<div><h2>${escapeHtml(details.name)}</h2><span>${escapeHtml(details.location)}</span></div></div>
+      <p class="messages-partner-card__contact">${escapeHtml(details.contact)}</p>
+      <button type="button" class="messages-text-action" data-messages-action="view-partner">View partner profile ${icon('arrow')}</button>
+    </section>
+    <section class="messages-detail-card">
+      <div class="messages-detail-card__header"><h3>Active Campaigns <span>${details.activeCampaigns.length}</span></h3><button type="button" class="messages-icon-button" data-messages-action="view-campaigns" aria-label="View partner campaigns">${icon('arrow')}</button></div>
+      <div class="messages-campaign-list">
+        ${details.activeCampaigns.map((campaign) => `<div class="messages-campaign-item"><strong>${escapeHtml(campaign.name)}</strong><span>${escapeHtml(campaign.dates)}</span><b><i></i>${escapeHtml(campaign.status)}</b></div>`).join('')}
+      </div>
+    </section>
+    <section class="messages-detail-card">
+      <div class="messages-detail-card__header"><h3>Partner Overview</h3><button type="button" class="messages-icon-button" data-messages-action="view-analytics" aria-label="View partner analytics">${icon('arrow')}</button></div>
+      <dl class="messages-stats-grid">${details.stats.map((stat) => `<div><dt>${escapeHtml(stat.label)}</dt><dd>${escapeHtml(stat.value)}</dd></div>`).join('')}</dl>
+    </section>
+    <section class="messages-detail-card">
+      <div class="messages-detail-card__header"><h3>Conversation Info</h3></div>
+      <dl class="messages-info-list"><div><dt>Conversation ID</dt><dd>${escapeHtml(details.conversationId)}</dd></div><div><dt>Status</dt><dd class="messages-info-status"><i></i>${escapeHtml(details.conversationStatus)}</dd></div><div><dt>Labels</dt><dd><span class="messages-label-chip">${escapeHtml(details.labels)}</span></dd></div><div><dt>Added to CRM</dt><dd>${escapeHtml(details.addedToCrm)}</dd></div></dl>
+    </section>
+  `;
+};
+
+const renderMessagesPage = () => {
+  if (!messagesPage) return;
+  if (!messagesPageData.tabs.some((tab) => tab.id === messagesState.activeTab)) messagesState.activeTab = 'all-messages';
+  if (messagesSearch) messagesSearch.value = messagesState.search;
+  if (messagesFilter) messagesFilter.value = messagesState.filter;
+  if (messagesSort) messagesSort.value = messagesState.sort;
+  renderMessagesTabs();
+  const visibleMessages = getFilteredMessages();
+  renderMessagesRows(visibleMessages);
+  renderMessagesConversation(visibleMessages);
+  renderMessagesPartnerDetails();
+};
+
+const submitMessageReply = () => {
+  const message = getSelectedMessage();
+  const draft = messagesState.replyDraft.trim();
+  if (!draft) {
+    showToast('Write a reply before sending');
+    return;
+  }
+
+  messagesState.sentReplies.push({
+    id: `reply-demo-${Date.now()}`,
+    messageId: message.id,
+    sender: 'Demo1 (You)',
+    initials: 'D1',
+    avatarTone: 'slate',
+    time: 'Just now',
+    body: draft,
+  });
+  messagesState.replyDraft = '';
+  renderMessagesPage();
+  showToast('Reply saved to this demo conversation');
+};
+
+const handleMessagesAction = (action) => {
+  const actionName = action?.dataset.messagesAction;
+  if (!actionName) return false;
+
+  const message = getSelectedMessage();
+  if (actionName === 'sort-direction') {
+    messagesState.sort = messagesState.sort === 'newest' ? 'oldest' : 'newest';
+    renderMessagesPage();
+  } else if (actionName === 'star') {
+    if (messagesState.starredIds.has(message.id)) messagesState.starredIds.delete(message.id);
+    else messagesState.starredIds.add(message.id);
+    renderMessagesPage();
+    showToast(messagesState.starredIds.has(message.id) ? 'Conversation starred' : 'Conversation unstarred');
+  } else if (actionName === 'archive') {
+    showToast('Archive action is ready for product integration');
+  } else if (actionName === 'more' || actionName === 'partner-menu') {
+    showToast('More conversation actions are ready for product integration');
+  } else if (actionName === 'download-attachment') {
+    showToast(`${action.dataset.messagesFile} download is ready for product integration`);
+  } else if (actionName === 'page') {
+    showToast(`Messages page ${action.dataset.messagesPageNumber} is ready for product integration`);
+  } else if (actionName === 'view-partner') {
+    showToast('Partner profile is ready for product integration');
+  } else if (actionName === 'view-campaigns') {
+    showToast('Partner campaigns are ready for product integration');
+  } else if (actionName === 'view-analytics') {
+    showToast('Partner analytics are ready for product integration');
+  } else {
+    showToast(`${actionName.replaceAll('-', ' ')} is ready for product integration`);
+  }
+  return true;
+};
+
 const renderPage = () => {
   const context = findNavigationContext(state.activeNavigationChild ?? state.activeNavigationId);
   const isOverview = state.activeNavigationId === 'overview' && !state.activeNavigationChild;
@@ -1684,7 +1998,8 @@ const renderPage = () => {
   const isFinancePage = state.activeNavigationChild === 'balance-payments';
   const isInvoicesPage = state.activeNavigationChild === 'commission-invoices' || state.activeNavigationChild === 'invoices';
   const isHelpCenterPage = state.activeNavigationId === 'help-center';
-  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage;
+  const isMessagesPage = ['all-messages', 'partner-messages', 'system-alerts', 'archived-messages'].includes(state.activeNavigationChild);
+  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage || isMessagesPage;
 
   document.body.classList.toggle('is-campaign-page', isCampaignPage);
   document.body.classList.toggle('is-attribution-page', isAttributionPage);
@@ -1694,17 +2009,22 @@ const renderPage = () => {
   document.body.classList.toggle('is-commission-invoices-page', state.activeNavigationChild === 'commission-invoices');
   document.body.classList.toggle('is-finance-invoices-page', state.activeNavigationChild === 'invoices');
   document.body.classList.toggle('is-help-center-page', isHelpCenterPage);
+  document.body.classList.toggle('is-messages-page', isMessagesPage);
   if (helpCenterUtility) {
     helpCenterUtility.classList.toggle('is-active', isHelpCenterPage);
     if (isHelpCenterPage) helpCenterUtility.setAttribute('aria-current', 'page');
     else helpCenterUtility.removeAttribute('aria-current');
   }
   const currentPageTitle = recruitmentPage?.title ?? operationsPage?.title ?? context.current.label;
-  pageTitle.textContent = isOverview
-    ? t('page.overview.title', 'Business overview')
-    : isMainPage
-      ? context.current.label
-      : localizedPageTitle(activePageId, currentPageTitle);
+  if (isMessagesPage) {
+    pageTitle.innerHTML = `Messages &amp; Notifications <span class="messages-page-title-badge" aria-label="${messagesPageData.unreadCount} unread messages">${messagesPageData.unreadCount}</span>`;
+  } else {
+    pageTitle.textContent = isOverview
+      ? t('page.overview.title', 'Business overview')
+      : isMainPage
+        ? context.current.label
+        : localizedPageTitle(activePageId, currentPageTitle);
+  }
   pageDescription.textContent = isOverview
     ? t('page.overview.description', 'Monitor your affiliate program performance and partner activity.')
     : isCampaignPage
@@ -1719,12 +2039,14 @@ const renderPage = () => {
               ? 'Review, filter, and download demo invoice records for the selected workspace.'
             : isHelpCenterPage
               ? 'Find answers, learn best practices, and get the support you need.'
+            : isMessagesPage
+              ? 'Stay connected with your partners and never miss an important update.'
             : recruitmentPage?.description ?? operationsPage?.description ?? context.current.label + ' workspace preview for the current brand scope.';
-  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage
-    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isInvoicesPage ? 'Commission & Rules' : 'Finance')
+  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isMessagesPage
+    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isInvoicesPage ? 'Commission & Rules' : isMessagesPage ? 'Messages & Notifications' : 'Finance')
     : isHelpCenterPage ? 'Help center'
     : isOverview ? t('shell.merchantWorkspace', 'Merchant workspace') : context.parent.label;
-  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isOverview ? 'Overview' : context.current.label;
+  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isMessagesPage ? context.current.label : isOverview ? 'Overview' : context.current.label;
   breadcrumbCurrent.setAttribute('aria-current', 'page');
   overviewPage.hidden = !isOverview;
   modulePage.hidden = isOverview || (!recruitmentPage && !operationsPage);
@@ -1734,10 +2056,12 @@ const renderPage = () => {
   financePage.hidden = !isFinancePage;
   invoicesPage.hidden = !isInvoicesPage;
   helpCenterPage.hidden = !isHelpCenterPage;
+  messagesPage.hidden = !isMessagesPage;
   modulePlaceholder.hidden = isOverview || isMainPage || Boolean(recruitmentPage || operationsPage);
   if (pageActions) pageActions.hidden = !isAttributionPage;
   if (commissionRulesActions) commissionRulesActions.hidden = !isCommissionRulesPage;
   if (financeActions) financeActions.hidden = !isFinancePage;
+  if (messagesPageActions) messagesPageActions.hidden = !isMessagesPage;
 
   if (recruitmentPage) {
     renderRecruitmentPage(recruitmentPage.id);
@@ -1754,6 +2078,7 @@ const renderPage = () => {
   if (isFinancePage) renderFinancePage();
   if (isInvoicesPage) renderInvoicesPage();
   if (isHelpCenterPage) renderHelpCenterPage();
+  if (isMessagesPage) renderMessagesPage();
 };
 
 const renderAll = () => {
@@ -1793,6 +2118,7 @@ const closePeriodMenu = () => {
 const navigateTo = (navigationId) => {
   const context = findNavigationContext(navigationId);
   const activeNavigationChild = context.current.id === context.parent.id ? null : context.current.id;
+  if (messagesPageData.tabs.some((tab) => tab.id === navigationId)) messagesState.activeTab = navigationId;
   state = {
     ...state,
     activeNavigationId: context.parent.id,
@@ -2332,6 +2658,86 @@ if (helpCenterPage) {
   });
 }
 
+if (messagesPage) {
+  messagesPage.addEventListener('input', (event) => {
+    if (event.target.matches('[data-messages-search]')) {
+      messagesState.search = event.target.value;
+      renderMessagesPage();
+      messagesSearch?.focus();
+      return;
+    }
+
+    if (event.target.matches('[data-messages-reply]')) {
+      messagesState.replyDraft = event.target.value;
+    }
+  });
+
+  messagesPage.addEventListener('change', (event) => {
+    if (event.target.matches('[data-messages-filter]')) {
+      messagesState.filter = event.target.value;
+      renderMessagesPage();
+      return;
+    }
+
+    if (event.target.matches('[data-messages-sort]')) {
+      messagesState.sort = event.target.value;
+      renderMessagesPage();
+      return;
+    }
+
+    const checkbox = event.target.closest('[data-messages-select]');
+    if (checkbox) {
+      if (checkbox.checked) messagesState.selectedIds.add(checkbox.dataset.messagesSelect);
+      else messagesState.selectedIds.delete(checkbox.dataset.messagesSelect);
+      updateMessagesSelection();
+      return;
+    }
+
+    if (event.target.matches('[data-messages-select-all]')) {
+      const visibleIds = getFilteredMessages().map((message) => message.id);
+      if (event.target.checked) visibleIds.forEach((id) => messagesState.selectedIds.add(id));
+      else visibleIds.forEach((id) => messagesState.selectedIds.delete(id));
+      renderMessagesPage();
+    }
+  });
+
+  messagesPage.addEventListener('keydown', (event) => {
+    const row = event.target.closest('[data-messages-row]');
+    if (!row || !['Enter', ' '].includes(event.key) || event.target.closest('input')) return;
+    event.preventDefault();
+    messagesState.selectedId = row.dataset.messagesRow;
+    messagesState.readIds.add(messagesState.selectedId);
+    messagesState.replyDraft = '';
+    renderMessagesPage();
+  });
+
+  messagesPage.addEventListener('click', (event) => {
+    const tab = event.target.closest('[data-messages-tab]');
+    if (tab) {
+      navigateTo(tab.dataset.messagesTab);
+      return;
+    }
+
+    const row = event.target.closest('[data-messages-row]');
+    if (row && !event.target.closest('input, button, label')) {
+      messagesState.selectedId = row.dataset.messagesRow;
+      messagesState.readIds.add(messagesState.selectedId);
+      messagesState.replyDraft = '';
+      renderMessagesPage();
+      return;
+    }
+
+    const action = event.target.closest('[data-messages-action]');
+    if (action && action.dataset.messagesAction !== 'send-reply') handleMessagesAction(action);
+  });
+
+  messagesPage.addEventListener('submit', (event) => {
+    if (!event.target.matches('[data-messages-reply-form]')) return;
+    event.preventDefault();
+    submitMessageReply();
+  });
+}
+
 if (attributionPage) {
   attributionPage.addEventListener('change', (event) => {
     if (!event.target.matches('[data-attribution-model]')) return;
@@ -2344,6 +2750,19 @@ if (attributionPage) {
 
 document.addEventListener('click', (event) => {
   if (!event.target.closest('.period-picker')) closePeriodMenu();
+  const messagesAction = event.target.closest('[data-messages-action]');
+  if (messagesAction && !messagesPage?.contains(messagesAction)) {
+    if (messagesAction.dataset.messagesAction === 'compose') {
+      if (!document.body.classList.contains('is-messages-page')) {
+        navigateTo('all-messages');
+      }
+      requestAnimationFrame(() => messagesConversation?.querySelector('[data-messages-reply]')?.focus());
+      showToast('Compose a reply in the selected conversation');
+    } else if (messagesAction.dataset.messagesAction === 'preferences') {
+      showToast('Notification preferences are ready for product integration');
+    }
+    return;
+  }
   const actionNavigation = event.target.closest('[data-action-navigation]');
   if (actionNavigation) {
     navigateTo(actionNavigation.dataset.actionNavigation);
