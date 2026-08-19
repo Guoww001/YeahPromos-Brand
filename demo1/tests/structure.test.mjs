@@ -13,6 +13,49 @@ const appJs = readFileSync(resolve(demoDirectory, 'app.js'), 'utf8');
 const data = readFileSync(resolve(demoDirectory, 'data.mjs'), 'utf8');
 const readme = readFileSync(resolve(demoDirectory, 'README.md'), 'utf8');
 
+function cssBraceDepth(source) {
+  let depth = 0;
+  let mode = 'normal';
+  let quote = '';
+
+  for (let index = 0; index < source.length; index += 1) {
+    const character = source[index];
+    const nextCharacter = source[index + 1];
+
+    if (mode === 'comment') {
+      if (character === '*' && nextCharacter === '/') {
+        mode = 'normal';
+        index += 1;
+      }
+      continue;
+    }
+
+    if (mode === 'string') {
+      if (character === '\\') {
+        index += 1;
+      } else if (character === quote) {
+        mode = 'normal';
+      }
+      continue;
+    }
+
+    if (character === '/' && nextCharacter === '*') {
+      mode = 'comment';
+      index += 1;
+    } else if (character === '"' || character === "'") {
+      mode = 'string';
+      quote = character;
+    } else if (character === '{') {
+      depth += 1;
+    } else if (character === '}') {
+      depth -= 1;
+      if (depth < 0) return depth;
+    }
+  }
+
+  return depth;
+}
+
 test('page provides the required sidebar and dashboard regions', () => {
   assert.match(html, /data-sidebar/);
   assert.match(html, /data-metrics-grid/);
@@ -32,7 +75,7 @@ test('app entry remains syntactically valid after conflict resolution', () => {
 });
 
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
-  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-20"><\/script>/);
+  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-22"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);
   assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
   assert.match(html, /data-module-page/);
@@ -43,6 +86,10 @@ test('page loads one module entry and keeps the global navigation in the sidebar
   assert.match(appJs, /renderOperationsPage/);
   assert.match(appJs, /createOperationsState/);
   assert.match(appJs, /aria-current="page"/);
+});
+
+test('stylesheet blocks remain balanced so routed page styles can load', () => {
+  assert.equal(cssBraceDepth(css), 0);
 });
 
 test('attribution rules has its own routed page shell and controls', () => {
@@ -127,6 +174,118 @@ test('help center reuses the README red navigation tokens', () => {
   assert.match(readme, /Help center > Help center/);
 });
 
+test('API credentials has its own Integrations & Settings page shell', () => {
+  assert.match(html, /data-api-credentials-page/);
+  assert.match(html, /API credentials/);
+  assert.match(html, /data-api-credentials-environment="live"/);
+  assert.match(html, /data-api-credentials-search/);
+  assert.match(html, /data-api-credentials-status/);
+  assert.match(html, /data-api-credentials-rows/);
+  assert.match(html, /data-api-credentials-webhooks/);
+  assert.match(appJs, /isApiCredentialsPage/);
+  assert.match(appJs, /renderApiCredentialsPage/);
+  assert.match(appJs, /getFilteredApiCredentials/);
+  assert.match(data, /apiCredentialsPageData/);
+  assert.match(data, /reporting-service/);
+  assert.match(data, /demoOnly:\s*true/);
+});
+
+test('API credentials reuses the README red navigation tokens and safe copy rules', () => {
+  assert.match(css, /body\.is-api-credentials-page[\s\S]*--api-credentials-red:\s*#e60000/i);
+  assert.match(css, /--api-credentials-soft-red:\s*#fde8e8/i);
+  assert.match(css, /--api-credentials-selected-red:\s*#ff312e/i);
+  assert.match(css, /nav-child\[data-nav-child="api-credentials"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--api-credentials-selected-red\)/i);
+  assert.match(readme, /Integrations & Settings > API credentials/);
+  assert.match(readme, /不可访问的 Webhook 占位 URL/);
+});
+
+test('Brand integration has its own Integrations & Settings page shell', () => {
+  assert.match(html, /data-brand-integration-page/);
+  assert.match(html, /Brand integration/);
+  assert.match(html, /Connected brand/);
+  assert.match(html, /Sync health summary/);
+  assert.match(html, /data-brand-integration-health/);
+  assert.match(html, /data-brand-integration-list/);
+  assert.match(html, /data-brand-integration-activity/);
+  assert.match(html, /Add integration/);
+  assert.match(appJs, /isBrandIntegrationPage/);
+  assert.match(appJs, /renderBrandIntegrationPage/);
+  assert.match(appJs, /Integrations & Settings/);
+  assert.match(appJs, /data-brand-integration-action/);
+  assert.match(data, /brandIntegrationPageData/);
+  assert.match(data, /shopify-storefront/);
+  assert.match(data, /amazon-marketplace/);
+});
+
+test('Brand integration reuses the README red navigation tokens and safe demo copy', () => {
+  assert.match(css, /body\.is-brand-integration-page[\s\S]*--brand-integration-red:\s*#e60000/i);
+  assert.match(css, /--brand-integration-soft-red:\s*#fde8e8/i);
+  assert.match(css, /--brand-integration-selected-red:\s*#ff312e/i);
+  assert.match(css, /nav-child\[data-nav-child="brand-integration"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--brand-integration-selected-red\)/i);
+  assert.match(readme, /Integrations & Settings > Brand integration/);
+  assert.match(readme, /demo-store\.com/);
+  assert.match(data, /demoOnly:\s*true/);
+});
+
+test('Team accounts has its own Integrations & Settings page shell', () => {
+  assert.match(html, /data-team-accounts-page/);
+  assert.match(html, /Team accounts/);
+  assert.match(html, /Create new account/);
+  assert.match(html, /data-team-accounts-invite-form/);
+  assert.match(html, /data-team-accounts-search/);
+  assert.match(html, /data-team-accounts-filter-menu/);
+  assert.match(html, /data-team-accounts-brand-filter/);
+  assert.match(html, /data-team-accounts-rows/);
+  assert.match(html, /data-team-accounts-pagination/);
+  assert.match(appJs, /isTeamAccountsPage/);
+  assert.match(appJs, /renderTeamAccountsPage/);
+  assert.match(appJs, /getFilteredTeamAccounts/);
+  assert.match(appJs, /data-team-accounts-action/);
+  assert.match(data, /teamAccountsPageData/);
+  assert.match(data, /ethan-turner/);
+  assert.match(data, /mfa:\s*'Enabled'/);
+  assert.match(readme, /Integrations & Settings > Team accounts/);
+});
+
+test('Team accounts reuses README red tokens and safe demo rules', () => {
+  assert.match(css, /body\.is-team-accounts-page[\s\S]*--team-accounts-red:\s*#e60000/i);
+  assert.match(css, /--team-accounts-soft-red:\s*#fde8e8/i);
+  assert.match(css, /--team-accounts-selected-red:\s*#ff312e/i);
+  assert.match(css, /nav-child\[data-nav-child="team-accounts"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--team-accounts-selected-red\)/i);
+  assert.match(readme, /不展示密码/);
+  assert.match(readme, /Team accounts 使用 `#1F2937`/);
+});
+
+test('Recruitment page has its own Integrations & Settings configuration workspace', () => {
+  assert.match(html, /data-recruitment-page-settings/);
+  assert.match(html, /Recruitment page status/);
+  assert.match(html, /Public page URL/);
+  assert.match(html, /data-recruitment-page-action="toggle-status"/);
+  assert.match(html, /data-recruitment-page-setting="brand"/);
+  assert.match(html, /data-recruitment-page-setting="queue"/);
+  assert.match(html, /data-recruitment-page-field="title"/);
+  assert.match(html, /data-recruitment-page-field="description"/);
+  assert.match(html, /data-recruitment-page-field-toggle="full-name"/);
+  assert.match(html, /data-recruitment-page-preview/);
+  assert.match(html, /Publishing checklist/);
+  assert.match(appJs, /isRecruitmentSettingsPage/);
+  assert.match(appJs, /renderRecruitmentSettingsPage/);
+  assert.match(appJs, /renderRecruitmentPagePreview/);
+  assert.match(appJs, /recruitmentPageSettingsData/);
+  assert.match(data, /recruitmentPageSettingsData/);
+  assert.match(data, /partners\.yeahpromos\.com\/demo-brand/);
+  assert.match(data, /applicationFields/);
+  assert.match(readme, /Integrations & Settings > Recruitment page/);
+});
+
+test('Recruitment page reuses README red tokens and demo-only publishing rules', () => {
+  assert.match(css, /body\.is-recruitment-page-settings-page[\s\S]*--recruitment-settings-red:\s*#e60000/i);
+  assert.match(css, /--recruitment-settings-soft-red:\s*#fde8e8/i);
+  assert.match(css, /--recruitment-settings-selected-red:\s*#ff312e/i);
+  assert.match(css, /nav-child\[data-nav-child="recruitment-page"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--recruitment-settings-selected-red\)/i);
+  assert.match(readme, /不发布公开页面、不发送邮件、不创建真实申请/);
+  assert.match(readme, /Recruitment page 使用 `#1F2937`/);
+});
 test('messages and notifications has its own routed conversation workspace', () => {
   assert.match(html, /data-messages-page/);
   assert.match(html, /Messages &amp; Notifications/);
@@ -158,6 +317,66 @@ test('messages and notifications uses readable contrast-ready tokens', () => {
   assert.match(css, /\.messages-reply-form textarea[\s\S]*font-size:\s*var\(--messages-font-body\)/);
   assert.match(readme, /Messages & Notifications 的消息列表、未读标记/);
   assert.match(readme, /Messages & Notifications 使用 `#1F2937`/);
+});
+
+test('products and assets banners page has its own routed asset workspace', () => {
+  assert.match(html, /data-products-assets-page/);
+  assert.match(html, /data-products-assets-tabs/);
+  assert.match(html, /data-products-assets-filter="folder"/);
+  assert.match(html, /data-products-assets-filter="campaign"/);
+  assert.match(html, /data-products-assets-filter="status"/);
+  assert.match(html, /data-products-assets-search/);
+  assert.match(html, /data-products-assets-grid/);
+  assert.match(html, /data-products-assets-detail/);
+  assert.match(appJs, /isProductsAssetsPage/);
+  assert.match(appJs, /renderProductsAssetsPage/);
+  assert.match(appJs, /getFilteredProductsAssets/);
+  assert.match(data, /bannersImagesPageData/);
+  assert.match(data, /workspace-sale-1200x628.jpg/);
+  assert.match(data, /Banners & images/);
+  assert.match(readme, /Products & Assets > Banners & images/);
+});
+
+test('banners page keeps asset states readable and keyboard-addressable', () => {
+  assert.match(css, /\.is-products-assets-page \.page-header__filters[\s\S]*display:\s*none/);
+  assert.match(css, /\.products-assets-grid[\s\S]*grid-template-columns:\s*repeat\(3/);
+  assert.match(css, /\.products-asset-card__status[\s\S]*font-size:\s*10px/);
+  assert.match(css, /\.products-assets-detail__facts dt[\s\S]*font-size:\s*10px/);
+  assert.match(css, /\.products-assets-detail__facts dd[\s\S]*color:\s*var\(--color-text-soft\)/);
+  assert.match(appJs, /aria-pressed/);
+  assert.match(readme, /Banners & images 的资产卡片、筛选器/);
+  assert.match(readme, /Banners & images 使用 `#1F2937`/);
+});
+
+test('products and assets coupons page has its own routed filterable table', () => {
+  assert.match(html, /data-coupons-page/);
+  assert.match(html, /data-coupons-tabs/);
+  assert.match(html, /data-coupons-filter="status"/);
+  assert.match(html, /data-coupons-filter="permission"/);
+  assert.match(html, /data-coupons-filter="category"/);
+  assert.match(html, /data-coupons-search/);
+  assert.match(html, /data-coupons-rows/);
+  assert.match(html, /Coupon code/);
+  assert.match(html, /Add coupon/);
+  assert.match(appJs, /isCouponsPage/);
+  assert.match(appJs, /renderCouponsPage/);
+  assert.match(appJs, /getFilteredCoupons/);
+  assert.match(data, /couponsPageData/);
+  assert.match(data, /SUMMER20/);
+  assert.match(readme, /Products & Assets > Coupons/);
+});
+
+test('coupons page keeps status contrast and keyboard-addressable filters', () => {
+  assert.match(css, /body\.is-products-coupons-page[\s\S]*--coupons-red:\s*#e60000/i);
+  assert.match(css, /--coupons-soft-red:\s*#fde8e8/i);
+  assert.match(css, /\.products-coupon-filters__row[\s\S]*grid-template-columns/);
+  assert.match(css, /\.products-coupon-status--active[\s\S]*color:\s*#167346/);
+  assert.match(css, /\.products-coupon-status--expired[\s\S]*color:\s*#4b5563/);
+  assert.match(css, /\.products-coupons-page \.products-coupon-table th[\s\S]*font-size:\s*11px/);
+  assert.match(css, /\.products-coupons-page \.products-coupon-table td[\s\S]*font-size:\s*12px/);
+  assert.match(appJs, /data-coupons-select-all/);
+  assert.match(readme, /Coupons 的日期范围、筛选器/);
+  assert.match(readme, /Coupons 使用 `#1F2937`/);
 });
 
 test('finance page reuses the README red navigation tokens', () => {
@@ -226,7 +445,7 @@ test('finance neutral text uses contrast-ready dark gray tokens', () => {
 });
 
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
-  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-20"><\/script>/);
+  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-22"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);
   assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
 });
@@ -265,8 +484,8 @@ test('overview follows the reference dashboard hierarchy', () => {
 });
 
 test('preview busts the entry cache for the reference dashboard skin', () => {
-  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-20"/);
-  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-20"/);
+  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-22"/);
+  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-22"/);
 });
 
 test('reference dashboard keeps flat cards and red action controls', () => {

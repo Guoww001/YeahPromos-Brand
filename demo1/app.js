@@ -1,4 +1,4 @@
-import { attributionPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData } from './data.mjs?v=merchant-reference-18';
+import { apiCredentialsPageData, attributionPageData, bannersImagesPageData, brandIntegrationPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, couponsPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData, recruitmentPageSettingsData, teamAccountsPageData } from './data.mjs?v=merchant-reference-22';
 import {
   createDashboardState,
   isNavigationItemActive,
@@ -26,7 +26,7 @@ import {
   updateRecruitmentGroup,
   updateRecruitmentFilter,
   updateRecruitmentSearch,
-} from './recruitment.mjs?v=merchant-reference-20';
+} from './recruitment.mjs?v=merchant-reference-22';
 import {
   buildSmoothChartPath,
   createOverviewState,
@@ -137,6 +137,42 @@ const helpCenterSearch = document.querySelector('[data-help-center-search]');
 const helpCenterLoadMore = document.querySelector('[data-help-center-action="load-more-articles"]');
 const helpCenterStatus = document.querySelector('[data-help-center-status]');
 const helpCenterUtility = document.querySelector('[data-help-center-utility]');
+const apiCredentialsPage = document.querySelector('[data-api-credentials-page]');
+const apiCredentialsActions = document.querySelector('[data-api-credentials-actions]');
+const apiCredentialsEnvironmentButtons = document.querySelectorAll('[data-api-credentials-environment]');
+const apiCredentialsSearch = document.querySelector('[data-api-credentials-search]');
+const apiCredentialsStatus = document.querySelector('[data-api-credentials-status]');
+const apiCredentialsFilterButton = document.querySelector('[data-api-credentials-action="toggle-filter"]');
+const apiCredentialsFilterMenu = document.querySelector('[data-api-credentials-filter-menu]');
+const apiCredentialsRows = document.querySelector('[data-api-credentials-rows]');
+const apiCredentialsResultCount = document.querySelector('[data-api-credentials-result-count]');
+const apiCredentialsWebhooks = document.querySelector('[data-api-credentials-webhooks]');
+const brandIntegrationPage = document.querySelector('[data-brand-integration-page]');
+const brandIntegrationActions = document.querySelector('[data-brand-integration-actions]');
+const brandIntegrationHealth = document.querySelector('[data-brand-integration-health]');
+const brandIntegrationList = document.querySelector('[data-brand-integration-list]');
+const brandIntegrationActivity = document.querySelector('[data-brand-integration-activity]');
+const teamAccountsPage = document.querySelector('[data-team-accounts-page]');
+const teamAccountsActions = document.querySelector('[data-team-accounts-actions]');
+const teamAccountsSearch = document.querySelector('[data-team-accounts-search]');
+const teamAccountsSearchForm = document.querySelector('[data-team-accounts-search-form]');
+const teamAccountsFilterButton = document.querySelector('[data-team-accounts-action="toggle-filter"]');
+const teamAccountsFilterMenu = document.querySelector('[data-team-accounts-filter-menu]');
+const teamAccountsRows = document.querySelector('[data-team-accounts-rows]');
+const teamAccountsResultCount = document.querySelector('[data-team-accounts-result-count]');
+const teamAccountsBrandFilter = document.querySelector('[data-team-accounts-brand-filter]');
+const teamAccountsPageSize = document.querySelector('[data-team-accounts-page-size]');
+const teamAccountsPagination = document.querySelector('[data-team-accounts-pagination]');
+const recruitmentPageSettings = document.querySelector('[data-recruitment-page-settings]');
+const recruitmentPageSettingsActions = document.querySelector('[data-recruitment-page-actions]');
+const recruitmentPagePreview = document.querySelector('[data-recruitment-page-preview]');
+const couponsPage = document.querySelector('[data-coupons-page]');
+const couponsTabs = document.querySelector('[data-coupons-tabs]');
+const couponsSearch = document.querySelector('[data-coupons-search]');
+const couponsRows = document.querySelector('[data-coupons-rows]');
+const couponsResultCount = document.querySelector('[data-coupons-result-count]');
+const couponsSelectAll = document.querySelector('[data-coupons-select-all]');
+const couponsDateLabel = document.querySelector('[data-coupons-date-label]');
 const messagesPage = document.querySelector('[data-messages-page]');
 const messagesPageActions = document.querySelector('[data-messages-page-actions]');
 const messagesTabs = document.querySelector('[data-messages-tabs]');
@@ -148,6 +184,16 @@ const messagesResultCount = document.querySelector('[data-messages-result-count]
 const messagesSelectAll = document.querySelector('[data-messages-select-all]');
 const messagesConversation = document.querySelector('[data-messages-conversation]');
 const messagesPartnerDetails = document.querySelector('[data-messages-partner-details]');
+const productsAssetsPage = document.querySelector('[data-products-assets-page]');
+const productsAssetsTabs = document.querySelector('[data-products-assets-tabs]');
+const productsAssetsGrid = document.querySelector('[data-products-assets-grid]');
+const productsAssetsDetail = document.querySelector('[data-products-assets-detail]');
+const productsAssetsSearch = document.querySelector('[data-products-assets-search]');
+const productsAssetsSearchForm = document.querySelector('[data-products-assets-search-form]');
+const productsAssetsResultCount = document.querySelector('[data-products-assets-result-count]');
+const productsAssetsPageLabel = document.querySelector('[data-products-assets-page-label]');
+const productsAssetsSort = document.querySelector('[data-products-assets-sort]');
+const productsAssetsPageSize = document.querySelector('[data-products-assets-page-size]');
 
 const campaignState = {
   activeTab: 'all',
@@ -219,6 +265,23 @@ const helpCenterState = {
   visibleArticleCount: 5,
 };
 
+const couponsState = {
+  search: '',
+  dateRange: 'last-7d',
+  filters: {
+    status: 'all',
+    permission: 'all',
+    category: 'all',
+  },
+  selectedIds: new Set(),
+};
+
+const apiCredentialsState = {
+  environment: 'live',
+  search: '',
+  status: 'all',
+};
+
 const messagesState = {
   activeTab: 'all-messages',
   search: '',
@@ -232,6 +295,40 @@ const messagesState = {
   sentReplies: [],
 };
 
+const productsAssetsState = {
+  activeTab: 'all-assets',
+  search: '',
+  sort: 'newest',
+  view: 'grid',
+  pageSize: 12,
+  filters: {
+    folder: 'all',
+    campaign: 'all',
+    status: 'all',
+  },
+  selectedId: bannersImagesPageData.assets[0]?.id ?? null,
+};
+
+const teamAccountsState = {
+  search: '',
+  page: 1,
+  pageSize: teamAccountsPageData.pageSize,
+  filters: {
+    brand: 'all',
+    role: 'all',
+    status: 'all',
+  },
+};
+
+const recruitmentPageSettingsState = {
+  status: recruitmentPageSettingsData.status,
+  brand: recruitmentPageSettingsData.brands[0]?.value ?? 'demo-brand',
+  queue: recruitmentPageSettingsData.queues[0]?.value ?? 'new',
+  title: recruitmentPageSettingsData.title,
+  description: recruitmentPageSettingsData.description,
+  cta: recruitmentPageSettingsData.cta,
+  fields: Object.fromEntries(recruitmentPageSettingsData.applicationFields.map((field) => [field.id, field.enabled])),
+};
 const icon = (name, className = '') => `
   <svg class="${className}" aria-hidden="true">
     <use href="#icon-${name}"></use>
@@ -1800,6 +1897,330 @@ const renderHelpCenterPage = () => {
   `).join('');
 };
 
+const renderBrandIntegrationPage = () => {
+  if (!brandIntegrationPage) return;
+
+  const { health, integrations, recentActivity } = brandIntegrationPageData;
+
+  if (brandIntegrationHealth) {
+    brandIntegrationHealth.innerHTML = `
+      <div class="brand-integration-health-visual">
+        <div class="brand-integration-health-ring" style="--health-value:${health.percentage}" role="img" aria-label="${health.percentage}% healthy in the last 24 hours">
+          <span><strong>${health.percentage}%</strong><small>Healthy</small></span>
+        </div>
+        <span class="brand-integration-health-window">${health.window}</span>
+      </div>
+      <ul class="brand-integration-health-legend">
+        ${health.counts.map((item) => `
+          <li><span><i class="brand-integration-health-dot brand-integration-health-dot--${item.tone}" aria-hidden="true"></i>${item.label}</span><strong>${item.value}</strong></li>
+        `).join('')}
+      </ul>
+    `;
+  }
+
+  if (brandIntegrationList) {
+    brandIntegrationList.innerHTML = integrations.map((integration) => `
+      <article class="brand-integration-row" data-brand-integration-row="${integration.id}">
+        <div class="brand-integration-provider">
+          <span class="brand-integration-provider-icon brand-integration-provider-icon--${integration.iconTone}">${icon(integration.icon)}</span>
+          <div class="brand-integration-provider-copy">
+            <strong>${escapeHtml(integration.name)}</strong>
+            <span class="brand-integration-status brand-integration-status--${integration.statusTone}"><i aria-hidden="true"></i>${escapeHtml(integration.status)}</span>
+            <small>Last sync: ${escapeHtml(integration.lastSync)}</small>
+          </div>
+        </div>
+        <div class="brand-integration-data-column">
+          <span class="brand-integration-column-label">Data scope</span>
+          <ul>
+            ${integration.scope.map((item) => `<li><i aria-hidden="true">✓</i>${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="brand-integration-data-column brand-integration-data-column--status">
+          <span class="brand-integration-column-label">Data status</span>
+          <ul>
+            ${integration.dataStatus.map((item) => `<li class="${item.value === 'Sync delayed' ? 'is-warning' : ''}"><i aria-hidden="true">${item.value === 'Sync delayed' ? '!' : '✓'}</i><span>${escapeHtml(item.value)}</span></li>`).join('')}
+          </ul>
+        </div>
+        <div class="brand-integration-row-actions">
+          <button class="brand-integration-manage-button${integration.actionTone === 'reconnect' ? ' is-reconnect' : ''}" type="button" data-brand-integration-action="${integration.actionTone === 'reconnect' ? 'reconnect' : 'manage'}" data-brand-integration-id="${integration.id}">
+            <svg><use href="#icon-${integration.actionTone === 'reconnect' ? 'refresh' : 'settings'}"></use></svg>
+            ${escapeHtml(integration.action)}
+          </button>
+          <button class="brand-integration-more-button" type="button" data-brand-integration-action="menu" data-brand-integration-id="${integration.id}" aria-label="More actions for ${escapeHtml(integration.name)}">${icon('more')}</button>
+        </div>
+      </article>
+    `).join('');
+  }
+
+  if (brandIntegrationActivity) {
+    brandIntegrationActivity.innerHTML = recentActivity.map((activity) => `
+      <li class="brand-integration-activity-row">
+        <span class="brand-integration-activity-icon brand-integration-provider-icon--${activity.iconTone}">${icon(activity.icon)}</span>
+        <span class="brand-integration-activity-copy">
+          <strong><i class="brand-integration-activity-dot brand-integration-activity-dot--${activity.tone}" aria-hidden="true"></i>${escapeHtml(activity.title)}</strong>
+          <small>${escapeHtml(activity.detail)}</small>
+          <time>${escapeHtml(activity.time)}</time>
+        </span>
+      </li>
+    `).join('');
+  }
+};
+
+const getFilteredTeamAccounts = () => {
+  const query = teamAccountsState.search.trim().toLowerCase();
+
+  return teamAccountsPageData.accounts.filter((account) => {
+    const matchesBrand = teamAccountsState.filters.brand === 'all'
+      || account.scope.includes('All Brands')
+      || account.scope.includes(teamAccountsState.filters.brand);
+    const matchesRole = teamAccountsState.filters.role === 'all' || account.role === teamAccountsState.filters.role;
+    const matchesStatus = teamAccountsState.filters.status === 'all' || account.status === teamAccountsState.filters.status;
+    const matchesSearch = !query || [account.name, account.username, account.role, account.status, ...account.scope]
+      .some((value) => value.toLowerCase().includes(query));
+
+    return matchesBrand && matchesRole && matchesStatus && matchesSearch;
+  });
+};
+
+const renderTeamAccountsPagination = (totalPages) => {
+  if (!teamAccountsPagination) return;
+
+  const pages = Array.from({ length: totalPages }, (_, index) => index + 1)
+    .slice(0, 4)
+    .map((page) => `
+      <button type="button" class="${page === teamAccountsState.page ? 'is-current' : ''}" ${page === teamAccountsState.page ? 'aria-current="page"' : ''} data-team-accounts-page-number="${page}">${page}</button>
+    `)
+    .join('');
+
+  teamAccountsPagination.innerHTML = `
+    <button type="button" aria-label="Previous page" data-team-accounts-page-number="${Math.max(1, teamAccountsState.page - 1)}" ${teamAccountsState.page === 1 ? 'disabled' : ''}>‹</button>
+    ${pages}
+    <button type="button" aria-label="Next page" data-team-accounts-page-number="${Math.min(totalPages, teamAccountsState.page + 1)}" ${teamAccountsState.page >= totalPages ? 'disabled' : ''}>›</button>
+  `;
+};
+
+const renderTeamAccountsRows = (accounts) => {
+  if (!teamAccountsRows) return;
+
+  teamAccountsRows.innerHTML = accounts.length
+    ? accounts.map((account) => `
+        <tr data-team-account-row="${account.id}">
+          <td class="team-accounts-cell--account">
+            <div class="team-account-identity">
+              <span class="team-account-avatar team-account-avatar--${account.avatarTone}">${escapeHtml(account.initials)}</span>
+              <strong>${escapeHtml(account.name)}</strong>
+              <span class="sr-only">MFA ${escapeHtml(account.mfa)}</span>
+            </div>
+          </td>
+          <td class="team-accounts-cell--username"><span>${escapeHtml(account.username)}</span></td>
+          <td class="team-accounts-cell--scope">
+            <div class="team-account-role-scope">
+              <strong>${escapeHtml(account.role)}</strong>
+              <span class="team-account-scope-list">${account.scope.map((scope) => `<span class="team-account-scope-chip">${escapeHtml(scope)}</span>`).join('')}</span>
+            </div>
+          </td>
+          <td class="team-accounts-cell--last-active"><time datetime="${account.datetime}">${escapeHtml(account.lastActive)}</time></td>
+          <td class="team-accounts-cell--status"><span class="team-account-status team-account-status--${account.statusTone}"><i aria-hidden="true"></i>${escapeHtml(account.status)}</span></td>
+          <td class="team-accounts-cell--actions">
+            <div class="team-account-actions">
+              <button type="button" class="team-account-edit-button" data-team-accounts-action="edit" data-team-accounts-id="${account.id}" aria-label="Edit ${escapeHtml(account.name)}; MFA ${escapeHtml(account.mfa)}">${icon('edit')}<span>Edit</span></button>
+              <button type="button" class="team-account-deactivate-button" data-team-accounts-action="deactivate" data-team-accounts-id="${account.id}" aria-label="Deactivate ${escapeHtml(account.name)}">${icon('trash')}<span>Deactivate</span></button>
+            </div>
+          </td>
+        </tr>
+      `).join('')
+    : '<tr><td class="team-accounts-empty" colspan="6"><strong>No team accounts found</strong><span>Try another name, username, brand, role, or status.</span></td></tr>';
+};
+
+const renderTeamAccountsPage = () => {
+  if (!teamAccountsPage) return;
+
+  const filteredAccounts = getFilteredTeamAccounts();
+  const totalPages = Math.max(1, Math.ceil(filteredAccounts.length / teamAccountsState.pageSize));
+  teamAccountsState.page = Math.min(teamAccountsState.page, totalPages);
+  const startIndex = (teamAccountsState.page - 1) * teamAccountsState.pageSize;
+  const visibleAccounts = filteredAccounts.slice(startIndex, startIndex + teamAccountsState.pageSize);
+
+  const roleFilter = teamAccountsPage.querySelector('[data-team-accounts-filter="role"]');
+  const statusFilter = teamAccountsPage.querySelector('[data-team-accounts-filter="status"]');
+  if (roleFilter) roleFilter.value = teamAccountsState.filters.role;
+  if (statusFilter) statusFilter.value = teamAccountsState.filters.status;
+  if (teamAccountsBrandFilter) teamAccountsBrandFilter.value = teamAccountsState.filters.brand;
+  if (teamAccountsSearch) teamAccountsSearch.value = teamAccountsState.search;
+  if (teamAccountsPageSize) teamAccountsPageSize.value = String(teamAccountsState.pageSize);
+
+  renderTeamAccountsRows(visibleAccounts);
+  renderTeamAccountsPagination(totalPages);
+
+  if (teamAccountsResultCount) {
+    teamAccountsResultCount.textContent = filteredAccounts.length
+      ? `Showing ${startIndex + 1} to ${Math.min(startIndex + visibleAccounts.length, filteredAccounts.length)} of ${filteredAccounts.length} results`
+      : 'Showing 0 of 0 results';
+  }
+};
+
+const getRecruitmentSettingsBrandLabel = () => recruitmentPageSettingsData.brands.find((brand) => brand.value === recruitmentPageSettingsState.brand)?.label ?? 'Demo Brand';
+const getRecruitmentSettingsQueueLabel = () => recruitmentPageSettingsData.queues.find((queue) => queue.value === recruitmentPageSettingsState.queue)?.label ?? 'New applications';
+
+const renderRecruitmentPagePreview = () => {
+  if (!recruitmentPagePreview) return;
+
+  const activeFields = recruitmentPageSettingsData.applicationFields.filter((field) => recruitmentPageSettingsState.fields[field.id]);
+  const brandLabel = getRecruitmentSettingsBrandLabel();
+  recruitmentPagePreview.innerHTML = `
+    <div class="recruitment-page-preview__browser-bar">
+      <span class="recruitment-page-preview__browser-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="recruitment-page-preview__browser-url">${escapeHtml(recruitmentPageSettingsData.publicUrl)}</span>
+      <button type="button" data-recruitment-page-action="preview" aria-label="Open recruitment page preview">${icon('external')}</button>
+    </div>
+    <div class="recruitment-page-preview__canvas${recruitmentPageSettingsState.status === 'disabled' ? ' is-disabled' : ''}">
+      <header class="recruitment-page-preview__header">
+        <span class="recruitment-page-preview__logo"><strong>YEAH</strong><b>P</b><strong>ROMOS</strong></span>
+        <span class="recruitment-page-preview__brand-name">${escapeHtml(brandLabel)}</span>
+      </header>
+      <div class="recruitment-page-preview__hero">
+        <span class="recruitment-page-preview__eyebrow">PARTNER PROGRAM</span>
+        <h3>${escapeHtml(recruitmentPageSettingsState.title)}</h3>
+        <p>${escapeHtml(recruitmentPageSettingsState.description)}</p>
+        <button type="button" class="recruitment-page-preview__cta" data-recruitment-page-action="preview-apply">${escapeHtml(recruitmentPageSettingsState.cta)} <svg><use href="#icon-arrow"></use></svg></button>
+      </div>
+      <div class="recruitment-page-preview__application">
+        <div class="recruitment-page-preview__application-heading"><span>01</span><div><strong>Tell us about you</strong><small>Complete the form to apply to this partner program.</small></div></div>
+        <div class="recruitment-page-preview__fields">
+          ${activeFields.slice(0, 4).map((field) => `<label><span>${escapeHtml(field.label)}${field.required ? ' *' : ''}</span><i>${field.id === 'email' ? 'name@example.com' : 'Enter your answer'}</i></label>`).join('')}
+        </div>
+        <span class="recruitment-page-preview__queue-note">Applications go to ${escapeHtml(getRecruitmentSettingsQueueLabel())}.</span>
+      </div>
+      ${recruitmentPageSettingsState.status === 'disabled' ? '<div class="recruitment-page-preview__disabled"><strong>Recruitment page is disabled</strong><span>Enable the page to accept new partner applications.</span></div>' : ''}
+    </div>
+  `;
+};
+
+const renderRecruitmentSettingsPage = () => {
+  if (!recruitmentPageSettings) return;
+
+  const brandSelect = recruitmentPageSettings.querySelector('[data-recruitment-page-setting="brand"]');
+  const queueSelect = recruitmentPageSettings.querySelector('[data-recruitment-page-setting="queue"]');
+  const titleInput = recruitmentPageSettings.querySelector('[data-recruitment-page-field="title"]');
+  const descriptionInput = recruitmentPageSettings.querySelector('[data-recruitment-page-field="description"]');
+  const ctaInput = recruitmentPageSettings.querySelector('[data-recruitment-page-field="cta"]');
+  const statusToggle = recruitmentPageSettings.querySelector('[data-recruitment-page-action="toggle-status"]');
+  const statusLabel = recruitmentPageSettings.querySelector('[data-recruitment-page-status-label]');
+  const statusPill = recruitmentPageSettings.querySelector('[data-recruitment-page-status-pill]');
+
+  if (brandSelect) brandSelect.value = recruitmentPageSettingsState.brand;
+  if (queueSelect) queueSelect.value = recruitmentPageSettingsState.queue;
+  if (titleInput) titleInput.value = recruitmentPageSettingsState.title;
+  if (descriptionInput) descriptionInput.value = recruitmentPageSettingsState.description;
+  if (ctaInput) ctaInput.value = recruitmentPageSettingsState.cta;
+
+  const isPublished = recruitmentPageSettingsState.status === 'published';
+  statusToggle?.setAttribute('aria-pressed', String(isPublished));
+  statusToggle?.classList.toggle('is-enabled', isPublished);
+  if (statusLabel) statusLabel.textContent = isPublished ? 'Published' : 'Disabled';
+  if (statusPill) {
+    statusPill.textContent = isPublished ? 'Published' : 'Disabled';
+    statusPill.classList.toggle('is-disabled', !isPublished);
+  }
+
+  recruitmentPageSettings.querySelectorAll('[data-recruitment-page-field-toggle]').forEach((input) => {
+    const fieldId = input.dataset.recruitmentPageFieldToggle;
+    input.checked = Boolean(recruitmentPageSettingsState.fields[fieldId]);
+    input.setAttribute('aria-checked', String(input.checked));
+  });
+
+  renderRecruitmentPagePreview();
+};
+const getFilteredApiCredentials = () => {
+  const query = apiCredentialsState.search.trim().toLowerCase();
+
+  return apiCredentialsPageData.credentials.filter((credential) => {
+    const matchesEnvironment = credential.environment === apiCredentialsState.environment;
+    const matchesStatus = apiCredentialsState.status === 'all' || credential.statusTone === apiCredentialsState.status;
+    const matchesSearch = !query || [credential.name, credential.createdBy.name, credential.createdBy.detail, ...credential.scopes]
+      .some((value) => value.toLowerCase().includes(query));
+
+    return matchesEnvironment && matchesStatus && matchesSearch;
+  });
+};
+
+const renderApiCredentialsRows = () => {
+  if (!apiCredentialsRows) return;
+
+  const credentials = getFilteredApiCredentials();
+  apiCredentialsRows.innerHTML = credentials.length
+    ? credentials.map((credential) => `
+        <tr>
+          <td class="api-credentials-cell--key">
+            <div class="api-credentials-key-copy">
+              <span class="api-credentials-key-icon">${icon('key')}</span>
+              <div>
+                <strong>${credential.name}</strong>
+                <small>${credential.masked} <button type="button" data-api-credentials-action="copy-key" data-api-credentials-name="${credential.name}" aria-label="Copy masked key for ${credential.name}">${icon('copy')}</button></small>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="api-credentials-created-by">
+              <span class="api-credentials-avatar">${credential.createdBy.initials}</span>
+              <span><strong>${credential.createdBy.name}</strong><small>${credential.createdBy.detail}</small></span>
+            </div>
+          </td>
+          <td><strong>${credential.createdOn}</strong><small>${credential.createdTime}</small></td>
+          <td><strong>${credential.lastUsed}</strong>${credential.lastUsedTime ? `<small>${credential.lastUsedTime}</small>` : ''}</td>
+          <td>
+            <div class="api-credentials-scopes">
+              ${credential.scopes.map((scope) => `<span>${scope}</span>`).join('')}
+              ${credential.extraScopes ? `<span class="api-credentials-scope-extra">+${credential.extraScopes}</span>` : ''}
+            </div>
+          </td>
+          <td><span class="api-credentials-status api-credentials-status--${credential.statusTone}"><i></i>${credential.status}</span></td>
+          <td class="api-credentials-cell--actions"><button type="button" data-api-credentials-action="row-menu" data-api-credentials-name="${credential.name}" aria-label="More actions for ${credential.name}">${icon('more')}</button></td>
+        </tr>
+      `).join('')
+    : '<tr><td class="api-credentials-empty" colspan="7"><strong>No API credentials found</strong><span>Try changing your search or filters.</span></td></tr>';
+
+  if (apiCredentialsResultCount) {
+    const total = apiCredentialsPageData.credentials.filter((credential) => credential.environment === apiCredentialsState.environment).length;
+    apiCredentialsResultCount.textContent = credentials.length
+      ? `Showing 1 to ${credentials.length} of ${total} results`
+      : `Showing 0 of ${total} results`;
+  }
+};
+
+const renderApiCredentialsWebhooks = () => {
+  if (!apiCredentialsWebhooks) return;
+
+  apiCredentialsWebhooks.innerHTML = apiCredentialsPageData.webhooks.map((webhook) => `
+    <article class="api-credentials-webhook">
+      <div class="api-credentials-webhook__title">
+        <strong>${webhook.label}</strong>
+        <span class="api-credentials-status api-credentials-status--${webhook.statusTone}"><i></i>${webhook.status}</span>
+      </div>
+      <div class="api-credentials-webhook__url">
+        <span>${webhook.url}</span>
+        <button type="button" data-api-credentials-action="copy-webhook" data-api-credentials-name="${webhook.label}" aria-label="Copy ${webhook.label} endpoint">${icon('copy')}</button>
+      </div>
+      <div class="api-credentials-webhook__actions">
+        <button type="button" data-api-credentials-action="rotate-webhook" data-api-credentials-name="${webhook.label}">${icon('refresh')}Rotate</button>
+        <button type="button" class="is-danger" data-api-credentials-action="revoke-webhook" data-api-credentials-name="${webhook.label}">${icon('trash')}Revoke</button>
+      </div>
+    </article>
+  `).join('');
+};
+
+const renderApiCredentialsPage = () => {
+  if (!apiCredentialsPage) return;
+
+  apiCredentialsEnvironmentButtons.forEach((button) => {
+    const isActive = button.dataset.apiCredentialsEnvironment === apiCredentialsState.environment;
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-pressed', String(isActive));
+  });
+  renderApiCredentialsRows();
+  renderApiCredentialsWebhooks();
+};
+
 const messageIsUnread = (message) => message.unread && !messagesState.readIds.has(message.id);
 
 const getFilteredMessages = () => {
@@ -2090,6 +2511,271 @@ const handleMessagesAction = (action) => {
   return true;
 };
 
+const getFilteredCoupons = () => {
+  const query = couponsState.search.trim().toLowerCase();
+
+  return couponsPageData.coupons.filter((coupon) => {
+    const matchesStatus = couponsState.filters.status === 'all' || coupon.status === couponsState.filters.status;
+    const matchesPermission = couponsState.filters.permission === 'all' || coupon.permission === couponsState.filters.permission;
+    const matchesCategory = couponsState.filters.category === 'all' || coupon.category === couponsState.filters.category;
+    const matchesSearch = !query || [coupon.code, coupon.offer, coupon.requirement, coupon.category, coupon.permission]
+      .some((value) => value.toLowerCase().includes(query));
+
+    return matchesStatus && matchesPermission && matchesCategory && matchesSearch;
+  });
+};
+
+const renderCouponsTabs = () => {
+  if (!couponsTabs) return;
+  couponsTabs.innerHTML = couponsPageData.tabs.map((tab) => `
+    <button class="products-coupon-tab${tab.id === 'coupons' ? ' is-active' : ''}" type="button" role="tab" aria-selected="${tab.id === 'coupons'}" data-coupons-tab="${tab.id}">
+      ${escapeHtml(tab.label)}
+    </button>
+  `).join('');
+};
+
+const renderCouponsFilters = () => {
+  if (!couponsPage) return;
+  const filterOptions = {
+    status: couponsPageData.filters.statuses,
+    permission: couponsPageData.filters.permissions,
+    category: couponsPageData.filters.categories,
+  };
+
+  Object.entries(filterOptions).forEach(([key, options]) => {
+    const select = couponsPage.querySelector(`[data-coupons-filter="${key}"]`);
+    if (!select) return;
+    select.innerHTML = options.map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join('');
+    select.value = couponsState.filters[key];
+  });
+};
+
+const renderCouponsRows = () => {
+  if (!couponsRows) return;
+  const visibleCoupons = getFilteredCoupons();
+
+  couponsRows.innerHTML = visibleCoupons.length
+    ? visibleCoupons.map((coupon) => `
+        <tr class="${couponsState.selectedIds.has(coupon.id) ? 'is-selected' : ''}" data-coupons-row="${coupon.id}">
+          <td class="products-coupon-check-cell">
+            <label class="products-coupon-checkbox">
+              <input type="checkbox" data-coupons-select="${coupon.id}" aria-label="Select ${escapeHtml(coupon.code)}"${couponsState.selectedIds.has(coupon.id) ? ' checked' : ''} />
+              <span aria-hidden="true"></span>
+            </label>
+          </td>
+          <td class="products-coupon-code"><strong>${escapeHtml(coupon.code)}</strong></td>
+          <td class="products-coupon-offer"><strong>${escapeHtml(coupon.offer)}</strong><span>${escapeHtml(coupon.requirement)}</span></td>
+          <td class="products-coupon-category">${escapeHtml(coupon.category)}</td>
+          <td class="products-coupon-dates"><span>${escapeHtml(coupon.validFrom)}</span><i aria-hidden="true">~</i><span>${escapeHtml(coupon.validTo)}</span></td>
+          <td class="products-coupon-usage">${coupon.usage.toLocaleString()} / ${coupon.usageLimit.toLocaleString()}</td>
+          <td><span class="products-coupon-status products-coupon-status--${coupon.statusTone}"><i></i>${escapeHtml(coupon.status)}</span></td>
+          <td class="products-coupon-actions">
+            <button type="button" data-coupons-action="edit" data-coupons-code="${escapeHtml(coupon.code)}" aria-label="Edit ${escapeHtml(coupon.code)}">${icon('edit')}</button>
+            <button type="button" data-coupons-action="delete" data-coupons-code="${escapeHtml(coupon.code)}" aria-label="Delete ${escapeHtml(coupon.code)}">${icon('trash')}</button>
+          </td>
+        </tr>
+      `).join('')
+    : '<tr><td class="products-coupon-empty" colspan="8"><strong>No coupons found</strong><span>Try changing the filters or search keywords.</span></td></tr>';
+
+  const visibleIds = visibleCoupons.map((coupon) => coupon.id);
+  const selectedVisibleCount = visibleIds.filter((id) => couponsState.selectedIds.has(id)).length;
+  if (couponsSelectAll) {
+    couponsSelectAll.checked = visibleIds.length > 0 && selectedVisibleCount === visibleIds.length;
+    couponsSelectAll.indeterminate = selectedVisibleCount > 0 && selectedVisibleCount < visibleIds.length;
+  }
+  if (couponsResultCount) {
+    const isDefaultView = couponsState.search === '' && Object.values(couponsState.filters).every((value) => value === 'all');
+    couponsResultCount.textContent = isDefaultView
+      ? `1 – ${couponsPageData.totalCount} of ${couponsPageData.totalCount}`
+      : visibleCoupons.length
+        ? `1 – ${visibleCoupons.length} of ${visibleCoupons.length}`
+        : '0 of 0';
+  }
+};
+
+const renderCouponsPage = () => {
+  if (!couponsPage) return;
+  renderCouponsTabs();
+  renderCouponsFilters();
+  if (couponsSearch) couponsSearch.value = couponsState.search;
+  if (couponsDateLabel) couponsDateLabel.textContent = 'May 05, 2025';
+  renderCouponsRows();
+};
+
+const getFilteredProductsAssets = () => {
+  const query = productsAssetsState.search.trim().toLowerCase();
+  const filtered = bannersImagesPageData.assets.filter((asset) => {
+    const matchesTab = productsAssetsState.activeTab === 'all-assets' || asset.category === productsAssetsState.activeTab;
+    const matchesFolder = productsAssetsState.filters.folder === 'all' || asset.folderValue === productsAssetsState.filters.folder;
+    const matchesCampaign = productsAssetsState.filters.campaign === 'all' || asset.campaignValue === productsAssetsState.filters.campaign;
+    const matchesStatus = productsAssetsState.filters.status === 'all' || asset.status === productsAssetsState.filters.status;
+    const matchesQuery = !query || [asset.fileName, asset.title, asset.subtitle, asset.folder, asset.campaign, ...asset.tags]
+      .some((value) => value.toLowerCase().includes(query));
+    return matchesTab && matchesFolder && matchesCampaign && matchesStatus && matchesQuery;
+  });
+
+  if (productsAssetsState.sort === 'name') return [...filtered].sort((left, right) => left.fileName.localeCompare(right.fileName));
+  if (productsAssetsState.sort === 'oldest') return [...filtered].reverse();
+  return filtered;
+};
+
+const renderProductsAssetsMedia = (asset) => `
+  <div class="products-asset-card__media${asset.strip ? ' products-asset-card__media--strip' : ''}" data-tone="${asset.tone}">
+    <span class="products-assets-art products-assets-art--${asset.tone}" aria-hidden="true"></span>
+    <span class="products-asset-card__copy">
+      <strong>${escapeHtml(asset.title)}</strong>
+      <small>${escapeHtml(asset.subtitle)}</small>
+      ${asset.cta ? `<span class="products-assets-art__cta">${escapeHtml(asset.cta)}</span>` : ''}
+    </span>
+    <span class="products-asset-card__format">${escapeHtml(asset.dimensions)}</span>
+  </div>
+`;
+
+const renderProductsAssetsTabs = () => {
+  if (!productsAssetsTabs) return;
+  productsAssetsTabs.innerHTML = bannersImagesPageData.tabs.map((tab) => `
+    <button
+      class="products-assets-tab${productsAssetsState.activeTab === tab.id ? ' is-active' : ''}"
+      type="button"
+      role="tab"
+      aria-selected="${productsAssetsState.activeTab === tab.id}"
+      data-products-assets-tab="${tab.id}"
+    >${escapeHtml(tab.label)}</button>
+  `).join('');
+};
+
+const renderProductsAssetsFilters = () => {
+  if (!productsAssetsPage) return;
+  const filterMap = {
+    folder: bannersImagesPageData.filters.folders,
+    campaign: bannersImagesPageData.filters.campaigns,
+    status: bannersImagesPageData.filters.statuses,
+  };
+
+  Object.entries(filterMap).forEach(([key, options]) => {
+    const select = productsAssetsPage.querySelector(`[data-products-assets-filter="${key}"]`);
+    if (!select) return;
+    select.innerHTML = options.map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join('');
+    select.value = productsAssetsState.filters[key];
+  });
+
+  if (productsAssetsSearch) productsAssetsSearch.value = productsAssetsState.search;
+  if (productsAssetsSort) productsAssetsSort.value = productsAssetsState.sort;
+  if (productsAssetsPageSize) productsAssetsPageSize.value = String(productsAssetsState.pageSize);
+};
+
+const renderProductsAssetsGrid = (visibleAssets) => {
+  if (!productsAssetsGrid) return;
+  productsAssetsGrid.classList.toggle('is-list', productsAssetsState.view === 'list');
+  productsAssetsGrid.innerHTML = visibleAssets.length
+    ? visibleAssets.map((asset) => `
+        <button
+          class="products-asset-card${asset.id === productsAssetsState.selectedId ? ' is-selected' : ''}${asset.strip ? ' is-strip' : ''}"
+          type="button"
+          data-products-assets-asset-id="${asset.id}"
+          role="listitem"
+          aria-pressed="${asset.id === productsAssetsState.selectedId}"
+        >
+          ${renderProductsAssetsMedia(asset)}
+          <span class="products-asset-card__footer">
+            <span>
+              <strong>${escapeHtml(asset.fileName)}</strong>
+              <small>${escapeHtml(asset.dimensions)}</small>
+            </span>
+            <span class="products-asset-card__meta">
+              <small>${escapeHtml(asset.folder)}</small>
+              <span class="products-asset-card__status products-asset-card__status--${asset.statusTone}"><i aria-hidden="true"></i>${escapeHtml(asset.status)}</span>
+            </span>
+          </span>
+          <span class="products-asset-card__menu" aria-hidden="true">${icon('more')}</span>
+          ${asset.id === productsAssetsState.selectedId ? `<span class="products-asset-card__selected" title="Selected asset">${icon('check')}</span>` : ''}
+        </button>
+      `).join('')
+    : '<div class="products-assets-empty"><span aria-hidden="true">⌕</span><strong>No assets found</strong><p>Try another category, folder, status, or search term.</p></div>';
+};
+
+const renderProductsAssetsDetail = (visibleAssets) => {
+  if (!productsAssetsDetail) return;
+  const asset = visibleAssets.find((item) => item.id === productsAssetsState.selectedId)
+    ?? visibleAssets[0];
+
+  if (!asset) {
+    productsAssetsDetail.innerHTML = `
+      <div class="products-assets-detail__empty">
+        <span>${icon('image')}</span>
+        <strong>Select an asset</strong>
+        <p>Choose an asset from the library to review its details.</p>
+      </div>
+    `;
+    return;
+  }
+
+  productsAssetsState.selectedId = asset.id;
+  productsAssetsDetail.innerHTML = `
+    <div class="products-assets-detail__header">
+      <div>
+        <span class="eyebrow">Selected asset</span>
+        <h2 id="products-assets-detail-title">${escapeHtml(asset.fileName)}</h2>
+      </div>
+      <div class="products-assets-detail__header-actions">
+        <button class="products-assets-icon-button" type="button" data-products-assets-action="open-preview" aria-label="Open asset preview">${icon('external')}</button>
+        <button class="products-assets-icon-button" type="button" data-products-assets-action="close-detail" aria-label="Close asset details">${icon('x')}</button>
+      </div>
+    </div>
+    <div class="products-assets-detail__preview">
+      ${renderProductsAssetsMedia(asset)}
+    </div>
+    <div class="products-assets-detail__identity">
+      <strong>${escapeHtml(asset.fileName)}</strong>
+      <span class="products-asset-card__status products-asset-card__status--${asset.statusTone}"><i aria-hidden="true"></i>${escapeHtml(asset.status)}</span>
+    </div>
+    <dl class="products-assets-detail__facts">
+      <div><dt>Type</dt><dd>${escapeHtml(asset.type)}</dd></div>
+      <div><dt>Dimensions</dt><dd>${escapeHtml(asset.dimensions)}</dd></div>
+      <div><dt>File size</dt><dd>${escapeHtml(asset.fileSize)}</dd></div>
+      <div><dt>Uploaded</dt><dd>${escapeHtml(asset.uploaded)}</dd></div>
+      <div><dt>Uploaded by</dt><dd>${escapeHtml(asset.uploadedBy)}</dd></div>
+      <div><dt>Folder</dt><dd>${escapeHtml(asset.folder)}</dd></div>
+      <div><dt>Used in</dt><dd>${escapeHtml(asset.usedIn)}</dd></div>
+    </dl>
+    <div class="products-assets-detail__tags">
+      <span>Tags</span>
+      <div>${asset.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join('')}</div>
+    </div>
+    <p class="products-assets-detail__description">${escapeHtml(asset.description)}</p>
+    <div class="products-assets-detail__actions">
+      <button class="products-assets-button products-assets-button--primary products-assets-detail__edit" type="button" data-products-assets-action="edit">Edit asset</button>
+      <button class="products-assets-icon-button" type="button" data-products-assets-action="more" aria-label="More asset actions">${icon('more')}</button>
+    </div>
+  `;
+};
+
+const renderProductsAssetsPage = () => {
+  if (!productsAssetsPage) return;
+  renderProductsAssetsTabs();
+  renderProductsAssetsFilters();
+  const visibleAssets = getFilteredProductsAssets();
+  if (!visibleAssets.some((asset) => asset.id === productsAssetsState.selectedId)) {
+    productsAssetsState.selectedId = visibleAssets[0]?.id ?? null;
+  }
+  if (!productsAssetsPage.classList.contains('is-detail-closed')) productsAssetsDetail.hidden = false;
+  productsAssetsPage.querySelectorAll('[data-products-assets-view]').forEach((button) => {
+    const isActive = button.dataset.productsAssetsView === productsAssetsState.view;
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-pressed', String(isActive));
+  });
+  renderProductsAssetsGrid(visibleAssets);
+  renderProductsAssetsDetail(visibleAssets);
+  const isDefaultView = productsAssetsState.activeTab === 'all-assets'
+    && productsAssetsState.search === ''
+    && Object.values(productsAssetsState.filters).every((value) => value === 'all');
+  const count = isDefaultView ? bannersImagesPageData.totalCount : visibleAssets.length;
+  if (productsAssetsResultCount) productsAssetsResultCount.textContent = `${count} assets`;
+  if (productsAssetsPageLabel) productsAssetsPageLabel.textContent = isDefaultView
+    ? bannersImagesPageData.pageLabel
+    : `${visibleAssets.length} matching asset${visibleAssets.length === 1 ? '' : 's'}`;
+};
+
 const renderPage = () => {
   const context = findNavigationContext(state.activeNavigationChild ?? state.activeNavigationId);
   const isOverview = state.activeNavigationId === 'overview' && !state.activeNavigationChild;
@@ -2102,8 +2788,14 @@ const renderPage = () => {
   const isFinancePage = state.activeNavigationChild === 'balance-payments';
   const isInvoicesPage = state.activeNavigationChild === 'commission-invoices' || state.activeNavigationChild === 'invoices';
   const isHelpCenterPage = state.activeNavigationId === 'help-center';
+  const isTeamAccountsPage = state.activeNavigationChild === 'team-accounts';
+  const isRecruitmentSettingsPage = state.activeNavigationChild === 'recruitment-page';
+  const isBrandIntegrationPage = state.activeNavigationChild === 'brand-integration';
+  const isApiCredentialsPage = state.activeNavigationChild === 'api-credentials';
   const isMessagesPage = ['all-messages', 'partner-messages', 'system-alerts', 'archived-messages'].includes(state.activeNavigationChild);
-  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage || isMessagesPage;
+  const isCouponsPage = state.activeNavigationChild === 'coupons';
+  const isProductsAssetsPage = state.activeNavigationChild === 'banners-images';
+  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage || isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage;
 
   document.body.classList.toggle('is-campaign-page', isCampaignPage);
   document.body.classList.toggle('is-attribution-page', isAttributionPage);
@@ -2113,7 +2805,13 @@ const renderPage = () => {
   document.body.classList.toggle('is-commission-invoices-page', state.activeNavigationChild === 'commission-invoices');
   document.body.classList.toggle('is-finance-invoices-page', state.activeNavigationChild === 'invoices');
   document.body.classList.toggle('is-help-center-page', isHelpCenterPage);
+  document.body.classList.toggle('is-team-accounts-page', isTeamAccountsPage);
+  document.body.classList.toggle('is-recruitment-page-settings-page', isRecruitmentSettingsPage);
+  document.body.classList.toggle('is-brand-integration-page', isBrandIntegrationPage);
+  document.body.classList.toggle('is-api-credentials-page', isApiCredentialsPage);
   document.body.classList.toggle('is-messages-page', isMessagesPage);
+  document.body.classList.toggle('is-products-coupons-page', isCouponsPage);
+  document.body.classList.toggle('is-products-assets-page', isProductsAssetsPage);
   if (helpCenterUtility) {
     helpCenterUtility.classList.toggle('is-active', isHelpCenterPage);
     if (isHelpCenterPage) helpCenterUtility.setAttribute('aria-current', 'page');
@@ -2143,14 +2841,26 @@ const renderPage = () => {
               ? 'Review, filter, and download demo invoice records for the selected workspace.'
             : isHelpCenterPage
               ? 'Find answers, learn best practices, and get the support you need.'
+            : isTeamAccountsPage
+              ? 'Manage teammate access and permissions for your brands and programs.'
+            : isRecruitmentSettingsPage
+              ? 'Configure the public page where potential partners can discover and apply to your program.'
+            : isBrandIntegrationPage
+              ? 'Connect your stores, marketplaces, and analytics tools to sync data and power your affiliate programs.'
+            : isApiCredentialsPage
+              ? 'Create and manage API keys to authenticate and authorize access to the YeahPromos Merchant API. Keep your credentials secure and never share them publicly.'
             : isMessagesPage
               ? 'Stay connected with your partners and never miss an important update.'
+            : isCouponsPage
+              ? 'Create, manage, and track promotional coupons for your partners and campaigns.'
+            : isProductsAssetsPage
+              ? 'Manage your creative assets and organize them into folders for easy access and use across campaigns.'
             : recruitmentPage?.description ?? operationsPage?.description ?? context.current.label + ' workspace preview for the current brand scope.';
-  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isMessagesPage
-    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isInvoicesPage ? 'Commission & Rules' : isMessagesPage ? 'Messages & Notifications' : 'Finance')
+  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage
+    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isInvoicesPage ? 'Commission & Rules' : isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage ? 'Integrations & Settings' : isMessagesPage ? 'Messages & Notifications' : isCouponsPage || isProductsAssetsPage ? 'Products & Assets' : 'Finance')
     : isHelpCenterPage ? 'Help center'
     : isOverview ? t('shell.merchantWorkspace', 'Merchant workspace') : context.parent.label;
-  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isMessagesPage ? context.current.label : isOverview ? 'Overview' : context.current.label;
+  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isTeamAccountsPage ? 'Team accounts' : isRecruitmentSettingsPage ? 'Recruitment page' : isBrandIntegrationPage ? 'Brand integration' : isApiCredentialsPage ? 'API credentials' : isMessagesPage ? context.current.label : isCouponsPage ? 'Coupons' : isProductsAssetsPage ? 'Banners & images' : isOverview ? 'Overview' : context.current.label;
   breadcrumbCurrent.setAttribute('aria-current', 'page');
   overviewPage.hidden = !isOverview;
   modulePage.hidden = isOverview || (!recruitmentPage && !operationsPage);
@@ -2160,11 +2870,21 @@ const renderPage = () => {
   financePage.hidden = !isFinancePage;
   invoicesPage.hidden = !isInvoicesPage;
   helpCenterPage.hidden = !isHelpCenterPage;
+  teamAccountsPage.hidden = !isTeamAccountsPage;
+  recruitmentPageSettings.hidden = !isRecruitmentSettingsPage;
+  brandIntegrationPage.hidden = !isBrandIntegrationPage;
+  apiCredentialsPage.hidden = !isApiCredentialsPage;
   messagesPage.hidden = !isMessagesPage;
+  couponsPage.hidden = !isCouponsPage;
+  productsAssetsPage.hidden = !isProductsAssetsPage;
   modulePlaceholder.hidden = isOverview || isMainPage || Boolean(recruitmentPage || operationsPage);
   if (pageActions) pageActions.hidden = !isAttributionPage;
   if (commissionRulesActions) commissionRulesActions.hidden = !isCommissionRulesPage;
   if (financeActions) financeActions.hidden = !isFinancePage;
+  if (teamAccountsActions) teamAccountsActions.hidden = !isTeamAccountsPage;
+  if (recruitmentPageSettingsActions) recruitmentPageSettingsActions.hidden = !isRecruitmentSettingsPage;
+  if (brandIntegrationActions) brandIntegrationActions.hidden = !isBrandIntegrationPage;
+  if (apiCredentialsActions) apiCredentialsActions.hidden = !isApiCredentialsPage;
   if (messagesPageActions) messagesPageActions.hidden = !isMessagesPage;
 
   if (recruitmentPage) {
@@ -2182,7 +2902,13 @@ const renderPage = () => {
   if (isFinancePage) renderFinancePage();
   if (isInvoicesPage) renderInvoicesPage();
   if (isHelpCenterPage) renderHelpCenterPage();
+  if (isTeamAccountsPage) renderTeamAccountsPage();
+  if (isRecruitmentSettingsPage) renderRecruitmentSettingsPage();
+  if (isBrandIntegrationPage) renderBrandIntegrationPage();
+  if (isApiCredentialsPage) renderApiCredentialsPage();
   if (isMessagesPage) renderMessagesPage();
+  if (isCouponsPage) renderCouponsPage();
+  if (isProductsAssetsPage) renderProductsAssetsPage();
 };
 
 const renderAll = () => {
@@ -2991,6 +3717,246 @@ if (helpCenterPage) {
   });
 }
 
+if (teamAccountsActions) {
+  teamAccountsActions.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-team-accounts-action]');
+    if (!action) return;
+    if (action.dataset.teamAccountsAction === 'create-account') {
+      showToast('Create new account flow is ready for product integration');
+    }
+  });
+}
+
+if (teamAccountsPage) {
+  teamAccountsPage.addEventListener('input', (event) => {
+    if (!event.target.matches('[data-team-accounts-search]')) return;
+    teamAccountsState.search = event.target.value;
+    teamAccountsState.page = 1;
+    renderTeamAccountsPage();
+  });
+
+  teamAccountsPage.addEventListener('change', (event) => {
+    const filter = event.target.closest('[data-team-accounts-filter]');
+    if (filter) {
+      teamAccountsState.filters[filter.dataset.teamAccountsFilter] = filter.value;
+      teamAccountsState.page = 1;
+      renderTeamAccountsPage();
+      return;
+    }
+
+    if (event.target.matches('[data-team-accounts-brand-filter]')) {
+      teamAccountsState.filters.brand = event.target.value;
+      teamAccountsState.page = 1;
+      renderTeamAccountsPage();
+      return;
+    }
+
+    if (event.target.matches('[data-team-accounts-page-size]')) {
+      teamAccountsState.pageSize = Number(event.target.value);
+      teamAccountsState.page = 1;
+      renderTeamAccountsPage();
+      showToast(`${event.target.options[event.target.selectedIndex].text} selected`);
+    }
+  });
+
+  teamAccountsPage.addEventListener('submit', (event) => {
+    if (event.target.matches('[data-team-accounts-search-form]')) {
+      event.preventDefault();
+      showToast(teamAccountsState.search ? `Searching team accounts for “${teamAccountsState.search}”` : 'Team account search cleared');
+      teamAccountsSearch?.focus();
+      return;
+    }
+
+    if (event.target.matches('[data-team-accounts-invite-form]')) {
+      event.preventDefault();
+      showToast('Invitation flow is ready for product integration');
+    }
+  });
+
+  teamAccountsPage.addEventListener('click', (event) => {
+    const filterToggle = event.target.closest('[data-team-accounts-action="toggle-filter"]');
+    if (filterToggle) {
+      const isHidden = teamAccountsFilterMenu?.hidden ?? true;
+      if (teamAccountsFilterMenu) teamAccountsFilterMenu.hidden = !isHidden;
+      filterToggle.setAttribute('aria-expanded', String(isHidden));
+      return;
+    }
+
+    const reset = event.target.closest('[data-team-accounts-action="reset-filter"]');
+    if (reset) {
+      teamAccountsState.filters = { brand: 'all', role: 'all', status: 'all' };
+      teamAccountsState.page = 1;
+      renderTeamAccountsPage();
+      if (teamAccountsFilterMenu) teamAccountsFilterMenu.hidden = true;
+      teamAccountsFilterButton?.setAttribute('aria-expanded', 'false');
+      showToast('Team account filters reset');
+      return;
+    }
+
+    const pageNumber = event.target.closest('[data-team-accounts-page-number]');
+    if (pageNumber && !pageNumber.disabled) {
+      teamAccountsState.page = Number(pageNumber.dataset.teamAccountsPageNumber);
+      renderTeamAccountsPage();
+      return;
+    }
+
+    const action = event.target.closest('[data-team-accounts-action]');
+    if (!action) return;
+    const account = teamAccountsPageData.accounts.find((item) => item.id === action.dataset.teamAccountsId);
+    if (action.dataset.teamAccountsAction === 'edit') {
+      showToast(`${account?.name ?? 'Team account'} edit flow is ready for product integration`);
+    } else if (action.dataset.teamAccountsAction === 'deactivate') {
+      showToast(`${account?.name ?? 'Team account'} deactivation requires confirmation`);
+    }
+  });
+}
+
+if (recruitmentPageSettingsActions) {
+  recruitmentPageSettingsActions.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-recruitment-page-action]');
+    if (!action) return;
+
+    if (action.dataset.recruitmentPageAction === 'preview') {
+      showToast('Public recruitment page preview is ready for product integration');
+    } else if (action.dataset.recruitmentPageAction === 'save') {
+      showToast('Recruitment page settings saved in this demo');
+    }
+  });
+}
+
+if (recruitmentPageSettings) {
+  recruitmentPageSettings.addEventListener('input', (event) => {
+    const field = event.target.closest('[data-recruitment-page-field]');
+    if (!field) return;
+
+    recruitmentPageSettingsState[field.dataset.recruitmentPageField] = field.value;
+    renderRecruitmentPagePreview();
+  });
+
+  recruitmentPageSettings.addEventListener('change', (event) => {
+    const setting = event.target.closest('[data-recruitment-page-setting]');
+    if (setting) {
+      recruitmentPageSettingsState[setting.dataset.recruitmentPageSetting] = setting.value;
+      renderRecruitmentSettingsPage();
+      return;
+    }
+
+    const fieldToggle = event.target.closest('[data-recruitment-page-field-toggle]');
+    if (fieldToggle) {
+      recruitmentPageSettingsState.fields[fieldToggle.dataset.recruitmentPageFieldToggle] = fieldToggle.checked;
+      renderRecruitmentPagePreview();
+    }
+  });
+
+  recruitmentPageSettings.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-recruitment-page-action]');
+    if (!action) return;
+
+    const actionName = action.dataset.recruitmentPageAction;
+    if (actionName === 'toggle-status') {
+      recruitmentPageSettingsState.status = recruitmentPageSettingsState.status === 'published' ? 'disabled' : 'published';
+      renderRecruitmentSettingsPage();
+      showToast(recruitmentPageSettingsState.status === 'published' ? 'Recruitment page enabled' : 'Recruitment page disabled');
+    } else if (actionName === 'copy-link') {
+      showToast('Public recruitment page link is ready to copy');
+    } else if (actionName === 'preview' || actionName === 'preview-apply') {
+      showToast(actionName === 'preview-apply' ? 'Application form preview is ready for product integration' : 'Public recruitment page preview is ready for product integration');
+    }
+  });
+}
+if (brandIntegrationActions) {
+  brandIntegrationActions.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-brand-integration-action]');
+    if (!action) return;
+    if (action.dataset.brandIntegrationAction === 'add-integration') {
+      showToast('Add integration flow is ready for product integration');
+    }
+  });
+}
+
+if (brandIntegrationPage) {
+  brandIntegrationPage.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-brand-integration-action]');
+    if (!action) return;
+
+    const integration = brandIntegrationPageData.integrations.find((item) => item.id === action.dataset.brandIntegrationId);
+    const name = integration?.name ?? 'Integration';
+    if (action.dataset.brandIntegrationAction === 'manage') {
+      showToast(`${name} settings are ready for product integration`);
+    } else if (action.dataset.brandIntegrationAction === 'reconnect') {
+      showToast(`${name} reconnect flow is ready for product integration`);
+    } else if (action.dataset.brandIntegrationAction === 'menu') {
+      showToast(`${name} actions are ready for product integration`);
+    } else if (action.dataset.brandIntegrationAction === 'domain') {
+      showToast('Demo Store domain details are ready for product integration');
+    } else if (action.dataset.brandIntegrationAction === 'view-activity') {
+      showToast('Activity log is ready for product integration');
+    }
+  });
+}
+
+if (apiCredentialsPage) {
+  apiCredentialsPage.addEventListener('input', (event) => {
+    if (!event.target.matches('[data-api-credentials-search]')) return;
+    apiCredentialsState.search = event.target.value;
+    renderApiCredentialsRows();
+  });
+
+  apiCredentialsPage.addEventListener('change', (event) => {
+    if (!event.target.matches('[data-api-credentials-status]')) return;
+    apiCredentialsState.status = event.target.value;
+    renderApiCredentialsRows();
+  });
+
+  apiCredentialsPage.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-api-credentials-action]');
+    if (!action) return;
+
+    const actionName = action.dataset.apiCredentialsAction;
+    const itemName = action.dataset.apiCredentialsName;
+    if (actionName === 'toggle-filter') {
+      const nextOpenState = apiCredentialsFilterMenu.hidden;
+      apiCredentialsFilterMenu.hidden = !nextOpenState;
+      apiCredentialsFilterButton.setAttribute('aria-expanded', String(nextOpenState));
+      return;
+    }
+
+    if (actionName === 'copy-key') {
+      showToast(`Masked key for ${itemName} is ready to copy`);
+    } else if (actionName === 'row-menu') {
+      showToast(`Actions for ${itemName} are ready for product integration`);
+    } else if (actionName === 'next-page') {
+      showToast('API keys page 2 is ready for product integration');
+    } else if (actionName === 'security-help') {
+      showToast('API key security guidance is ready for product integration');
+    } else if (actionName === 'create-key') {
+      showToast('Create API key flow is ready for product integration');
+    } else if (actionName === 'add-endpoint') {
+      showToast('Webhook endpoint setup is ready for product integration');
+    } else if (actionName === 'copy-webhook') {
+      showToast(`${itemName} endpoint is ready to copy`);
+    } else if (actionName === 'rotate-webhook') {
+      showToast(`${itemName} rotation is ready for product integration`);
+    } else if (actionName === 'revoke-webhook') {
+      showToast(`${itemName} revoke flow is ready for product integration`);
+    } else if (actionName === 'webhook-help') {
+      showToast('Webhook documentation is ready for product integration');
+    }
+  });
+}
+
+apiCredentialsEnvironmentButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    apiCredentialsState.environment = button.dataset.apiCredentialsEnvironment;
+    apiCredentialsState.search = '';
+    apiCredentialsState.status = 'all';
+    if (apiCredentialsSearch) apiCredentialsSearch.value = '';
+    if (apiCredentialsStatus) apiCredentialsStatus.value = 'all';
+    renderApiCredentialsPage();
+    showToast(`${button.textContent.trim()} environment selected`);
+  });
+});
+
 if (messagesPage) {
   messagesPage.addEventListener('input', (event) => {
     if (event.target.matches('[data-messages-search]')) {
@@ -3071,6 +4037,169 @@ if (messagesPage) {
   });
 }
 
+if (couponsPage) {
+  couponsPage.addEventListener('input', (event) => {
+    if (!event.target.matches('[data-coupons-search]')) return;
+    couponsState.search = event.target.value;
+    renderCouponsRows();
+  });
+
+  couponsPage.addEventListener('change', (event) => {
+    const filter = event.target.closest('[data-coupons-filter]');
+    if (filter) {
+      couponsState.filters[filter.dataset.couponsFilter] = filter.value;
+      renderCouponsPage();
+      showToast(`${filter.options[filter.selectedIndex].text} selected`);
+      return;
+    }
+
+    if (event.target.matches('[data-coupons-select-all]')) {
+      const visibleIds = getFilteredCoupons().map((coupon) => coupon.id);
+      if (event.target.checked) visibleIds.forEach((id) => couponsState.selectedIds.add(id));
+      else visibleIds.forEach((id) => couponsState.selectedIds.delete(id));
+      renderCouponsRows();
+      return;
+    }
+
+    const checkbox = event.target.closest('[data-coupons-select]');
+    if (checkbox) {
+      if (checkbox.checked) couponsState.selectedIds.add(checkbox.dataset.couponsSelect);
+      else couponsState.selectedIds.delete(checkbox.dataset.couponsSelect);
+      renderCouponsRows();
+    }
+  });
+
+  couponsPage.addEventListener('submit', (event) => {
+    if (!event.target.matches('[data-coupons-filter-form]')) return;
+    event.preventDefault();
+    renderCouponsPage();
+    couponsSearch?.focus();
+    showToast(couponsState.search ? `Searching coupons for “${couponsState.search}”` : 'Showing all coupons');
+  });
+
+  couponsPage.addEventListener('click', (event) => {
+    const tab = event.target.closest('[data-coupons-tab]');
+    if (tab) {
+      const tabId = tab.dataset.couponsTab;
+      if (tabId === 'banners-images') navigateTo(tabId);
+      else if (tabId === 'texts-emails') showToast('Texts & emails is ready for product integration');
+      else renderCouponsPage();
+      return;
+    }
+
+    const action = event.target.closest('[data-coupons-action]');
+    if (!action) return;
+    const actionName = action.dataset.couponsAction;
+    const couponCode = action.dataset.couponsCode;
+
+    if (actionName === 'reset') {
+      couponsState.search = '';
+      couponsState.filters = { status: 'all', permission: 'all', category: 'all' };
+      couponsState.selectedIds.clear();
+      renderCouponsPage();
+      showToast('Coupon filters reset');
+    } else if (actionName === 'date-range') {
+      showToast(`${couponsPageData.dateRangeLabel} selected`);
+    } else if (actionName === 'add-coupon') {
+      showToast('Add coupon flow is ready for product integration');
+    } else if (actionName === 'edit') {
+      showToast(`Edit ${couponCode} is ready for product integration`);
+    } else if (actionName === 'delete') {
+      showToast(`Delete ${couponCode} is ready for product integration`);
+    } else if (actionName === 'page' || actionName === 'next-page' || actionName === 'previous-page') {
+      showToast('Coupon pagination is ready for product integration');
+    }
+  });
+}
+
+if (productsAssetsPage) {
+  productsAssetsPage.addEventListener('input', (event) => {
+    if (!event.target.matches('[data-products-assets-search]')) return;
+    productsAssetsState.search = event.target.value;
+    renderProductsAssetsPage();
+    productsAssetsSearch?.focus();
+  });
+
+  productsAssetsPage.addEventListener('change', (event) => {
+    const filter = event.target.closest('[data-products-assets-filter]');
+    if (filter) {
+      productsAssetsState.filters[filter.dataset.productsAssetsFilter] = filter.value;
+      renderProductsAssetsPage();
+      showToast(`${filter.options[filter.selectedIndex].text} selected`);
+      return;
+    }
+
+    if (event.target.matches('[data-products-assets-sort]')) {
+      productsAssetsState.sort = event.target.value;
+      renderProductsAssetsPage();
+      showToast('Asset order updated');
+      return;
+    }
+
+    if (event.target.matches('[data-products-assets-page-size]')) {
+      productsAssetsState.pageSize = Number(event.target.value);
+      renderProductsAssetsPage();
+      showToast(`${event.target.options[event.target.selectedIndex].text} selected`);
+    }
+  });
+
+  productsAssetsPage.addEventListener('submit', (event) => {
+    if (!event.target.matches('[data-products-assets-search-form]')) return;
+    event.preventDefault();
+    renderProductsAssetsPage();
+    productsAssetsSearch?.focus();
+    showToast(productsAssetsState.search ? `Searching assets for “${productsAssetsState.search}”` : 'Asset search cleared');
+  });
+
+  productsAssetsPage.addEventListener('click', (event) => {
+    const tab = event.target.closest('[data-products-assets-tab]');
+    if (tab) {
+      productsAssetsState.activeTab = tab.dataset.productsAssetsTab;
+      productsAssetsPage.classList.remove('is-detail-closed');
+      renderProductsAssetsPage();
+      showToast(`${tab.textContent.trim()} selected`);
+      return;
+    }
+
+    const view = event.target.closest('[data-products-assets-view]');
+    if (view) {
+      productsAssetsState.view = view.dataset.productsAssetsView;
+      renderProductsAssetsPage();
+      return;
+    }
+
+    const asset = event.target.closest('[data-products-assets-asset-id]');
+    if (asset) {
+      productsAssetsState.selectedId = asset.dataset.productsAssetsAssetId;
+      productsAssetsPage.classList.remove('is-detail-closed');
+      renderProductsAssetsPage();
+      return;
+    }
+
+    const pageNumber = event.target.closest('[data-products-assets-page-number]');
+    if (pageNumber) {
+      showToast(`Assets page ${pageNumber.dataset.productsAssetsPageNumber} is ready for product integration`);
+      return;
+    }
+
+    const action = event.target.closest('[data-products-assets-action]');
+    if (!action) return;
+    const actionName = action.dataset.productsAssetsAction;
+    if (actionName === 'close-detail') {
+      productsAssetsPage.classList.add('is-detail-closed');
+      productsAssetsDetail.hidden = true;
+    } else if (actionName === 'upload') {
+      showToast('Upload asset flow is ready for product integration');
+    } else if (actionName === 'folder') {
+      showToast('Create folder flow is ready for product integration');
+    } else if (actionName === 'edit') {
+      showToast('Asset editor is ready for product integration');
+    } else {
+      showToast(`${actionName.replaceAll('-', ' ')} is ready for product integration`);
+    }
+  });
+}
+
 if (attributionPage) {
   attributionPage.addEventListener('change', (event) => {
     if (!event.target.matches('[data-attribution-model]')) return;
@@ -3083,6 +4212,10 @@ if (attributionPage) {
 
 document.addEventListener('click', (event) => {
   if (!event.target.closest('.period-picker')) closePeriodMenu();
+  if (!event.target.closest('.team-accounts-filter-wrap')) {
+    if (teamAccountsFilterMenu) teamAccountsFilterMenu.hidden = true;
+    teamAccountsFilterButton?.setAttribute('aria-expanded', 'false');
+  }
   const messagesAction = event.target.closest('[data-messages-action]');
   if (messagesAction && !messagesPage?.contains(messagesAction)) {
     if (messagesAction.dataset.messagesAction === 'compose') {
