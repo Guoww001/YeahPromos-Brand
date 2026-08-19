@@ -22527,3 +22527,186 @@ body.is-brand-integration-page {
   .recruitment-button svg,
   .recruitment-icon-link svg { transition-duration: .01ms !important; }
 }
+
+/* Finance / Transaction history */
+body.is-transaction-history-page {
+  --transaction-history-red: #e60000;
+  --transaction-history-red-dark: #c90000;
+  --transaction-history-soft-red: #fde8e8;
+  --transaction-history-selected-red: #ff312e;
+  --transaction-history-border: #e3e7ed;
+  --transaction-history-line: #edf0f3;
+  --transaction-history-text: #111111;
+  --transaction-history-text-strong: #1f2937;
+  --transaction-history-text-secondary: #374151;
+  --transaction-history-text-muted: #4b5563;
+  --transaction-history-green: #13864e;
+  --transaction-history-orange: #b96b00;
+  background: #ffffff;
+}
+
+.is-transaction-history-page .page-header { min-height: 104px; margin-bottom: 18px; }
+.is-transaction-history-page .scope-line,
+.is-transaction-history-page .page-header__filters { display: none; }
+.is-transaction-history-page .page-header__actions { width: auto; flex: 0 0 auto; gap: 20px; padding-top: 0; }
+.is-transaction-history-page .page-header__utility { padding-top: 0; }
+.is-transaction-history-page .breadcrumb [data-breadcrumb-parent] { color: var(--transaction-history-red); font-weight: 600; }
+.is-transaction-history-page .breadcrumb strong,
+.is-transaction-history-page .page-header h1 { color: var(--transaction-history-text); }
+.is-transaction-history-page .page-header h1 { font-size: 30px; letter-spacing: -.9px; }
+.is-transaction-history-page .page-header p { max-width: 720px; color: var(--transaction-history-text-secondary); font-size: 13px; }
+.is-transaction-history-page .nav-item[data-nav-item="finance"] { background: var(--transaction-history-red); color: #fff; }
+.is-transaction-history-page .nav-item[data-nav-item="finance"]:hover { background: var(--transaction-history-red-dark); color: #fff; }
+.is-transaction-history-page .nav-item[data-nav-item="finance"] .nav-item__icon,
+.is-transaction-history-page .nav-item[data-nav-item="finance"] .nav-item__chevron { color: #fff; }
+.is-transaction-history-page .nav-child[data-nav-child="transaction-history"] { background: var(--transaction-history-soft-red); box-shadow: inset 3px 0 0 var(--transaction-history-selected-red); color: var(--transaction-history-selected-red); font-weight: 600; }
+
+.transaction-history-page[hidden] { display: none; }
+.transaction-history-page { display: block; color: var(--transaction-history-text-secondary); font-size: 11px; }
+.transaction-history-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+.transaction-history-summary-card { display: flex; min-width: 0; min-height: 108px; align-items: center; gap: 16px; padding: 18px 17px; border: 1px solid var(--transaction-history-border); border-radius: 7px; background: #fff; }
+.transaction-history-summary-card__icon { display: grid; width: 51px; height: 51px; flex: 0 0 51px; place-items: center; border-radius: 8px; }
+.transaction-history-summary-card__icon svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.transaction-history-summary-card--coral .transaction-history-summary-card__icon { background: #ffe6e6; color: var(--transaction-history-red); }
+.transaction-history-summary-card--green .transaction-history-summary-card__icon { background: #eaf7df; color: var(--transaction-history-green); }
+.transaction-history-summary-card--orange .transaction-history-summary-card__icon { background: #fff0dc; color: #e87500; }
+.transaction-history-summary-card__copy { display: grid; min-width: 0; gap: 5px; }
+.transaction-history-summary-card__copy > span { display: inline-flex; align-items: center; gap: 4px; color: var(--transaction-history-text-muted); font-size: 11px; line-height: 1.35; }
+.transaction-history-summary-card__copy > strong { color: var(--transaction-history-text-strong); font-size: 18px; font-weight: 700; letter-spacing: -.35px; line-height: 1.1; }
+.transaction-history-summary-card__note { overflow: hidden; color: var(--transaction-history-text-muted); font-size: 10px; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
+.transaction-history-summary-card__note--positive { color: var(--transaction-history-green); }
+.transaction-history-info { width: 14px; height: 14px; padding: 0; border: 0; background: transparent; color: var(--transaction-history-text-muted); cursor: pointer; }
+.transaction-history-info svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+
+.transaction-history-card { min-width: 0; border: 1px solid var(--transaction-history-border); border-radius: 7px; background: #fff; }
+.transaction-history-card__header { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; padding: 18px 16px 14px; }
+.transaction-history-card__header h2 { margin: 0 0 5px; color: var(--transaction-history-text-strong); font-size: 15px; letter-spacing: -.15px; }
+.transaction-history-card__header p { margin: 0; color: var(--transaction-history-text-muted); font-size: 10px; line-height: 1.4; }
+.transaction-history-card__actions { display: flex; flex: 0 0 auto; align-items: center; gap: 8px; }
+.transaction-history-card__actions .button { min-height: 31px; padding: 0 12px; border-radius: 5px; font-size: 10px; white-space: nowrap; }
+.transaction-history-card__actions .button--secondary { border-color: #cfd5dd; color: var(--transaction-history-text-secondary); }
+.transaction-history-card__actions .button--secondary:hover { border-color: var(--transaction-history-red); color: var(--transaction-history-red); }
+.transaction-history-card__actions .button--primary { border-color: #161616; background: #161616; color: #fff; }
+.transaction-history-card__actions .button--primary:hover { border-color: #343434; background: #343434; }
+.transaction-history-card__actions svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+
+.transaction-history-toolbar { display: flex; min-width: 0; align-items: center; flex-wrap: wrap; gap: 8px; padding: 0 16px 14px; }
+.transaction-history-filter { position: relative; display: inline-flex; min-width: 104px; height: 36px; align-items: center; }
+.transaction-history-filter select { width: 100%; height: 36px; appearance: none; padding: 0 25px 0 10px; border: 1px solid #dce1e7; border-radius: 5px; outline: 0; background: #fff; color: var(--transaction-history-text-secondary); cursor: pointer; font: inherit; font-size: 10px; font-weight: 500; }
+.transaction-history-filter select:hover,
+.transaction-history-filter select:focus { border-color: var(--transaction-history-selected-red); box-shadow: 0 0 0 3px var(--transaction-history-soft-red); }
+.transaction-history-filter::after { position: absolute; top: 14px; right: 10px; width: 5px; height: 5px; border-right: 1px solid var(--transaction-history-text-muted); border-bottom: 1px solid var(--transaction-history-text-muted); content: ''; pointer-events: none; transform: rotate(45deg); }
+.transaction-history-filter--time { min-width: 106px; }
+.transaction-history-filter--time svg { position: absolute; right: 26px; width: 13px; height: 13px; fill: none; stroke: var(--transaction-history-text-muted); stroke-width: 1.7; pointer-events: none; }
+.transaction-history-filter--time select { padding-right: 42px; }
+.transaction-history-search { display: inline-flex; min-width: 210px; height: 36px; align-items: center; margin-left: auto; border: 1px solid #dce1e7; border-radius: 5px; background: #fff; }
+.transaction-history-search:focus-within { border-color: var(--transaction-history-selected-red); box-shadow: 0 0 0 3px var(--transaction-history-soft-red); }
+.transaction-history-search > svg { width: 14px; height: 14px; margin-left: 10px; flex: 0 0 auto; fill: none; stroke: var(--transaction-history-text-muted); stroke-width: 1.8; }
+.transaction-history-search input { min-width: 0; flex: 1; height: 34px; padding: 0 8px; border: 0; outline: 0; background: transparent; color: var(--transaction-history-text-secondary); font: inherit; font-size: 10px; }
+.transaction-history-search input::placeholder { color: var(--transaction-history-text-muted); }
+.transaction-history-search button,
+.transaction-history-columns { display: grid; width: 34px; height: 34px; flex: 0 0 34px; place-items: center; border: 0; background: transparent; color: var(--transaction-history-text-secondary); cursor: pointer; }
+.transaction-history-search button svg,
+.transaction-history-columns svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.transaction-history-search button:hover,
+.transaction-history-columns:hover { color: var(--transaction-history-red); }
+.transaction-history-columns { width: 36px; height: 36px; flex-basis: 36px; border: 1px solid #dce1e7; border-radius: 5px; }
+
+.transaction-history-table-scroll { overflow-x: auto; border-top: 1px solid var(--transaction-history-line); border-bottom: 1px solid var(--transaction-history-line); }
+.transaction-history-table { width: 100%; min-width: 1290px; border-collapse: collapse; table-layout: fixed; }
+.transaction-history-table th,
+.transaction-history-table td { height: 41px; padding: 0 9px; border-bottom: 1px solid #f0f2f5; color: var(--transaction-history-text-secondary); font-size: 10px; line-height: 1.35; text-align: left; vertical-align: middle; white-space: nowrap; }
+.transaction-history-table th { height: 38px; background: #fafbfc; color: var(--transaction-history-text-muted); font-size: 10px; font-weight: 700; }
+.transaction-history-table tbody tr:last-child td { border-bottom: 0; }
+.transaction-history-table th:first-child,
+.transaction-history-table td:first-child { padding-left: 14px; }
+.transaction-history-col--check { width: 39px; }
+.transaction-history-col--order { width: 126px; }
+.transaction-history-col--date { width: 157px; }
+.transaction-history-col--items { width: 122px; }
+.transaction-history-col--quantity { width: 65px; }
+.transaction-history-col--country { width: 111px; }
+.transaction-history-col--sales { width: 103px; }
+.transaction-history-col--commission-id { width: 129px; }
+.transaction-history-col--commission { width: 111px; }
+.transaction-history-col--coupon { width: 105px; }
+.transaction-history-col--group { width: 72px; }
+.transaction-history-col--status { width: 81px; }
+.transaction-history-col--action { width: 48px; }
+.transaction-history-row:hover td,
+.transaction-history-row.is-expanded td { background: #fffafa; }
+.transaction-history-row.is-expanded td { border-bottom-color: transparent; }
+.transaction-history-cell--order strong,
+.transaction-history-cell--amount strong,
+.transaction-history-cell--commission strong { color: var(--transaction-history-text-strong); font-weight: 700; }
+.transaction-history-cell--items { overflow: hidden; text-overflow: ellipsis; }
+.transaction-history-cell--items > span { display: inline-block; max-width: 78px; overflow: hidden; color: var(--transaction-history-text-secondary); text-overflow: ellipsis; vertical-align: middle; }
+.transaction-history-items-toggle { display: inline-flex; align-items: center; gap: 2px; margin-right: 3px; padding: 0; border: 0; background: transparent; color: var(--transaction-history-text-strong); cursor: pointer; vertical-align: middle; }
+.transaction-history-items-toggle strong { font-size: 10px; }
+.transaction-history-items-toggle svg,
+.transaction-history-sort svg { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.transaction-history-items-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+.transaction-history-sort { width: 13px; height: 13px; padding: 0; border: 0; background: transparent; color: var(--transaction-history-text-muted); cursor: pointer; vertical-align: middle; }
+.transaction-history-cell--commission small { margin-left: 3px; color: var(--transaction-history-text-muted); font-size: 10px; }
+.transaction-history-status { display: inline-flex; min-height: 22px; align-items: center; gap: 5px; padding: 0 9px; border-radius: 6px; font-size: 10px; font-weight: 700; }
+.transaction-history-status i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.transaction-history-status--paid { background: #e8f7ee; color: var(--transaction-history-green); }
+.transaction-history-status--pending { background: #fff0da; color: var(--transaction-history-orange); }
+.transaction-history-status--void { background: #fde7e7; color: #c43a35; }
+.transaction-history-row-action { display: grid; width: 25px; height: 25px; place-items: center; padding: 0; border: 0; border-radius: 4px; background: transparent; color: var(--transaction-history-text-secondary); cursor: pointer; }
+.transaction-history-row-action:hover,
+.transaction-history-row-action:focus-visible { background: var(--transaction-history-soft-red); color: var(--transaction-history-red); }
+.transaction-history-row-action svg { width: 15px; height: 15px; fill: currentColor; }
+.transaction-history-checkbox { display: inline-grid; width: 16px; height: 16px; place-items: center; cursor: pointer; }
+.transaction-history-checkbox input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.transaction-history-checkbox span { display: block; width: 15px; height: 15px; border: 1px solid #cbd2db; border-radius: 3px; background: #fff; }
+.transaction-history-checkbox input:checked + span,
+.transaction-history-checkbox input:indeterminate + span { border-color: var(--transaction-history-red); background: var(--transaction-history-red); box-shadow: inset 0 0 0 3px #fff; }
+.transaction-history-checkbox input:focus-visible + span { outline: 2px solid var(--transaction-history-selected-red); outline-offset: 2px; }
+.transaction-history-items-row td { height: auto; padding: 0 14px 11px 55px; background: #fffafa; }
+.transaction-history-items-panel { display: grid; gap: 7px; padding: 10px 12px; border: 1px solid #f3dede; border-radius: 5px; background: #fff; }
+.transaction-history-items-panel > strong { color: var(--transaction-history-text-strong); font-size: 10px; }
+.transaction-history-items-panel > div { display: flex; flex-wrap: wrap; gap: 8px; }
+.transaction-history-items-panel > div > span { display: grid; gap: 2px; min-width: 145px; padding: 7px 9px; border-radius: 4px; background: #fafbfc; }
+.transaction-history-items-panel b { color: var(--transaction-history-text-secondary); font-size: 10px; }
+.transaction-history-items-panel small { color: var(--transaction-history-text-muted); font-size: 10px; }
+.transaction-history-empty { height: 105px !important; text-align: center !important; }
+.transaction-history-empty strong,
+.transaction-history-empty span { display: block; }
+.transaction-history-empty strong { color: var(--transaction-history-text-strong); font-size: 12px; }
+.transaction-history-empty span { margin-top: 5px; color: var(--transaction-history-text-muted); font-size: 10px; }
+
+.transaction-history-table-footer { display: flex; min-height: 57px; align-items: center; justify-content: space-between; gap: 14px; padding: 0 14px; color: var(--transaction-history-text-muted); font-size: 10px; }
+.transaction-history-footer-controls { display: flex; align-items: center; gap: 20px; }
+.transaction-history-pagination { display: flex; align-items: center; gap: 4px; }
+.transaction-history-pagination button { display: grid; min-width: 25px; height: 25px; place-items: center; padding: 0 5px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--transaction-history-text-secondary); cursor: pointer; font: inherit; font-size: 10px; }
+.transaction-history-pagination button:hover:not(:disabled) { border-color: var(--transaction-history-soft-red); background: #fffafa; color: var(--transaction-history-red); }
+.transaction-history-pagination button.is-current { border-color: var(--transaction-history-selected-red); color: var(--transaction-history-red); font-weight: 700; }
+.transaction-history-pagination button:disabled { color: #c4c9d0; cursor: not-allowed; }
+.transaction-history-pagination__ellipsis { padding: 0 3px; color: var(--transaction-history-text-muted); }
+.transaction-history-page-size { position: relative; display: inline-flex; height: 32px; align-items: center; }
+.transaction-history-page-size select { height: 32px; appearance: none; padding: 0 29px 0 10px; border: 1px solid #dce1e7; border-radius: 5px; outline: 0; background: #fff; color: var(--transaction-history-text-secondary); font: inherit; font-size: 10px; }
+.transaction-history-page-size > svg { position: absolute; right: 9px; width: 12px; height: 12px; fill: none; stroke: var(--transaction-history-text-muted); stroke-width: 1.8; pointer-events: none; }
+.transaction-history-card button:focus-visible,
+.transaction-history-card select:focus-visible,
+.transaction-history-card input:focus-visible { outline: 2px solid var(--transaction-history-selected-red); outline-offset: 2px; }
+
+@media (max-width: 1220px) {
+  .transaction-history-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .transaction-history-search { margin-left: 0; }
+}
+
+@media (max-width: 767px) {
+  .is-transaction-history-page .page-header { min-height: 0; }
+  .is-transaction-history-page .page-header__actions { display: grid; gap: 14px; padding-top: 16px; }
+  .transaction-history-summary-grid { grid-template-columns: 1fr; }
+  .transaction-history-card__header { align-items: flex-start; flex-direction: column; }
+  .transaction-history-card__actions { width: 100%; flex-wrap: wrap; }
+  .transaction-history-card__actions .button { flex: 1 1 145px; }
+  .transaction-history-toolbar { align-items: stretch; }
+  .transaction-history-filter { flex: 1 1 145px; }
+  .transaction-history-search { width: 100%; flex-basis: 100%; }
+  .transaction-history-columns { display: none; }
+  .transaction-history-table-footer { align-items: flex-start; flex-direction: column; padding-block: 12px; }
+  .transaction-history-footer-controls { width: 100%; justify-content: space-between; }
+}

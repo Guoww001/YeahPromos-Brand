@@ -168,7 +168,7 @@ export const dashboardData = {
       icon: 'wallet',
       children: [
         { id: 'balance-payments', label: 'Balance & payments' },
-        { id: 'finance-transactions', label: 'Transactions' },
+        { id: 'transaction-history', label: 'Transaction history' },
         { id: 'payouts', label: 'Payouts' },
         { id: 'invoices', label: 'Invoices' },
         { id: 'payment-methods', label: 'Payment methods' },
@@ -952,6 +952,97 @@ export const financeBalancePageData = {
     { id: 'PAYOUT-DEMO-0317', date: 'Mar 31, 2025 09:04 AM', amount: '$10,950.00', method: 'Mastercard · •••• 1111', methodTone: 'mastercard', status: 'Paid', description: 'Bi-weekly payout', reference: 'DEMO-9M2D8' },
     { id: 'PAYOUT-DEMO-0303', date: 'Mar 17, 2025 09:01 AM', amount: '$10,320.00', method: 'Bank · •••• 2222', methodTone: 'bank', status: 'Paid', description: 'Bi-weekly payout', reference: 'DEMO-4J1H6' },
     { id: 'PAYOUT-DEMO-0217', date: 'Mar 03, 2025 08:59 AM', amount: '$9,870.00', method: 'Bank · •••• 2222', methodTone: 'bank', status: 'Paid', description: 'Bi-weekly payout', reference: 'DEMO-7P5Q1' },
+  ],
+};
+
+export const transactionHistoryPageData = {
+  demoOnly: true,
+  totalCount: 1238,
+  pageSize: 10,
+  summary: [
+    { id: 'total-sales', label: 'Total sales', value: '$126,431.28', note: '↑ 12.4% vs May 05 – May 12, 2025', tone: 'coral', noteTone: 'positive', icon: 'dollar' },
+    { id: 'locked-commission', label: 'Locked commission', value: '$0.00', note: '— 0.0% vs May 05 – May 12, 2025', tone: 'green', noteTone: 'neutral', icon: 'shield' },
+    { id: 'total-commission', label: 'Total commission', value: '$25,248.63', note: '↑ 8.7% vs May 05 – May 12, 2025', tone: 'coral', noteTone: 'positive', icon: 'coins' },
+    { id: 'estimated-commission', label: 'Estimated commission', value: '$3,821.19', note: '↑ 5.3% vs May 05 – May 12, 2025', tone: 'orange', noteTone: 'positive', icon: 'chart' },
+  ],
+  filters: {
+    timeRanges: [
+      { value: 'last-7d', label: 'May 05 – May 12, 2025' },
+      { value: 'last-30d', label: 'Apr 13 – May 12, 2025' },
+      { value: 'year', label: 'Jan 01 – May 12, 2025' },
+    ],
+    orderStatuses: [
+      { value: 'all', label: 'All order statuses' },
+      { value: 'Paid', label: 'Paid' },
+      { value: 'Pending', label: 'Pending' },
+      { value: 'Void', label: 'Void' },
+    ],
+    skuStatuses: [
+      { value: 'all', label: 'All SKU statuses' },
+      { value: 'In stock', label: 'In stock' },
+      { value: 'Backordered', label: 'Backordered' },
+    ],
+    transactionTypes: [
+      { value: 'all', label: 'All transaction types' },
+      { value: 'Sale', label: 'Sale' },
+      { value: 'Refund', label: 'Refund' },
+    ],
+    groups: [
+      { value: 'all', label: 'All groups' },
+      { value: '182', label: 'Group 182' },
+      { value: '181', label: 'Group 181' },
+    ],
+    publishers: [
+      { value: 'all', label: 'All publishers' },
+      { value: 'Demo Publisher A', label: 'Demo Publisher A' },
+      { value: 'Demo Publisher B', label: 'Demo Publisher B' },
+      { value: 'Demo Publisher C', label: 'Demo Publisher C' },
+    ],
+    channels: [
+      { value: 'all', label: 'All channels' },
+      { value: 'Instagram', label: 'Instagram' },
+      { value: 'YouTube', label: 'YouTube' },
+      { value: 'TikTok', label: 'TikTok' },
+      { value: 'Blog', label: 'Blog' },
+    ],
+    commissionRules: [
+      { value: 'all', label: 'All commission rules' },
+      { value: 'Standard 9%', label: 'Standard 9%' },
+      { value: 'Standard 10%', label: 'Standard 10%' },
+      { value: 'Holiday 8%', label: 'Holiday 8%' },
+    ],
+    countries: [
+      { value: 'all', label: 'All countries' },
+      { value: 'United States', label: 'United States' },
+      { value: 'Canada', label: 'Canada' },
+      { value: 'United Kingdom', label: 'United Kingdom' },
+      { value: 'Australia', label: 'Australia' },
+      { value: 'Germany', label: 'Germany' },
+      { value: 'France', label: 'France' },
+      { value: 'Japan', label: 'Japan' },
+      { value: 'Brazil', label: 'Brazil' },
+      { value: 'Italy', label: 'Italy' },
+    ],
+    amazonBrands: [
+      { value: 'all', label: 'All Amazon brands' },
+      { value: 'Demo Brand', label: 'Demo Brand' },
+      { value: 'Northstar Demo', label: 'Northstar Demo' },
+      { value: 'PartnerBoost', label: 'PartnerBoost' },
+    ],
+  },
+  rows: [
+    { id: 'YP-250512-0001', date: 'May 12, 2025 14:32', datetime: '2025-05-12T14:32:00', itemCount: 1, items: [{ name: 'Demo Linen Shirt', sku: 'SKU-DEMO-1001', quantity: 1 }], quantity: 1, country: 'United States', amazonBrand: 'Demo Brand', salesAmount: '$129.99', commissionId: 'CM-250512-001', commission: '$11.70 (9%)', couponCode: 'WELCOME10', group: '182', status: 'Paid', statusTone: 'paid', skuStatus: 'In stock', transactionType: 'Sale', publisher: 'Demo Publisher A', channel: 'Instagram', commissionRule: 'Standard 9%' },
+    { id: 'YP-250512-0002', date: 'May 12, 2025 13:18', datetime: '2025-05-12T13:18:00', itemCount: 2, items: [{ name: 'Demo Travel Tote', sku: 'SKU-DEMO-1002', quantity: 1 }, { name: 'Demo Cotton Cap', sku: 'SKU-DEMO-1003', quantity: 1 }], quantity: 2, country: 'Canada', amazonBrand: 'Northstar Demo', salesAmount: '$199.98', commissionId: 'CM-250512-002', commission: '$18.00 (9%)', couponCode: '—', group: '182', status: 'Paid', statusTone: 'paid', skuStatus: 'In stock', transactionType: 'Sale', publisher: 'Demo Publisher B', channel: 'YouTube', commissionRule: 'Standard 9%' },
+    { id: 'YP-250512-0003', date: 'May 12, 2025 11:05', datetime: '2025-05-12T11:05:00', itemCount: 1, items: [{ name: 'Demo Everyday Sneaker', sku: 'SKU-DEMO-1004', quantity: 1 }], quantity: 1, country: 'United Kingdom', amazonBrand: 'PartnerBoost', salesAmount: '$89.00', commissionId: 'CM-250512-003', commission: '$8.90 (10%)', couponCode: 'SPRING20', group: '182', status: 'Paid', statusTone: 'paid', skuStatus: 'In stock', transactionType: 'Sale', publisher: 'Demo Publisher C', channel: 'TikTok', commissionRule: 'Standard 10%' },
+    { id: 'YP-250512-0004', date: 'May 12, 2025 10:21', datetime: '2025-05-12T10:21:00', itemCount: 3, items: [{ name: 'Demo Canvas Pouch', sku: 'SKU-DEMO-1005', quantity: 1 }, { name: 'Demo Travel Tote', sku: 'SKU-DEMO-1002', quantity: 1 }, { name: 'Demo Cotton Cap', sku: 'SKU-DEMO-1003', quantity: 1 }], quantity: 3, country: 'Australia', amazonBrand: 'Demo Brand', salesAmount: '$149.97', commissionId: 'CM-250512-004', commission: '$13.50 (9%)', couponCode: '—', group: '182', status: 'Paid', statusTone: 'paid', skuStatus: 'In stock', transactionType: 'Sale', publisher: 'Demo Publisher A', channel: 'Blog', commissionRule: 'Standard 9%' },
+    { id: 'YP-250512-0005', date: 'May 12, 2025 09:12', datetime: '2025-05-12T09:12:00', itemCount: 1, items: [{ name: 'Demo Weekend Jacket', sku: 'SKU-DEMO-1006', quantity: 1 }], quantity: 1, country: 'Germany', amazonBrand: 'Northstar Demo', salesAmount: '$79.99', commissionId: 'CM-250512-005', commission: '$6.40 (8%)', couponCode: '—', group: '182', status: 'Pending', statusTone: 'pending', skuStatus: 'Backordered', transactionType: 'Sale', publisher: 'Demo Publisher B', channel: 'Instagram', commissionRule: 'Holiday 8%' },
+    { id: 'YP-250511-0999', date: 'May 11, 2025 22:47', datetime: '2025-05-11T22:47:00', itemCount: 2, items: [{ name: 'Demo Linen Shirt', sku: 'SKU-DEMO-1001', quantity: 1 }, { name: 'Demo Canvas Pouch', sku: 'SKU-DEMO-1005', quantity: 1 }], quantity: 1, country: 'France', amazonBrand: 'Demo Brand', salesAmount: '$59.99', commissionId: 'CM-250511-999', commission: '$5.40 (9%)', couponCode: 'SAVE15', group: '181', status: 'Paid', statusTone: 'paid', skuStatus: 'In stock', transactionType: 'Sale', publisher: 'Demo Publisher C', channel: 'YouTube', commissionRule: 'Standard 9%' },
+    { id: 'YP-250511-0998', date: 'May 11, 2025 21:33', datetime: '2025-05-11T21:33:00', itemCount: 1, items: [{ name: 'Demo Utility Backpack', sku: 'SKU-DEMO-1007', quantity: 1 }], quantity: 1, country: 'Japan', amazonBrand: 'PartnerBoost', salesAmount: '$109.00', commissionId: 'CM-250511-998', commission: '$9.81 (9%)', couponCode: '—', group: '181', status: 'Paid', statusTone: 'paid', skuStatus: 'In stock', transactionType: 'Sale', publisher: 'Demo Publisher A', channel: 'Instagram', commissionRule: 'Standard 9%' },
+    { id: 'YP-250511-0997', date: 'May 11, 2025 19:16', datetime: '2025-05-11T19:16:00', itemCount: 4, items: [{ name: 'Demo Travel Tote', sku: 'SKU-DEMO-1002', quantity: 2 }, { name: 'Demo Cotton Cap', sku: 'SKU-DEMO-1003', quantity: 2 }], quantity: 2, country: 'United States', amazonBrand: 'Demo Brand', salesAmount: '$239.80', commissionId: 'CM-250511-997', commission: '$21.58 (9%)', couponCode: 'WELCOME10', group: '181', status: 'Paid', statusTone: 'paid', skuStatus: 'In stock', transactionType: 'Sale', publisher: 'Demo Publisher B', channel: 'TikTok', commissionRule: 'Standard 9%' },
+    { id: 'YP-250511-0996', date: 'May 11, 2025 17:02', datetime: '2025-05-11T17:02:00', itemCount: 1, items: [{ name: 'Demo Everyday Sneaker', sku: 'SKU-DEMO-1004', quantity: 1 }], quantity: 1, country: 'Brazil', amazonBrand: 'Northstar Demo', salesAmount: '$69.90', commissionId: 'CM-250511-996', commission: '$5.59 (8%)', couponCode: '—', group: '181', status: 'Void', statusTone: 'void', skuStatus: 'In stock', transactionType: 'Refund', publisher: 'Demo Publisher C', channel: 'Blog', commissionRule: 'Holiday 8%' },
+    { id: 'YP-250511-0995', date: 'May 11, 2025 15:48', datetime: '2025-05-11T15:48:00', itemCount: 2, items: [{ name: 'Demo Canvas Pouch', sku: 'SKU-DEMO-1005', quantity: 1 }, { name: 'Demo Weekend Jacket', sku: 'SKU-DEMO-1006', quantity: 1 }], quantity: 1, country: 'Italy', amazonBrand: 'PartnerBoost', salesAmount: '$99.90', commissionId: 'CM-250511-995', commission: '$8.91 (9%)', couponCode: 'SUMMER25', group: '181', status: 'Paid', statusTone: 'paid', skuStatus: 'In stock', transactionType: 'Sale', publisher: 'Demo Publisher A', channel: 'YouTube', commissionRule: 'Standard 9%' },
+    { id: 'YP-250510-0988', date: 'May 10, 2025 12:11', datetime: '2025-05-10T12:11:00', itemCount: 1, items: [{ name: 'Demo Utility Backpack', sku: 'SKU-DEMO-1007', quantity: 1 }], quantity: 1, country: 'United States', amazonBrand: 'Demo Brand', salesAmount: '$149.00', commissionId: 'CM-250510-988', commission: '$14.90 (10%)', couponCode: '—', group: '182', status: 'Pending', statusTone: 'pending', skuStatus: 'In stock', transactionType: 'Sale', publisher: 'Demo Publisher B', channel: 'TikTok', commissionRule: 'Standard 10%' },
+    { id: 'YP-250509-0977', date: 'May 09, 2025 16:40', datetime: '2025-05-09T16:40:00', itemCount: 1, items: [{ name: 'Demo Everyday Sneaker', sku: 'SKU-DEMO-1004', quantity: 1 }], quantity: 1, country: 'Canada', amazonBrand: 'Northstar Demo', salesAmount: '$119.00', commissionId: 'CM-250509-977', commission: '$10.71 (9%)', couponCode: 'SPRING20', group: '182', status: 'Paid', statusTone: 'paid', skuStatus: 'In stock', transactionType: 'Sale', publisher: 'Demo Publisher C', channel: 'Instagram', commissionRule: 'Standard 9%' },
   ],
 };
 

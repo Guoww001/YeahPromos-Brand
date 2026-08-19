@@ -9,7 +9,7 @@
       content="YeahPromos merchant business overview demo"
     />
     <title>Business Overview · YeahPromos</title>
-    <link rel="stylesheet" href="./styles.css?v=merchant-reference-22" />
+    <link rel="stylesheet" href="./styles.css?v=merchant-reference-23" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -962,6 +962,105 @@
             </section>
           </section>
 
+          <section class="transaction-history-page" data-transaction-history-page hidden aria-labelledby="transaction-history-page-title">
+            <h2 id="transaction-history-page-title" class="sr-only">Transaction history</h2>
+
+            <div class="transaction-history-summary-grid" data-transaction-history-summary></div>
+
+            <section class="transaction-history-card" aria-labelledby="transaction-history-list-title">
+              <div class="transaction-history-card__header">
+                <div>
+                  <h2 id="transaction-history-list-title">1,238 transactions</h2>
+                  <p>Review order activity, sales, and commission status for your partner program.</p>
+                </div>
+                <div class="transaction-history-card__actions">
+                  <button class="button button--secondary" type="button" data-transaction-history-action="bulk-approve-void">Bulk approve / void</button>
+                  <button class="button button--secondary" type="button" data-transaction-history-action="export"><svg><use href="#icon-download"></use></svg>Export CSV</button>
+                  <button class="button button--primary" type="button" data-transaction-history-action="add-transaction"><svg><use href="#icon-plus"></use></svg>Add transaction</button>
+                </div>
+              </div>
+
+              <div class="transaction-history-toolbar" aria-label="Transaction filters">
+                <label class="transaction-history-filter transaction-history-filter--time">
+                  <span class="sr-only">Time range</span>
+                  <select data-transaction-history-time-range aria-label="Time range">
+                    <option value="last-7d">Time range</option>
+                    <option value="last-30d">Last 30 days</option>
+                    <option value="year">This year</option>
+                  </select>
+                  <svg aria-hidden="true"><use href="#icon-calendar"></use></svg>
+                </label>
+                <label class="transaction-history-filter"><span class="sr-only">Order status</span><select data-transaction-history-filter="orderStatus" aria-label="Order status"><option value="all">Order status</option><option value="Paid">Paid</option><option value="Pending">Pending</option><option value="Void">Void</option></select></label>
+                <label class="transaction-history-filter"><span class="sr-only">SKU status</span><select data-transaction-history-filter="skuStatus" aria-label="SKU status"><option value="all">SKU status</option><option value="In stock">In stock</option><option value="Backordered">Backordered</option></select></label>
+                <label class="transaction-history-filter"><span class="sr-only">Transaction type</span><select data-transaction-history-filter="transactionType" aria-label="Transaction type"><option value="all">Transaction type</option><option value="Sale">Sale</option><option value="Refund">Refund</option></select></label>
+                <label class="transaction-history-filter"><span class="sr-only">Group</span><select data-transaction-history-filter="group" aria-label="Group"><option value="all">Group</option><option value="182">Group 182</option><option value="181">Group 181</option></select></label>
+                <label class="transaction-history-filter"><span class="sr-only">Publisher</span><select data-transaction-history-filter="publisher" aria-label="Publisher"><option value="all">Publisher</option><option value="Demo Publisher A">Demo Publisher A</option><option value="Demo Publisher B">Demo Publisher B</option><option value="Demo Publisher C">Demo Publisher C</option></select></label>
+                <label class="transaction-history-filter"><span class="sr-only">Channel</span><select data-transaction-history-filter="channel" aria-label="Channel"><option value="all">Channel</option><option value="Instagram">Instagram</option><option value="YouTube">YouTube</option><option value="TikTok">TikTok</option><option value="Blog">Blog</option></select></label>
+                <label class="transaction-history-filter"><span class="sr-only">Commission rule</span><select data-transaction-history-filter="commissionRule" aria-label="Commission rule"><option value="all">Commission rule</option><option value="Standard 9%">Standard 9%</option><option value="Standard 10%">Standard 10%</option><option value="Holiday 8%">Holiday 8%</option></select></label>
+                <label class="transaction-history-filter"><span class="sr-only">Country</span><select data-transaction-history-filter="country" aria-label="Country"><option value="all">Country</option><option value="United States">United States</option><option value="Canada">Canada</option><option value="United Kingdom">United Kingdom</option><option value="Australia">Australia</option><option value="Germany">Germany</option><option value="France">France</option><option value="Japan">Japan</option><option value="Brazil">Brazil</option><option value="Italy">Italy</option></select></label>
+                <label class="transaction-history-filter"><span class="sr-only">Amazon brand</span><select data-transaction-history-filter="amazonBrand" aria-label="Amazon brand"><option value="all">Amazon brand</option><option value="Demo Brand">Demo Brand</option><option value="Northstar Demo">Northstar Demo</option><option value="PartnerBoost">PartnerBoost</option></select></label>
+                <form class="transaction-history-search" data-transaction-history-search-form>
+                  <label class="sr-only" for="transaction-history-search-input">Search by Order ID, SKU, or UID</label>
+                  <svg aria-hidden="true"><use href="#icon-search"></use></svg>
+                  <input id="transaction-history-search-input" type="search" data-transaction-history-search placeholder="Search by Order ID, SKU, or UID" autocomplete="off" />
+                  <button type="submit" aria-label="Search transactions"><svg><use href="#icon-search"></use></svg></button>
+                </form>
+                <button class="transaction-history-columns" type="button" data-transaction-history-action="columns" aria-label="Choose transaction columns"><svg><use href="#icon-list"></use></svg></button>
+              </div>
+
+              <div class="transaction-history-table-scroll">
+                <table class="transaction-history-table">
+                  <caption class="sr-only">Transaction history</caption>
+                  <colgroup>
+                    <col class="transaction-history-col--check" />
+                    <col class="transaction-history-col--order" />
+                    <col class="transaction-history-col--date" />
+                    <col class="transaction-history-col--items" />
+                    <col class="transaction-history-col--quantity" />
+                    <col class="transaction-history-col--country" />
+                    <col class="transaction-history-col--sales" />
+                    <col class="transaction-history-col--commission-id" />
+                    <col class="transaction-history-col--commission" />
+                    <col class="transaction-history-col--coupon" />
+                    <col class="transaction-history-col--group" />
+                    <col class="transaction-history-col--status" />
+                    <col class="transaction-history-col--action" />
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th scope="col"><label class="transaction-history-checkbox"><input type="checkbox" data-transaction-history-select-all aria-label="Select all visible transactions" /><span aria-hidden="true"></span></label></th>
+                      <th scope="col">Order ID</th>
+                      <th scope="col" aria-sort="descending">Date/Time <button type="button" class="transaction-history-sort" data-transaction-history-action="sort" aria-label="Sort by date"><svg><use href="#icon-chevron"></use></svg></button></th>
+                      <th scope="col">Item(s)</th>
+                      <th scope="col">Quantity</th>
+                      <th scope="col">Country</th>
+                      <th scope="col">Sales amount</th>
+                      <th scope="col">Commission ID</th>
+                      <th scope="col">Commission</th>
+                      <th scope="col">Coupon code</th>
+                      <th scope="col">Group</th>
+                      <th scope="col">Status</th>
+                      <th scope="col"><span class="sr-only">Action</span></th>
+                    </tr>
+                  </thead>
+                  <tbody data-transaction-history-rows></tbody>
+                </table>
+              </div>
+
+              <div class="transaction-history-table-footer">
+                <span data-transaction-history-result-count>Showing 1 to 10 of 1,238 results</span>
+                <div class="transaction-history-footer-controls">
+                  <div class="transaction-history-pagination" data-transaction-history-pagination aria-label="Transaction history pagination"></div>
+                  <label class="transaction-history-page-size">
+                    <span class="sr-only">Transactions per page</span>
+                    <select aria-label="Transactions per page"><option>10 / page</option></select>
+                    <svg aria-hidden="true"><use href="#icon-chevron"></use></svg>
+                  </label>
+                </div>
+              </div>
+            </section>
+          </section>
+
           <section class="help-center-page" data-help-center-page hidden aria-labelledby="help-center-content-title">
             <h2 id="help-center-content-title" class="sr-only">Help center</h2>
 
@@ -1820,6 +1919,6 @@
       <button type="button" data-toast-close aria-label="Dismiss notification"><svg><use href="#icon-x"></use></svg></button>
     </div>
 
-    <script type="module" src="./app.js?v=merchant-reference-22"></script>
+    <script type="module" src="./app.js?v=merchant-reference-23"></script>
   </body>
 </html>

@@ -34,6 +34,7 @@ http://127.0.0.1:8766/demo1/
 - `Commission & Rules > Commission rules`：佣金规则列表、状态/伙伴类型/渠道筛选、规则详情、阶梯佣金和表现数据；
 - `Commission & Rules > Restriction rules`：PPC 限制规则列表、关键词/品牌词、搜索渠道、地区、伙伴范围、违规处理和规则详情；页面数据为依据 RUL-04 功能合同整理的演示数据；
 - `Finance > Balance & payments`：余额摘要、余额趋势、付款计划、掩码支付方式和近期 payout activity；
+- `Finance > Transaction history`：Total Sales、Locked / Total / Estimated Commission 摘要卡、十组交易筛选、Order ID / SKU / UID 搜索、交易表格、商品展开、批量审批/作废、CSV 导出和分页；
 - `Help center > Help center`：帮助分类、热门文章搜索、联系客服、工单入口和系统状态摘要；
 - `Integrations & Settings > API credentials`：Live/Test 环境切换、掩码 API 凭证表、状态筛选、Webhook endpoint 管理和安全提示；
 - `Integrations & Settings > Brand integration`：已连接品牌摘要、Shopify / WooCommerce / Amazon / Web Analytics 集成状态、同步健康摘要和近期活动；
@@ -109,6 +110,7 @@ Demo 1 使用白、黑、红三色构成品牌视觉；旧蓝色不得继续作�
 - 文字与背景应保持清晰对比；状态不得只靠颜色表达，必须同时提供文字、图标、形状或辅助技术语义。
 - 所有交互控件必须保留清晰的键盘焦点轮廓；页面在窄屏和放大浏览场景下仍应能读出标题、字段名、状态和数值。
 - Finance 页面中的图表轴、Tooltip、付款表格、状态标签和辅助说明遵循以上规则；不得为了压缩卡片高度再次降低字号。
+- Transaction history 页面中的摘要卡、十组筛选器、订单表格、Commission / Status 标签、商品展开和批量操作遵循以上字号与行高约束；表格在窄屏保持横向滚动，危险的 Approve / Void 操作只保留带审计原因的占位入口。
 - Invoices 页面中的日期控件、筛选器、发票表格、状态标签和操作按钮同样遵循以上字号与行高约束；表格在窄屏保持横向滚动，不通过缩小文字来塞入所有字段。
 - Help center 的搜索框支持键盘 `/` 快捷键；文章、分类、支持入口和系统状态均提供可读文本，不把颜色作为唯一状态线索。
 - API credentials 的搜索、状态筛选、环境切换、复制、轮换和撤销入口均保留文字标签、键盘焦点和 `aria-label`；密钥与 Webhook 地址只展示掩码占位符，不展示可用凭证。
@@ -125,6 +127,7 @@ Demo 1 使用白、黑、红三色构成品牌视觉；旧蓝色不得继续作�
 可读文字必须使用足够深的中性灰，不能用浅灰压缩信息层级：
 
 - Finance 主要数据使用 `#1F2937`，正文和表格数据使用 `#374151`，辅助说明、图表轴和 Tooltip 使用 `#4B5563`；`#6B7280` 及更浅颜色仅用于禁用态或非信息性装饰。
+- Transaction history 使用 `#1F2937` 承载摘要数值、Order ID 和金额，`#374151` 承载订单字段与表格数据，`#4B5563` 承载筛选器、日期和辅助说明；Paid / Pending / Void 同时使用文字、圆点和浅色背景表达，不只依赖颜色。
 - 白色背景上的普通文字以至少 `4.5:1` 的对比度目标进行设计；放大字号不能替代足够的颜色对比度。
 - 成功、信息等语义色也必须使用较深的文字色，并搭配浅色背景、文字或图标，不能只依靠颜色区分状态。
 - 新增 Finance 组件不得重新引入 `#69758C`、`#748198`、`#7C889C`、`#8994A7` 等低对比度灰色作为可读文字。
@@ -144,6 +147,7 @@ Demo 1 使用白、黑、红三色构成品牌视觉；旧蓝色不得继续作�
 - Brand integration 页面只使用 Demo Store、`demo-store.com` 与合成的同步统计；Add integration、Manage、Reconnect、域名详情和活动日志均为产品接入占位交互，不连接真实店铺、市场或分析服务。
 - Team accounts 只使用合成成员、用户名和席位数据；邀请、编辑、停用、重置访问等均为占位交互，不展示密码或真实账号信息。
 - Recruitment page 只使用 Demo Brand、`partners.yeahpromos.com/demo-brand` 和合成的页面配置；Preview、Copy link、启停、Save changes 与申请按钮均为占位交互，不发布公开页面、不发送邮件、不创建真实申请。
+- Transaction history 只使用合成订单、商品、佣金和国家数据；Approve / Void、Export CSV、Add transaction、商品展开和行操作均为产品接入占位交互，不提交真实交易、不导出业务数据。
 - `Deposit funds`、支付方式管理和自动付款按钮只保留产品接入占位交互，不收集或提交真实支付信息。
 
 ## 本地字体
@@ -162,11 +166,11 @@ Demo 1 使用白、黑、红三色构成品牌视觉；旧蓝色不得继续作�
 
 | 文件 | 职责 |
 | --- | --- |
-| `index.html` | Merchant 页面语义骨架、SVG 图标库、抽屉、状态选择器、活动页、归因规则页、佣金规则页、Restriction rules 页、发票页、财务页、Help center、Team accounts、Recruitment page、Brand integration、API credentials、Messages & Notifications、Coupons 和 Products & Assets 页面 |
+| `index.html` | Merchant 页面语义骨架、SVG 图标库、抽屉、状态选择器、活动页、归因规则页、佣金规则页、Restriction rules 页、发票页、财务页、Transaction history、Help center、Team accounts、Recruitment page、Brand integration、API credentials、Messages & Notifications、Coupons 和 Products & Assets 页面 |
 | `styles.css` | 视觉 Token、布局、组件、状态、动效和响应式样式 |
-| `data.mjs` | 工作区、任务导航、时间范围快照、指标、伙伴、活动、归因规则、佣金规则、Restriction rules、发票、财务、Help center、Team accounts、Recruitment page、Brand integration、API credentials、Messages & Notifications、Coupons 和 Banners & images 模拟数据 |
+| `data.mjs` | 工作区、任务导航、时间范围快照、指标、伙伴、活动、归因规则、佣金规则、Restriction rules、发票、财务、Transaction history、Help center、Team accounts、Recruitment page、Brand integration、API credentials、Messages & Notifications、Coupons 和 Banners & images 模拟数据 |
 | `app-core.mjs` | 不依赖 DOM 的状态函数 |
-| `app.js` | 数据渲染、模块导航、活动筛选、归因模型交互、佣金规则筛选/详情交互、Restriction rules 筛选/选择/详情交互、发票筛选/下载交互、财务趋势/付款交互、Help center 搜索/文章交互、Team accounts 搜索/筛选/邀请/编辑/停用/分页交互、Recruitment page 启停/品牌/队列/文案/申请字段/预览交互、Brand integration 集成管理/重连/活动交互、API credentials 环境/筛选/复制/轮换交互、Messages & Notifications 标签/搜索/回复/伙伴交互、Coupons 日期/筛选/搜索/选择交互、Banners & images 分类/筛选/搜索/详情交互、状态切换、抽屉和浏览器交互 |
+| `app.js` | 数据渲染、模块导航、活动筛选、归因模型交互、佣金规则筛选/详情交互、Restriction rules 筛选/选择/详情交互、发票筛选/下载交互、财务趋势/付款交互、Transaction history 搜索/筛选/选择/商品展开/批量操作/导出/分页交互、Help center 搜索/文章交互、Team accounts 搜索/筛选/邀请/编辑/停用/分页交互、Recruitment page 启停/品牌/队列/文案/申请字段/预览交互、Brand integration 集成管理/重连/活动交互、API credentials 环境/筛选/复制/轮换交互、Messages & Notifications 标签/搜索/回复/伙伴交互、Coupons 日期/筛选/搜索/选择交互、Banners & images 分类/筛选/搜索/详情交互、状态切换、抽屉和浏览器交互 |
 | `tests/app-core.test.mjs` | 时间范围、导航展开和 Demo 状态行为测试 |
 | `tests/structure.test.mjs` | Merchant 结构、字体、响应式和无障碍规则测试 |
 
