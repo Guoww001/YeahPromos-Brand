@@ -22870,6 +22870,11 @@ body.is-sidebar-collapsed .account-card {
   line-height: 1.45;
 }
 
+.content-frame :is(input, select, textarea, .button) {
+  font-size: 12px !important;
+  line-height: 1.4;
+}
+
 @media (max-width: 767px) {
   .sidebar__collapse { display: none; }
   body.is-sidebar-collapsed { --sidebar-width: 272px; }
