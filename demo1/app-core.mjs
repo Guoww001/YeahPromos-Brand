@@ -51,3 +51,7 @@ export function toggleNavigationGroup(state, groupId) {
       : [...state.expandedGroups, groupId],
   };
 }
+
+export function isNavigationItemActive(state, itemId) {
+  return state.activeNavigationId === itemId;
+}

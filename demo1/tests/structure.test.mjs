@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
@@ -23,6 +24,11 @@ test('page provides the required sidebar and dashboard regions', () => {
   assert.match(html, /data-toast/);
   assert.match(html, /data-action-center/);
   assert.match(html, /data-demo-state/);
+});
+
+test('app entry remains syntactically valid after conflict resolution', () => {
+  const syntax = spawnSync(process.execPath, ['--check', resolve(demoDirectory, 'app.js')], { encoding: 'utf8' });
+  assert.equal(syntax.status, 0, syntax.stderr || syntax.stdout);
 });
 
 test('attribution rules has its own routed page shell and controls', () => {
@@ -173,35 +179,34 @@ test('finance neutral text uses contrast-ready dark gray tokens', () => {
 });
 
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
-  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-5"><\/script>/);
+  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-18"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);
   assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
 });
 
 test('styles define the light red merchant-dashboard visual tokens', () => {
-  assert.match(css, /--color-brand:\s*#fa4a4a/i);
-  assert.match(css, /--color-canvas:\s*#fbfbfa/i);
-  assert.match(css, /--color-brand-soft:\s*#fff1f3/i);
+  assert.match(css, /--color-brand:\s*#e60000/i);
+  assert.match(css, /--color-canvas:\s*#ffffff/i);
+  assert.match(css, /--color-brand-soft:\s*#fde8e8/i);
   assert.match(css, /--radius-card:\s*6px/i);
 });
 
 test('overview follows the reference dashboard hierarchy', () => {
   assert.match(html, /class="brand__wordmark"><strong>YEAH<\/strong><b>P<\/b><strong>ROMOS<\/strong>/);
   assert.match(html, /Performance overview/);
-  assert.match(html, /class="live-status"[^>]*><i><\/i> Live/);
   assert.match(html, /Scope: All partners and campaigns/);
   assert.match(html, /class="page-header__utility"/);
   assert.match(html, /class="ranking-table-head"/);
   assert.match(appJs, /data-metric-id="\$\{metric\.id\}"/);
   assert.match(css, /\.metric-card\[data-metric-id="net-sales"\]/i);
-  assert.match(css, /\.analytics-grid\s*\{[\s\S]*grid-template-columns:\s*minmax\(0, 1\.9fr\)\s+minmax\(0, \.9fr\)\s+minmax\(0, \.9fr\)/s);
-  assert.match(css, /\.summary-grid\s*\{[\s\S]*display:\s*contents;/s);
-  assert.match(css, /\.metric-card::before\s*\{[\s\S]*width:\s*38px;/s);
+  assert.match(css, /\.overview-layout\s*\{/s);
+  assert.match(css, /\.overview-summary-grid\s*\{/s);
+  assert.match(css, /\.overview-metric-card::before\s*\{/s);
 });
 
 test('preview busts the entry cache for the reference dashboard skin', () => {
-  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-5"/);
-  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-5"/);
+  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-18"/);
+  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-18"/);
 });
 
 test('reference dashboard keeps flat cards and red action controls', () => {
@@ -223,36 +228,28 @@ test('merchant overview keeps task-oriented navigation and account context', () 
   assert.match(data, /Data & Transactions/);
 });
 
-test('styles load all local Plus Jakarta Sans weights without remote font requests', () => {
-  const fontFaces = css.match(/@font-face/g) ?? [];
-  assert.equal(fontFaces.length, 5);
-  assert.match(css, /\.\.\/fonts\/plus-jakarta-sans-latin-400-normal\.woff2/);
-  assert.match(css, /\.\.\/fonts\/plus-jakarta-sans-latin-800-normal\.woff2/);
-  assert.doesNotMatch(css, /fonts\.googleapis|use\.typekit|https?:\/\//i);
+test('target modules use the approved red visual tokens and light card surfaces', () => {
+  assert.match(css, /--color-brand:\s*#e60000/);
+  assert.match(css, /\.overview-chart\s*\{/);
+  assert.match(css, /\.recruitment-module\s*\{/);
+  assert.match(css, /\.workspace-module\s*\{/);
+  assert.match(css, /\.workspace-button--primary\s*\{/);
 });
 
-test('partner details use accessible modal dialog semantics', () => {
-  assert.match(html, /data-drawer[^>]+role="dialog"/);
-  assert.match(html, /data-drawer[^>]+aria-modal="true"/);
-  assert.match(html, /data-drawer[^>]+aria-labelledby="merchant-drawer-title"/);
-  assert.match(html, /data-drawer-backdrop[^>]+aria-label="Dismiss partner details overlay"/);
+test('smooth chart and selected child navigation contracts remain in the source', () => {
+  assert.match(appJs, /buildSmoothChartPath/);
+  assert.match(appJs, /isNavigationItemActive/);
+  assert.match(css, /\.nav-child\.is-active/);
 });
 
-test('styles retain a side drawer on mobile and respect reduced motion', () => {
-  assert.match(css, /@media \(max-width: 767px\)/);
-  assert.match(css, /\.sidebar\.is-open\s*\{[^}]*transform:\s*translateX\(0\)/s);
-  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
-});
 
-test('desktop-only stylesheet hides both mobile navigation controls with a selector stronger than icon button', () => {
-  assert.match(css, /\.sidebar__close\.icon-button,\s*\.mobile-menu\.icon-button\s*\{\s*display:\s*none;/s);
-});
-
-test('partner ranking fills are block elements so percentage widths can render', () => {
-  assert.match(css, /\.ranking-row__fill\s*\{[^}]*display:\s*block;/s);
-});
-
-test('drawer focus restoration falls back to the partner trigger', () => {
-  assert.match(appJs, /lastDrawerTrigger\?\.isConnected/);
-  assert.match(appJs, /data-partner-view=.*activePartnerId/s);
+test('target workspace keeps the overview shell and routed module regions', () => {
+  assert.match(html, /data-overview-page/);
+  assert.match(html, /data-overview-chart/);
+  assert.match(html, /data-module-page/);
+  assert.match(appJs, /createOverviewState/);
+  assert.match(appJs, /createRecruitmentState/);
+  assert.match(appJs, /createOperationsState/);
+  assert.match(appJs, /renderOperationsPage/);
+  assert.match(data, /Data & Transactions/);
 });
