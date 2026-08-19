@@ -1,4 +1,4 @@
-import { apiCredentialsPageData, attributionPageData, bannersImagesPageData, brandIntegrationPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, couponsPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData, recruitmentPageSettingsData, restrictionRulesPageData, teamAccountsPageData, transactionHistoryPageData } from './data.mjs?v=merchant-reference-23';
+import { apiCredentialsPageData, attributionPageData, bannersImagesPageData, brandIntegrationPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, couponAttributionPageData, couponsPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData, ppcPageData, recruitmentPageSettingsData, restrictionRulesPageData, teamAccountsPageData, transactionHistoryPageData } from './data.mjs?v=merchant-reference-25';
 import {
   createDashboardState,
   isNavigationItemActive,
@@ -87,7 +87,6 @@ const sidebar = document.querySelector('[data-sidebar]');
 const sidebarBackdrop = document.querySelector('[data-sidebar-backdrop]');
 const sidebarOpenButton = document.querySelector('[data-sidebar-open]');
 const sidebarCloseButton = document.querySelector('[data-sidebar-close]');
-const sidebarCollapseButton = document.querySelector('[data-sidebar-collapse]');
 const campaignPage = document.querySelector('[data-campaign-page]');
 const campaignMetrics = document.querySelector('[data-campaign-metrics]');
 const campaignTabs = document.querySelector('[data-campaign-tabs]');
@@ -108,6 +107,14 @@ const attributionCoverage = document.querySelector('[data-attribution-coverage]'
 const attributionDistribution = document.querySelector('[data-attribution-distribution]');
 const attributionRules = document.querySelector('[data-attribution-rules]');
 const attributionAudit = document.querySelector('[data-attribution-audit]');
+const couponAttributionPage = document.querySelector('[data-coupon-attribution-page]');
+const couponAttributionActions = document.querySelector('[data-coupon-attribution-actions]');
+const couponAttributionSummary = document.querySelector('[data-coupon-attribution-summary]');
+const couponAttributionRows = document.querySelector('[data-coupon-attribution-rows]');
+const couponAttributionSearch = document.querySelector('[data-coupon-attribution-search]');
+const couponAttributionSelectAll = document.querySelector('[data-coupon-attribution-select-all]');
+const couponAttributionResultCount = document.querySelector('[data-coupon-attribution-result-count]');
+const couponAttributionDetail = document.querySelector('[data-coupon-attribution-detail]');
 const commissionRulesPage = document.querySelector('[data-commission-rules-page]');
 const commissionRulesActions = document.querySelector('[data-commission-rules-actions]');
 const commissionRulesSummary = document.querySelector('[data-commission-rules-summary]');
@@ -124,6 +131,14 @@ const restrictionRulesSearch = document.querySelector('[data-restriction-rules-s
 const restrictionRulesSelectAll = document.querySelector('[data-restriction-rules-select-all]');
 const restrictionRulesResultCount = document.querySelector('[data-restriction-rules-result-count]');
 const restrictionRulesDetail = document.querySelector('[data-restriction-rules-detail]');
+const ppcPage = document.querySelector('[data-ppc-page]');
+const ppcActions = document.querySelector('[data-ppc-actions]');
+const ppcSummary = document.querySelector('[data-ppc-summary]');
+const ppcRows = document.querySelector('[data-ppc-rows]');
+const ppcSearch = document.querySelector('[data-ppc-search]');
+const ppcSelectAll = document.querySelector('[data-ppc-select-all]');
+const ppcResultCount = document.querySelector('[data-ppc-result-count]');
+const ppcDetail = document.querySelector('[data-ppc-detail]');
 const financePage = document.querySelector('[data-finance-page]');
 const financeActions = document.querySelector('[data-finance-actions]');
 const financeSummary = document.querySelector('[data-finance-summary]');
@@ -247,6 +262,18 @@ const attributionState = {
   isDirty: false,
 };
 
+const couponAttributionState = {
+  search: '',
+  selectedRuleId: couponAttributionPageData.selectedRuleId,
+  filters: {
+    status: 'all',
+    couponScope: 'all',
+    matchType: 'all',
+    conflict: 'all',
+  },
+  selectedIds: new Set([couponAttributionPageData.selectedRuleId]),
+};
+
 const commissionRulesState = {
   search: '',
   selectedRuleId: commissionRulesPageData.selectedRuleId,
@@ -270,6 +297,19 @@ const restrictionRulesState = {
     effectiveDate: 'all',
   },
   selectedIds: new Set([restrictionRulesPageData.selectedRuleId]),
+};
+
+const ppcState = {
+  search: '',
+  selectedRuleId: ppcPageData.selectedRuleId,
+  filters: {
+    status: 'all',
+    policy: 'all',
+    channel: 'all',
+    region: 'all',
+    effectiveDate: 'all',
+  },
+  selectedIds: new Set([ppcPageData.selectedRuleId]),
 };
 
 const financeState = {
@@ -417,8 +457,6 @@ const renderNavigation = () => {
           <button
             class="nav-item${isActive ? ' is-active' : ''}"
             type="button"
-            aria-label="${localizedNavigationLabel(item)}"
-            title="${localizedNavigationLabel(item)}"
             data-nav-item="${item.id}"
             ${hasChildren ? `data-nav-group="${item.id}" aria-expanded="${isExpanded}"` : ''}
             ${isActive && !state.activeNavigationChild ? 'aria-current="page"' : ''}
@@ -1489,6 +1527,171 @@ const renderAttributionPage = () => {
     .join('');
 };
 
+const getFilteredCouponAttributionRules = () => {
+  const { search, filters } = couponAttributionState;
+  const normalizedSearch = search.trim().toLowerCase();
+
+  return couponAttributionPageData.rules.filter((rule) => {
+    const matchesSearch = !normalizedSearch || [
+      rule.name,
+      rule.ruleId,
+      rule.couponScope,
+      rule.matchType,
+      rule.fallback,
+      rule.conflict,
+      rule.status,
+    ].some((value) => String(value ?? '').toLowerCase().includes(normalizedSearch));
+    const matchesStatus = filters.status === 'all' || rule.status === filters.status;
+    const matchesScope = filters.couponScope === 'all' || rule.couponScope === filters.couponScope;
+    const matchesType = filters.matchType === 'all' || rule.matchType === filters.matchType;
+    const matchesConflict = filters.conflict === 'all' || rule.conflict === filters.conflict;
+
+    return matchesSearch && matchesStatus && matchesScope && matchesType && matchesConflict;
+  });
+};
+
+const renderCouponAttributionSummary = () => {
+  if (!couponAttributionSummary) return;
+
+  couponAttributionSummary.innerHTML = couponAttributionPageData.metrics
+    .map((metric) => `
+      <article class="coupon-attribution-summary-card coupon-attribution-summary-card--${escapeHtml(metric.tone)}">
+        <div class="coupon-attribution-summary-card__copy">
+          <span>${escapeHtml(metric.label)}</span>
+          <strong>${escapeHtml(metric.value)}</strong>
+          <small>${escapeHtml(metric.note)}</small>
+        </div>
+        <span class="coupon-attribution-summary-card__icon">${icon(metric.icon)}</span>
+      </article>
+    `)
+    .join('');
+};
+
+const updateCouponAttributionSelection = () => {
+  const visibleIds = getFilteredCouponAttributionRules().map((rule) => rule.id);
+  const visibleSelected = visibleIds.filter((id) => couponAttributionState.selectedIds.has(id));
+
+  if (couponAttributionSelectAll) {
+    couponAttributionSelectAll.checked = visibleIds.length > 0 && visibleSelected.length === visibleIds.length;
+    couponAttributionSelectAll.indeterminate = visibleSelected.length > 0 && visibleSelected.length < visibleIds.length;
+  }
+};
+
+const renderCouponAttributionRows = () => {
+  if (!couponAttributionRows) return;
+
+  const filteredRules = getFilteredCouponAttributionRules();
+  couponAttributionRows.innerHTML = filteredRules.length
+    ? filteredRules.map((rule) => `
+        <tr class="${rule.id === couponAttributionState.selectedRuleId ? 'is-selected' : ''}" data-coupon-attribution-row="${escapeHtml(rule.id)}" aria-selected="${rule.id === couponAttributionState.selectedRuleId}">
+          <td class="coupon-attribution-cell--check">
+            <label class="coupon-attribution-checkbox">
+              <input type="checkbox" data-coupon-attribution-select="${escapeHtml(rule.id)}" ${couponAttributionState.selectedIds.has(rule.id) ? 'checked' : ''} aria-label="Select ${escapeHtml(rule.name)}" />
+              <span aria-hidden="true"></span>
+            </label>
+          </td>
+          <td class="coupon-attribution-cell--name">
+            <strong>${escapeHtml(rule.name)}</strong>
+            <small>${escapeHtml(rule.ruleId)}</small>
+          </td>
+          <td><span class="coupon-attribution-scope coupon-attribution-scope--${escapeHtml(rule.scopeTone)}">${escapeHtml(rule.couponScope)}</span></td>
+          <td class="coupon-attribution-cell--match">${escapeHtml(rule.matchType)}</td>
+          <td class="coupon-attribution-cell--priority"><strong>${escapeHtml(rule.priority)}</strong></td>
+          <td class="coupon-attribution-cell--fallback">${escapeHtml(rule.fallback)}</td>
+          <td class="coupon-attribution-cell--lookback">${escapeHtml(rule.lookback)}</td>
+          <td><span class="coupon-attribution-status coupon-attribution-status--${escapeHtml(rule.statusTone)}"><i aria-hidden="true"></i>${escapeHtml(rule.status)}</span></td>
+          <td class="coupon-attribution-cell--actions">
+            <button type="button" data-coupon-attribution-action="edit" data-coupon-attribution-rule="${escapeHtml(rule.name)}" aria-label="Edit ${escapeHtml(rule.name)}">${icon('edit')}</button>
+            <button type="button" data-coupon-attribution-action="row-menu" data-coupon-attribution-rule="${escapeHtml(rule.name)}" aria-label="More actions for ${escapeHtml(rule.name)}">${icon('more')}</button>
+          </td>
+        </tr>
+      `).join('')
+    : '<tr><td class="coupon-attribution-empty" colspan="9"><strong>No coupon attribution rules found</strong><span>Try changing your search or filters.</span></td></tr>';
+
+  if (couponAttributionResultCount) {
+    const total = couponAttributionPageData.rules.length;
+    couponAttributionResultCount.textContent = filteredRules.length
+      ? `Showing 1 to ${filteredRules.length} of ${total} rules`
+      : `Showing 0 of ${total} rules`;
+  }
+
+  updateCouponAttributionSelection();
+};
+
+const renderCouponAttributionDetail = () => {
+  if (!couponAttributionDetail) return;
+
+  const rule = couponAttributionPageData.rules.find((item) => item.id === couponAttributionState.selectedRuleId);
+  if (!rule) {
+    couponAttributionDetail.hidden = true;
+    couponAttributionDetail.innerHTML = '';
+    couponAttributionPage?.classList.add('is-detail-closed');
+    return;
+  }
+
+  const detail = couponAttributionPageData.details[rule.id] ?? {
+    description: `Applies ${rule.matchType.toLowerCase()} for ${rule.couponScope.toLowerCase()}.`,
+    decision: rule.fallback,
+    scope: rule.couponScope,
+    lookback: rule.lookback,
+    effectiveDate: 'May 01, 2025',
+    lastUpdated: `${rule.lastUpdated} by Demo Admin`,
+    decisionOrder: ['Validate the coupon and order scope before assigning credit.', 'Apply one primary commission decision per order.', 'Record any fallback or conflict for audit.'],
+    conflicts: ['Out-of-scope or invalid codes are ignored.', 'Multiple ownership matches require manual review.'],
+    audit: 'Decision inputs and outcomes are retained in the attribution audit log.',
+  };
+
+  couponAttributionDetail.hidden = false;
+  couponAttributionPage?.classList.remove('is-detail-closed');
+  couponAttributionDetail.innerHTML = `
+    <div class="coupon-attribution-detail__header">
+      <div>
+        <span class="eyebrow">Selected attribution rule</span>
+        <h2 id="coupon-attribution-detail-title">${escapeHtml(rule.name)}</h2>
+        <p>${escapeHtml(rule.ruleId)}</p>
+      </div>
+      <button class="icon-button" type="button" data-coupon-attribution-action="close-detail" aria-label="Close coupon attribution details">${icon('x')}</button>
+    </div>
+    <p class="coupon-attribution-detail__description">${escapeHtml(detail.description)}</p>
+
+    <div class="coupon-attribution-detail__decision" role="status">
+      <span class="coupon-attribution-detail__decision-icon">${icon('check')}</span>
+      <div><span>Primary decision</span><strong>${escapeHtml(detail.decision)}</strong></div>
+    </div>
+
+    <div class="coupon-attribution-detail__facts">
+      <div><span>Coupon scope</span><strong>${escapeHtml(detail.scope)}</strong></div>
+      <div><span>Lookback</span><strong>${escapeHtml(detail.lookback)}</strong></div>
+      <div><span>Effective date</span><strong>${escapeHtml(detail.effectiveDate)}</strong></div>
+      <div><span>Last updated</span><strong>${escapeHtml(detail.lastUpdated)}</strong></div>
+    </div>
+
+    <section class="coupon-attribution-detail__section">
+      <div class="coupon-attribution-detail__section-header"><div><h3>Decision order</h3><p>Evaluate the order from top to bottom.</p></div><button type="button" class="coupon-attribution-detail__edit" data-coupon-attribution-action="edit-rule">Edit</button></div>
+      <ol class="coupon-attribution-decision-list">
+        ${detail.decisionOrder.map((item, index) => `<li><span>${index + 1}</span><p>${escapeHtml(item)}</p></li>`).join('')}
+      </ol>
+    </section>
+
+    <section class="coupon-attribution-detail__section coupon-attribution-conflicts">
+      <div class="coupon-attribution-detail__section-header"><div><h3>Conflict handling</h3><p>Never pay two primary commissions for one order.</p></div></div>
+      <ul>${detail.conflicts.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
+    </section>
+
+    <section class="coupon-attribution-detail__audit">
+      <span class="coupon-attribution-detail__audit-icon">${icon('shield')}</span>
+      <div><strong>Audit evidence</strong><p>${escapeHtml(detail.audit)}</p></div>
+    </section>
+  `;
+};
+
+const renderCouponAttributionPage = () => {
+  if (!couponAttributionPage) return;
+  renderCouponAttributionSummary();
+  renderCouponAttributionRows();
+  renderCouponAttributionDetail();
+};
+
 const getFilteredCommissionRules = () => {
   const { search, filters } = commissionRulesState;
   const normalizedSearch = search.trim().toLowerCase();
@@ -1684,12 +1887,12 @@ const renderCommissionRulesPage = () => {
   renderCommissionRulesDetail();
 };
 
-const getFilteredRestrictionRules = () => {
-  const { search, filters } = restrictionRulesState;
+const filterRules = (pageData, rulesState) => {
+  const { search, filters } = rulesState;
   const normalizedSearch = search.trim().toLowerCase();
   const referenceDate = Date.parse('2025-05-12T23:59:59Z');
 
-  return restrictionRulesPageData.rules.filter((rule) => {
+  return pageData.rules.filter((rule) => {
     const matchesSearch = !normalizedSearch || [
       rule.name,
       rule.ruleId,
@@ -1699,6 +1902,8 @@ const getFilteredRestrictionRules = () => {
       rule.channel,
       rule.region,
       rule.partnerScope,
+      rule.matchType,
+      rule.violationAction,
       rule.status,
     ].some((value) => String(value ?? '').toLowerCase().includes(normalizedSearch));
     const matchesStatus = filters.status === 'all' || rule.status === filters.status;
@@ -1716,12 +1921,12 @@ const getFilteredRestrictionRules = () => {
   });
 };
 
-const renderRestrictionRulesSummary = () => {
-  if (!restrictionRulesSummary) return;
+const renderRulesSummary = (pageData, target) => {
+  if (!target) return;
 
-  restrictionRulesSummary.innerHTML = restrictionRulesPageData.metrics
+  target.innerHTML = pageData.metrics
     .map((metric) => `
-      <article class="restriction-rules-summary-card restriction-rules-summary-card--${metric.tone}">
+      <article class="restriction-rules-summary-card restriction-rules-summary-card--${escapeHtml(metric.tone)}">
         <div class="restriction-rules-summary-card__copy">
           <span>${escapeHtml(metric.label)}</span>
           <strong>${escapeHtml(metric.value)}</strong>
@@ -1733,26 +1938,27 @@ const renderRestrictionRulesSummary = () => {
     .join('');
 };
 
-const updateRestrictionRulesSelection = () => {
-  const visibleIds = getFilteredRestrictionRules().map((rule) => rule.id);
-  const visibleSelected = visibleIds.filter((id) => restrictionRulesState.selectedIds.has(id));
+const updateRulesSelection = (filteredRules, rulesState, selectAll) => {
+  const visibleIds = filteredRules.map((rule) => rule.id);
+  const visibleSelected = visibleIds.filter((id) => rulesState.selectedIds.has(id));
 
-  if (restrictionRulesSelectAll) {
-    restrictionRulesSelectAll.checked = visibleIds.length > 0 && visibleSelected.length === visibleIds.length;
-    restrictionRulesSelectAll.indeterminate = visibleSelected.length > 0 && visibleSelected.length < visibleIds.length;
+  if (selectAll) {
+    selectAll.checked = visibleIds.length > 0 && visibleSelected.length === visibleIds.length;
+    selectAll.indeterminate = visibleSelected.length > 0 && visibleSelected.length < visibleIds.length;
   }
 };
 
-const renderRestrictionRulesRows = () => {
-  if (!restrictionRulesRows) return;
+const renderRulesRows = ({ pageData, rulesState, rows, resultCount, selectAll, prefix, emptyLabel }) => {
+  if (!rows) return;
 
-  const filteredRules = getFilteredRestrictionRules();
-  restrictionRulesRows.innerHTML = filteredRules.length
+  const filteredRules = filterRules(pageData, rulesState);
+  const attribute = (name) => `data-${prefix}-${name}`;
+  rows.innerHTML = filteredRules.length
     ? filteredRules.map((rule) => `
-        <tr class="${rule.id === restrictionRulesState.selectedRuleId ? 'is-selected' : ''}" data-restriction-rules-row="${escapeHtml(rule.id)}" aria-selected="${rule.id === restrictionRulesState.selectedRuleId}">
+        <tr class="${rule.id === rulesState.selectedRuleId ? 'is-selected' : ''}" ${attribute('row')}="${escapeHtml(rule.id)}" aria-selected="${rule.id === rulesState.selectedRuleId}">
           <td class="restriction-rules-cell--check">
             <label class="restriction-rules-checkbox">
-              <input type="checkbox" data-restriction-rules-select="${escapeHtml(rule.id)}" ${restrictionRulesState.selectedIds.has(rule.id) ? 'checked' : ''} aria-label="Select ${escapeHtml(rule.name)}" />
+              <input type="checkbox" ${attribute('select')}="${escapeHtml(rule.id)}" ${rulesState.selectedIds.has(rule.id) ? 'checked' : ''} aria-label="Select ${escapeHtml(rule.name)}" />
               <span aria-hidden="true"></span>
             </label>
           </td>
@@ -1771,58 +1977,75 @@ const renderRestrictionRulesRows = () => {
           <td class="restriction-rules-cell--effective">${escapeHtml(rule.effectiveDate)}</td>
           <td><span class="restriction-rules-status restriction-rules-status--${escapeHtml(rule.statusTone)}"><i aria-hidden="true"></i>${escapeHtml(rule.status)}</span></td>
           <td class="restriction-rules-cell--actions">
-            <button type="button" data-restriction-rules-action="edit" data-restriction-rules-rule="${escapeHtml(rule.name)}" aria-label="Edit ${escapeHtml(rule.name)}">${icon('edit')}</button>
-            <button type="button" data-restriction-rules-action="row-menu" data-restriction-rules-rule="${escapeHtml(rule.name)}" aria-label="More actions for ${escapeHtml(rule.name)}">${icon('more')}</button>
+            <button type="button" ${attribute('action')}="edit" ${attribute('rule')}="${escapeHtml(rule.name)}" aria-label="Edit ${escapeHtml(rule.name)}">${icon('edit')}</button>
+            <button type="button" ${attribute('action')}="row-menu" ${attribute('rule')}="${escapeHtml(rule.name)}" aria-label="More actions for ${escapeHtml(rule.name)}">${icon('more')}</button>
           </td>
         </tr>
       `).join('')
-    : '<tr><td class="restriction-rules-empty" colspan="10"><strong>No restriction rules found</strong><span>Try changing your search or filters.</span></td></tr>';
+    : `<tr><td class="restriction-rules-empty" colspan="10"><strong>${escapeHtml(emptyLabel)}</strong><span>Try changing your search or filters.</span></td></tr>`;
 
-  if (restrictionRulesResultCount) {
-    const total = restrictionRulesPageData.rules.length;
-    restrictionRulesResultCount.textContent = filteredRules.length
+  if (resultCount) {
+    const total = pageData.rules.length;
+    resultCount.textContent = filteredRules.length
       ? `Showing 1 to ${filteredRules.length} of ${total} rules`
       : `Showing 0 of ${total} rules`;
   }
 
-  updateRestrictionRulesSelection();
+  updateRulesSelection(filteredRules, rulesState, selectAll);
 };
 
-const renderRestrictionRulesDetail = () => {
-  if (!restrictionRulesDetail) return;
+const renderRulesDetail = ({ pageData, rulesState, detailTarget, pageTarget, prefix, variant }) => {
+  if (!detailTarget) return;
 
-  const rule = restrictionRulesPageData.rules.find((item) => item.id === restrictionRulesState.selectedRuleId);
+  const rule = pageData.rules.find((item) => item.id === rulesState.selectedRuleId);
   if (!rule) {
-    restrictionRulesDetail.hidden = true;
-    restrictionRulesDetail.innerHTML = '';
-    restrictionRulesPage?.classList.add('is-detail-closed');
+    detailTarget.hidden = true;
+    detailTarget.innerHTML = '';
+    pageTarget?.classList.add('is-detail-closed');
     return;
   }
 
-  const detail = restrictionRulesPageData.details[rule.id] ?? {
+  const isPpc = variant === 'ppc';
+  const detail = pageData.details[rule.id] ?? {
     description: `Applies a ${rule.policy.toLowerCase()} policy to ${rule.termsSummary.toLowerCase()} for ${rule.partnerScope.toLowerCase()}.`,
     enforcement: rule.policy === 'Block' ? 'Block and review' : rule.policy === 'Review' ? 'Review before approval' : 'Allow when conditions pass',
     keywords: [rule.termsSummary],
     channels: [rule.channel],
     regions: rule.region,
     partnerScope: rule.partnerScope,
+    matchType: rule.matchType ?? 'Exact and phrase match',
+    violationAction: rule.violationAction ?? (rule.policy === 'Block' ? 'Block traffic and notify partner' : 'Record for policy review'),
     effectiveDate: rule.effectiveDate,
     lastUpdated: rule.lastUpdated,
     updatedBy: 'Demo Admin',
     violations: 'No flagged violations',
     conditions: ['Applies only to the selected channel and region scope', 'Partner traffic is checked before attribution is applied'],
   };
+  const enhancedFacts = isPpc ? `
+      <div><span>Match type</span><strong>${escapeHtml(detail.matchType)}</strong></div>
+      <div><span>Violation action</span><strong>${escapeHtml(detail.violationAction)}</strong></div>` : '';
+  const businessRuleSections = isPpc && pageData.businessRules ? `
+    <section class="restriction-rules-detail__section restriction-rules-priority">
+      <div class="restriction-rules-detail__section-header"><div><h3>Decision priority</h3><p>Apply the policy in this order when rules overlap.</p></div></div>
+      <ol>${pageData.businessRules.precedence.map((item, index) => `<li><span>${index + 1}</span><div><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.description)}</p></div></li>`).join('')}</ol>
+    </section>
 
-  restrictionRulesDetail.hidden = false;
-  restrictionRulesPage?.classList.remove('is-detail-closed');
-  restrictionRulesDetail.innerHTML = `
+    <section class="restriction-rules-detail__audit">
+      <span class="restriction-rules-detail__audit-icon">${icon('shield')}</span>
+      <div><strong>Audit evidence</strong><p>${escapeHtml(pageData.businessRules.audit)}</p></div>
+    </section>` : '';
+  const attribute = (name) => `data-${prefix}-${name}`;
+
+  detailTarget.hidden = false;
+  pageTarget?.classList.remove('is-detail-closed');
+  detailTarget.innerHTML = `
     <div class="restriction-rules-detail__header">
       <div>
-        <span class="eyebrow">Selected restriction</span>
-        <h2 id="restriction-rules-detail-title">${escapeHtml(rule.name)}</h2>
+        <span class="eyebrow">${isPpc ? 'Selected PPC rule' : 'Selected restriction'}</span>
+        <h2 id="${isPpc ? 'ppc-detail-title' : 'restriction-rules-detail-title'}">${escapeHtml(rule.name)}</h2>
         <p>${escapeHtml(rule.ruleId)}</p>
       </div>
-      <button class="icon-button" type="button" data-restriction-rules-action="close-detail" aria-label="Close restriction rule details">${icon('x')}</button>
+      <button class="icon-button" type="button" ${attribute('action')}="close-detail" aria-label="Close ${isPpc ? 'PPC' : 'restriction rule'} details">${icon('x')}</button>
     </div>
     <p class="restriction-rules-detail__description">${escapeHtml(detail.description)}</p>
 
@@ -1832,6 +2055,7 @@ const renderRestrictionRulesDetail = () => {
       <div><span>Channels</span><strong>${detail.channels.map((channel) => escapeHtml(channel)).join(', ')}</strong></div>
       <div><span>Regions</span><strong>${escapeHtml(detail.regions)}</strong></div>
       <div><span>Partner scope</span><strong>${escapeHtml(detail.partnerScope)}</strong></div>
+      ${enhancedFacts}
       <div><span>Effective date</span><strong>${escapeHtml(detail.effectiveDate)}</strong></div>
       <div><span>Last updated</span><strong>${escapeHtml(detail.lastUpdated)} by ${escapeHtml(detail.updatedBy)}</strong></div>
     </div>
@@ -1839,7 +2063,7 @@ const renderRestrictionRulesDetail = () => {
     <section class="restriction-rules-detail__section">
       <div class="restriction-rules-detail__section-header">
         <div><h3>Protected terms</h3><p>Keywords evaluated before partner paid traffic is approved.</p></div>
-        <button type="button" class="restriction-rules-detail__edit" data-restriction-rules-action="edit-terms">Edit</button>
+        <button type="button" class="restriction-rules-detail__edit" ${attribute('action')}="edit-terms">Edit</button>
       </div>
       <div class="restriction-rules-term-list">
         ${detail.keywords.map((keyword) => `<span>${escapeHtml(keyword)}</span>`).join('')}
@@ -1847,12 +2071,14 @@ const renderRestrictionRulesDetail = () => {
     </section>
 
     <section class="restriction-rules-detail__section restriction-rules-conditions">
-      <div class="restriction-rules-detail__section-header"><div><h3>Rule conditions</h3></div><button type="button" class="restriction-rules-detail__edit" data-restriction-rules-action="edit-conditions">Edit</button></div>
+      <div class="restriction-rules-detail__section-header"><div><h3>Rule conditions</h3></div><button type="button" class="restriction-rules-detail__edit" ${attribute('action')}="edit-conditions">Edit</button></div>
       <ul>${detail.conditions.map((condition) => `<li>${escapeHtml(condition)}</li>`).join('')}</ul>
     </section>
 
+    ${businessRuleSections}
+
     <section class="restriction-rules-detail__section restriction-rules-enforcement">
-      <div class="restriction-rules-detail__section-header"><div><h3>Enforcement activity</h3><p>Recent policy checks for this rule.</p></div><button type="button" class="restriction-rules-detail__edit" data-restriction-rules-action="view-violations">View all</button></div>
+      <div class="restriction-rules-detail__section-header"><div><h3>Enforcement activity</h3><p>Recent policy checks for this rule.</p></div><button type="button" class="restriction-rules-detail__edit" ${attribute('action')}="view-violations">View all</button></div>
       <div class="restriction-rules-enforcement-card">
         <span class="restriction-rules-enforcement-card__icon">${icon('shield')}</span>
         <div><strong>${escapeHtml(detail.violations)}</strong><span>Policy checks are recorded for audit review.</span></div>
@@ -1861,11 +2087,68 @@ const renderRestrictionRulesDetail = () => {
   `;
 };
 
+const getFilteredRestrictionRules = () => filterRules(restrictionRulesPageData, restrictionRulesState);
+
+const renderRestrictionRulesSummary = () => renderRulesSummary(restrictionRulesPageData, restrictionRulesSummary);
+
+const updateRestrictionRulesSelection = () => updateRulesSelection(getFilteredRestrictionRules(), restrictionRulesState, restrictionRulesSelectAll);
+
+const renderRestrictionRulesRows = () => renderRulesRows({
+  pageData: restrictionRulesPageData,
+  rulesState: restrictionRulesState,
+  rows: restrictionRulesRows,
+  resultCount: restrictionRulesResultCount,
+  selectAll: restrictionRulesSelectAll,
+  prefix: 'restriction-rules',
+  emptyLabel: 'No restriction rules found',
+});
+
+const renderRestrictionRulesDetail = () => renderRulesDetail({
+  pageData: restrictionRulesPageData,
+  rulesState: restrictionRulesState,
+  detailTarget: restrictionRulesDetail,
+  pageTarget: restrictionRulesPage,
+  prefix: 'restriction-rules',
+  variant: 'restriction',
+});
+
 const renderRestrictionRulesPage = () => {
   if (!restrictionRulesPage) return;
   renderRestrictionRulesSummary();
   renderRestrictionRulesRows();
   renderRestrictionRulesDetail();
+};
+
+const getFilteredPpcRules = () => filterRules(ppcPageData, ppcState);
+
+const renderPpcSummary = () => renderRulesSummary(ppcPageData, ppcSummary);
+
+const updatePpcSelection = () => updateRulesSelection(getFilteredPpcRules(), ppcState, ppcSelectAll);
+
+const renderPpcRows = () => renderRulesRows({
+  pageData: ppcPageData,
+  rulesState: ppcState,
+  rows: ppcRows,
+  resultCount: ppcResultCount,
+  selectAll: ppcSelectAll,
+  prefix: 'ppc',
+  emptyLabel: 'No PPC rules found',
+});
+
+const renderPpcDetail = () => renderRulesDetail({
+  pageData: ppcPageData,
+  rulesState: ppcState,
+  detailTarget: ppcDetail,
+  pageTarget: ppcPage,
+  prefix: 'ppc',
+  variant: 'ppc',
+});
+
+const renderPpcPage = () => {
+  if (!ppcPage) return;
+  renderPpcSummary();
+  renderPpcRows();
+  renderPpcDetail();
 };
 
 const renderFinanceSummary = () => {
@@ -3178,11 +3461,13 @@ const renderPage = () => {
   const operationsPage = operationsPageSet.has(activePageId) ? getOperationsPage(activePageId) : null;
   const isCampaignPage = state.activeNavigationChild === 'all-campaigns';
   const isAttributionPage = state.activeNavigationChild === 'attribution-rules';
+  const isCouponAttributionPage = state.activeNavigationChild === 'coupon-attribution';
   const isCommissionRulesPage = state.activeNavigationChild === 'commission-rules-list';
   const isRestrictionRulesPage = state.activeNavigationChild === 'restriction-rules';
+  const isPpcPage = state.activeNavigationChild === 'ppc';
   const isFinancePage = state.activeNavigationChild === 'balance-payments';
   const isTransactionHistoryPage = ['transaction-history', 'finance-transactions'].includes(state.activeNavigationChild);
-  const isInvoicesPage = state.activeNavigationChild === 'commission-invoices' || state.activeNavigationChild === 'invoices';
+  const isInvoicesPage = state.activeNavigationChild === 'invoices';
   const isHelpCenterPage = state.activeNavigationId === 'help-center';
   const isTeamAccountsPage = state.activeNavigationChild === 'team-accounts';
   const isRecruitmentSettingsPage = state.activeNavigationChild === 'recruitment-page';
@@ -3191,16 +3476,17 @@ const renderPage = () => {
   const isMessagesPage = ['all-messages', 'partner-messages', 'system-alerts', 'archived-messages'].includes(state.activeNavigationChild);
   const isCouponsPage = state.activeNavigationChild === 'coupons';
   const isProductsAssetsPage = state.activeNavigationChild === 'banners-images';
-  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isRestrictionRulesPage || isFinancePage || isTransactionHistoryPage || isInvoicesPage || isHelpCenterPage || isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage;
+  const isMainPage = isCampaignPage || isAttributionPage || isCouponAttributionPage || isCommissionRulesPage || isRestrictionRulesPage || isPpcPage || isFinancePage || isTransactionHistoryPage || isInvoicesPage || isHelpCenterPage || isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage;
 
   document.body.classList.toggle('is-campaign-page', isCampaignPage);
   document.body.classList.toggle('is-attribution-page', isAttributionPage);
+  document.body.classList.toggle('is-coupon-attribution-page', isCouponAttributionPage);
   document.body.classList.toggle('is-commission-rules-page', isCommissionRulesPage);
   document.body.classList.toggle('is-restriction-rules-page', isRestrictionRulesPage);
+  document.body.classList.toggle('is-ppc-page', isPpcPage);
   document.body.classList.toggle('is-finance-page', isFinancePage);
   document.body.classList.toggle('is-transaction-history-page', isTransactionHistoryPage);
   document.body.classList.toggle('is-invoices-page', isInvoicesPage);
-  document.body.classList.toggle('is-commission-invoices-page', state.activeNavigationChild === 'commission-invoices');
   document.body.classList.toggle('is-finance-invoices-page', state.activeNavigationChild === 'invoices');
   document.body.classList.toggle('is-help-center-page', isHelpCenterPage);
   document.body.classList.toggle('is-team-accounts-page', isTeamAccountsPage);
@@ -3227,14 +3513,18 @@ const renderPage = () => {
   }
   pageDescription.textContent = isOverview
     ? t('page.overview.description', 'Monitor your affiliate program performance and partner activity.')
-    : isCampaignPage
+      : isCampaignPage
       ? 'View, manage, and analyze all your campaigns in one place.'
       : isAttributionPage
         ? 'Configure how conversions are attributed across channels and partners.'
+        : isCouponAttributionPage
+          ? 'Define how coupon ownership, referral links, and conflicts decide partner credit.'
         : isCommissionRulesPage
           ? 'Manage base commission rates, bonuses, attribution windows, and rule conditions for your partners.'
           : isRestrictionRulesPage
-            ? 'Control paid-search terms, channels, regions, and partner eligibility for your programs.'
+            ? 'Define paid-search terms, channels, regions, and partner eligibility for your programs.'
+          : isPpcPage
+            ? 'Control PPC keywords, channels, regions, partner eligibility, and violation handling for your programs.'
           : isFinancePage
             ? 'Track your account balance, commissions, payouts, and payment methods.'
             : isTransactionHistoryPage
@@ -3258,18 +3548,20 @@ const renderPage = () => {
             : isProductsAssetsPage
               ? 'Manage your creative assets and organize them into folders for easy access and use across campaigns.'
             : recruitmentPage?.description ?? operationsPage?.description ?? context.current.label + ' workspace preview for the current brand scope.';
-  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isRestrictionRulesPage || isFinancePage || isTransactionHistoryPage || isInvoicesPage || isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage
-    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isRestrictionRulesPage || isInvoicesPage ? 'Commission & Rules' : isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage ? 'Integrations & Settings' : isMessagesPage ? 'Messages & Notifications' : isCouponsPage || isProductsAssetsPage ? 'Products & Assets' : 'Finance')
+  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCouponAttributionPage || isCommissionRulesPage || isRestrictionRulesPage || isPpcPage || isFinancePage || isTransactionHistoryPage || isInvoicesPage || isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage
+    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCouponAttributionPage || isCommissionRulesPage || isRestrictionRulesPage || isPpcPage || isInvoicesPage ? 'Commission & Rules' : isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage ? 'Integrations & Settings' : isMessagesPage ? 'Messages & Notifications' : isCouponsPage || isProductsAssetsPage ? 'Products & Assets' : 'Finance')
     : isHelpCenterPage ? 'Help center'
     : isOverview ? t('shell.merchantWorkspace', 'Merchant workspace') : context.parent.label;
-  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isRestrictionRulesPage ? 'Restriction rules' : isFinancePage ? 'Balance & payments' : isTransactionHistoryPage ? 'Transaction history' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isTeamAccountsPage ? 'Team accounts' : isRecruitmentSettingsPage ? 'Recruitment page' : isBrandIntegrationPage ? 'Brand integration' : isApiCredentialsPage ? 'API credentials' : isMessagesPage ? context.current.label : isCouponsPage ? 'Coupons' : isProductsAssetsPage ? 'Banners & images' : isOverview ? 'Overview' : context.current.label;
+  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCouponAttributionPage ? 'Coupon attribution' : isCommissionRulesPage ? 'Commission rules' : isRestrictionRulesPage ? 'Restriction rules' : isPpcPage ? 'PPC' : isFinancePage ? 'Balance & payments' : isTransactionHistoryPage ? 'Transaction history' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isTeamAccountsPage ? 'Team accounts' : isRecruitmentSettingsPage ? 'Recruitment page' : isBrandIntegrationPage ? 'Brand integration' : isApiCredentialsPage ? 'API credentials' : isMessagesPage ? context.current.label : isCouponsPage ? 'Coupons' : isProductsAssetsPage ? 'Banners & images' : isOverview ? 'Overview' : context.current.label;
   breadcrumbCurrent.setAttribute('aria-current', 'page');
   overviewPage.hidden = !isOverview;
   modulePage.hidden = isOverview || (!recruitmentPage && !operationsPage);
   campaignPage.hidden = !isCampaignPage;
   attributionPage.hidden = !isAttributionPage;
+  couponAttributionPage.hidden = !isCouponAttributionPage;
   commissionRulesPage.hidden = !isCommissionRulesPage;
   restrictionRulesPage.hidden = !isRestrictionRulesPage;
+  ppcPage.hidden = !isPpcPage;
   financePage.hidden = !isFinancePage;
   transactionHistoryPage.hidden = !isTransactionHistoryPage;
   invoicesPage.hidden = !isInvoicesPage;
@@ -3283,8 +3575,10 @@ const renderPage = () => {
   productsAssetsPage.hidden = !isProductsAssetsPage;
   modulePlaceholder.hidden = isOverview || isMainPage || Boolean(recruitmentPage || operationsPage);
   if (pageActions) pageActions.hidden = !isAttributionPage;
+  if (couponAttributionActions) couponAttributionActions.hidden = !isCouponAttributionPage;
   if (commissionRulesActions) commissionRulesActions.hidden = !isCommissionRulesPage;
   if (restrictionRulesActions) restrictionRulesActions.hidden = !isRestrictionRulesPage;
+  if (ppcActions) ppcActions.hidden = !isPpcPage;
   if (financeActions) financeActions.hidden = !isFinancePage;
   if (teamAccountsActions) teamAccountsActions.hidden = !isTeamAccountsPage;
   if (recruitmentPageSettingsActions) recruitmentPageSettingsActions.hidden = !isRecruitmentSettingsPage;
@@ -3303,8 +3597,10 @@ const renderPage = () => {
 
   if (isCampaignPage) renderCampaignPage();
   if (isAttributionPage) renderAttributionPage();
+  if (isCouponAttributionPage) renderCouponAttributionPage();
   if (isCommissionRulesPage) renderCommissionRulesPage();
   if (isRestrictionRulesPage) renderRestrictionRulesPage();
+  if (isPpcPage) renderPpcPage();
   if (isFinancePage) renderFinancePage();
   if (isTransactionHistoryPage) renderTransactionHistoryPage();
   if (isInvoicesPage) renderInvoicesPage();
@@ -3519,6 +3815,30 @@ const closePartnerDrawer = () => {
   }, 240);
 };
 
+
+function updateCollapsedNavigationA11y(collapsed) {
+  document.querySelectorAll('[data-navigation] .nav-children').forEach((children) => {
+    children.toggleAttribute('inert', collapsed);
+    children.setAttribute('aria-hidden', String(collapsed));
+  });
+}
+
+function setSidebarCollapsed(collapsed) {
+  document.body.classList.toggle('is-sidebar-collapsed', collapsed);
+  const control = document.querySelector('[data-sidebar-collapse]');
+  control?.setAttribute('aria-pressed', String(collapsed));
+  control?.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+  if (control) control.title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+  updateCollapsedNavigationA11y(collapsed);
+}
+
+function triggerInteractionBeam(target) {
+  if (!target) return;
+  target.classList.remove('has-interaction-beam');
+  requestAnimationFrame(() => target.classList.add('has-interaction-beam'));
+  window.setTimeout(() => target.classList.remove('has-interaction-beam'), 520);
+}
+
 const openSidebar = () => {
   sidebar.classList.add('is-open');
   sidebarBackdrop.classList.add('is-open');
@@ -3533,50 +3853,6 @@ const closeSidebar = () => {
   sidebarOpenButton.focus();
 };
 
-const updateCollapsedNavigationA11y = (collapsed) => {
-  navigation.querySelectorAll('.nav-children').forEach((children) => {
-    children.inert = collapsed;
-    children.setAttribute('aria-hidden', String(collapsed));
-  });
-};
-
-const setSidebarCollapsed = (collapsed) => {
-  document.body.classList.toggle('is-sidebar-collapsed', collapsed);
-  sidebarCollapseButton?.setAttribute('aria-pressed', String(collapsed));
-  sidebarCollapseButton?.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
-  sidebarCollapseButton?.setAttribute('title', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
-  updateCollapsedNavigationA11y(collapsed);
-};
-
-sidebarCollapseButton?.addEventListener('click', () => {
-  setSidebarCollapsed(!document.body.classList.contains('is-sidebar-collapsed'));
-});
-
-const interactionBeamSelector = [
-  '.button',
-  '.icon-button',
-  '.nav-item',
-  '.nav-child',
-  '.metric-card',
-  '.quick-action',
-  '.sidebar__utility',
-  '.account-card',
-  '[role="tab"]',
-  '[role="button"]',
-].join(', ');
-
-const triggerInteractionBeam = (target) => {
-  if (target.matches(':disabled, [aria-disabled="true"]')) return;
-  target.classList.remove('has-interaction-beam');
-  requestAnimationFrame(() => target.classList.add('has-interaction-beam'));
-  window.setTimeout(() => target.classList.remove('has-interaction-beam'), 520);
-};
-
-document.addEventListener('pointerdown', (event) => {
-  const target = event.target instanceof Element ? event.target.closest(interactionBeamSelector) : null;
-  if (target) triggerInteractionBeam(target);
-});
-
 navigation.addEventListener('click', (event) => {
   const groupButton = event.target.closest('[data-nav-group]');
   const childButton = event.target.closest('[data-nav-child]');
@@ -3590,10 +3866,8 @@ navigation.addEventListener('click', (event) => {
   if (!itemButton) return;
 
   if (groupButton) {
-    if (document.body.classList.contains('is-sidebar-collapsed')) setSidebarCollapsed(false);
     state = toggleNavigationGroup(state, groupButton.dataset.navGroup);
     renderNavigation();
-    updateCollapsedNavigationA11y(document.body.classList.contains('is-sidebar-collapsed'));
     return;
   }
 
@@ -4047,71 +4321,99 @@ if (commissionRulesPage) {
   });
 }
 
-if (restrictionRulesPage) {
-  restrictionRulesPage.addEventListener('input', (event) => {
-    if (!event.target.matches('[data-restriction-rules-search]')) return;
-    restrictionRulesState.search = event.target.value;
-    renderRestrictionRulesRows();
+const bindRulesPage = ({ page, rulesState, prefix, getFiltered, renderRows, renderDetail, updateSelection, pageLabel }) => {
+  if (!page) return;
+
+  const selector = (name) => `[data-${prefix}-${name}]`;
+  const attribute = (element, name) => element.getAttribute(`data-${prefix}-${name}`);
+
+  page.addEventListener('input', (event) => {
+    if (!event.target.matches(selector('search'))) return;
+    rulesState.search = event.target.value;
+    renderRows();
   });
 
-  restrictionRulesPage.addEventListener('change', (event) => {
-    const filter = event.target.closest('[data-restriction-rules-filter]');
+  page.addEventListener('change', (event) => {
+    const filter = event.target.closest(selector('filter'));
     if (filter) {
-      restrictionRulesState.filters[filter.dataset.restrictionRulesFilter] = filter.value;
-      renderRestrictionRulesRows();
+      rulesState.filters[attribute(filter, 'filter')] = filter.value;
+      renderRows();
       return;
     }
 
-    const ruleCheckbox = event.target.closest('[data-restriction-rules-select]');
+    const ruleCheckbox = event.target.closest(selector('select'));
     if (ruleCheckbox) {
-      if (ruleCheckbox.checked) restrictionRulesState.selectedIds.add(ruleCheckbox.dataset.restrictionRulesSelect);
-      else restrictionRulesState.selectedIds.delete(ruleCheckbox.dataset.restrictionRulesSelect);
-      updateRestrictionRulesSelection();
+      const ruleId = attribute(ruleCheckbox, 'select');
+      if (ruleCheckbox.checked) rulesState.selectedIds.add(ruleId);
+      else rulesState.selectedIds.delete(ruleId);
+      updateSelection();
       return;
     }
 
-    if (event.target.matches('[data-restriction-rules-select-all]')) {
-      const visibleIds = getFilteredRestrictionRules().map((rule) => rule.id);
-      if (event.target.checked) visibleIds.forEach((id) => restrictionRulesState.selectedIds.add(id));
-      else visibleIds.forEach((id) => restrictionRulesState.selectedIds.delete(id));
-      renderRestrictionRulesRows();
+    if (event.target.matches(selector('select-all'))) {
+      const visibleIds = getFiltered().map((rule) => rule.id);
+      if (event.target.checked) visibleIds.forEach((id) => rulesState.selectedIds.add(id));
+      else visibleIds.forEach((id) => rulesState.selectedIds.delete(id));
+      renderRows();
     }
   });
 
-  restrictionRulesPage.addEventListener('click', (event) => {
-    const action = event.target.closest('[data-restriction-rules-action]');
+  page.addEventListener('click', (event) => {
+    const action = event.target.closest(selector('action'));
     if (action) {
       event.stopPropagation();
-      const actionName = action.dataset.restrictionRulesAction;
+      const actionName = attribute(action, 'action');
       if (actionName === 'close-detail') {
-        restrictionRulesState.selectedRuleId = null;
-        renderRestrictionRulesRows();
-        renderRestrictionRulesDetail();
-      } else if (actionName === 'next-page' || actionName === 'more-filters' || actionName === 'settings') {
+        rulesState.selectedRuleId = null;
+        renderRows();
+        renderDetail();
+      } else if (actionName === 'next-page' || actionName === 'more-filters' || actionName === 'settings' || actionName === 'policy') {
         showToast(`${actionName.replace('-', ' ')} is ready for product integration`);
       } else if (actionName === 'edit' || actionName === 'row-menu') {
-        showToast(`${action.dataset.restrictionRulesRule} ${actionName === 'edit' ? 'edit' : 'more actions'} is ready for product integration`);
+        showToast(`${attribute(action, 'rule')} ${actionName === 'edit' ? 'edit' : 'more actions'} is ready for product integration`);
       } else if (actionName === 'edit-terms' || actionName === 'edit-conditions' || actionName === 'view-violations') {
         showToast(`${actionName.replaceAll('-', ' ')} is ready for product integration`);
       }
       return;
     }
 
-    const pageNumber = event.target.closest('[data-restriction-rules-page-number]');
+    const pageNumber = event.target.closest(selector('page-number'));
     if (pageNumber) {
       event.stopPropagation();
-      showToast(`Restriction rules page ${pageNumber.dataset.restrictionRulesPageNumber} is ready for product integration`);
+      showToast(`${pageLabel} page ${attribute(pageNumber, 'page-number')} is ready for product integration`);
       return;
     }
 
-    const row = event.target.closest('[data-restriction-rules-row]');
+    const row = event.target.closest(selector('row'));
     if (!row || event.target.closest('input')) return;
     event.stopPropagation();
-    restrictionRulesState.selectedRuleId = row.dataset.restrictionRulesRow;
-    renderRestrictionRulesRows();
-    renderRestrictionRulesDetail();
+    rulesState.selectedRuleId = attribute(row, 'row');
+    renderRows();
+    renderDetail();
   });
-}
+};
+
+bindRulesPage({
+  page: restrictionRulesPage,
+  rulesState: restrictionRulesState,
+  prefix: 'restriction-rules',
+  getFiltered: getFilteredRestrictionRules,
+  renderRows: renderRestrictionRulesRows,
+  renderDetail: renderRestrictionRulesDetail,
+  updateSelection: updateRestrictionRulesSelection,
+  pageLabel: 'Restriction rules',
+});
+
+bindRulesPage({
+  page: ppcPage,
+  rulesState: ppcState,
+  prefix: 'ppc',
+  getFiltered: getFilteredPpcRules,
+  renderRows: renderPpcRows,
+  renderDetail: renderPpcDetail,
+  updateSelection: updatePpcSelection,
+  pageLabel: 'PPC',
+});
 
 if (financePage) {
   financePage.addEventListener('change', (event) => {
@@ -4816,6 +5118,65 @@ if (attributionPage) {
   });
 }
 
+if (couponAttributionPage) {
+  couponAttributionPage.addEventListener('input', (event) => {
+    if (!event.target.matches('[data-coupon-attribution-search]')) return;
+    couponAttributionState.search = event.target.value;
+    renderCouponAttributionRows();
+  });
+
+  couponAttributionPage.addEventListener('change', (event) => {
+    const filter = event.target.closest('[data-coupon-attribution-filter]');
+    if (filter) {
+      couponAttributionState.filters[filter.dataset.couponAttributionFilter] = filter.value;
+      renderCouponAttributionRows();
+      return;
+    }
+
+    const checkbox = event.target.closest('[data-coupon-attribution-select]');
+    if (checkbox) {
+      if (checkbox.checked) couponAttributionState.selectedIds.add(checkbox.dataset.couponAttributionSelect);
+      else couponAttributionState.selectedIds.delete(checkbox.dataset.couponAttributionSelect);
+      updateCouponAttributionSelection();
+      return;
+    }
+
+    if (event.target.matches('[data-coupon-attribution-select-all]')) {
+      const visibleIds = getFilteredCouponAttributionRules().map((rule) => rule.id);
+      if (event.target.checked) visibleIds.forEach((id) => couponAttributionState.selectedIds.add(id));
+      else visibleIds.forEach((id) => couponAttributionState.selectedIds.delete(id));
+      renderCouponAttributionRows();
+    }
+  });
+
+  couponAttributionPage.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-coupon-attribution-action]');
+    if (action) {
+      event.stopPropagation();
+      const actionName = action.dataset.couponAttributionAction;
+      if (actionName === 'close-detail') {
+        couponAttributionState.selectedRuleId = null;
+        renderCouponAttributionRows();
+        renderCouponAttributionDetail();
+      } else if (actionName === 'edit' || actionName === 'edit-rule' || actionName === 'row-menu') {
+        showToast(`${action.dataset.couponAttributionRule ?? 'Coupon attribution rule'} ${actionName === 'row-menu' ? 'more actions' : 'edit'} is ready for product integration`);
+      } else if (actionName === 'settings') {
+        showToast('Coupon attribution column settings are ready for product integration');
+      } else if (actionName === 'policy' || actionName === 'priority-info') {
+        showToast('Coupon precedence: owned code → eligible click → no partner credit');
+      }
+      return;
+    }
+
+    const row = event.target.closest('[data-coupon-attribution-row]');
+    if (!row || event.target.closest('input')) return;
+    event.stopPropagation();
+    couponAttributionState.selectedRuleId = row.dataset.couponAttributionRow;
+    renderCouponAttributionRows();
+    renderCouponAttributionDetail();
+  });
+}
+
 document.addEventListener('click', (event) => {
   if (!event.target.closest('.period-picker')) closePeriodMenu();
   if (!event.target.closest('.team-accounts-filter-wrap')) {
@@ -4847,6 +5208,14 @@ document.addEventListener('click', (event) => {
     return;
   }
 
+  const couponAttributionAction = event.target.closest('[data-coupon-attribution-action]');
+  if (couponAttributionAction && !couponAttributionPage?.contains(couponAttributionAction)) {
+    const action = couponAttributionAction.dataset.couponAttributionAction;
+    if (action === 'add-rule') showToast('Coupon attribution rule editor is ready for product integration');
+    else if (action === 'export') showToast('Coupon attribution rules export is ready for download');
+    return;
+  }
+
   const commissionAction = event.target.closest('[data-commission-action]');
   if (commissionAction) {
     const action = commissionAction.dataset.commissionAction;
@@ -4858,6 +5227,13 @@ document.addEventListener('click', (event) => {
   if (restrictionRulesAction && !restrictionRulesPage?.contains(restrictionRulesAction)) {
     const action = restrictionRulesAction.dataset.restrictionRulesAction;
     if (action === 'create') showToast('Restriction rule editor is ready for product integration');
+    return;
+  }
+
+  const ppcAction = event.target.closest('[data-ppc-action]');
+  if (ppcAction && !ppcPage?.contains(ppcAction)) {
+    const action = ppcAction.dataset.ppcAction;
+    if (action === 'create') showToast('PPC rule editor is ready for product integration');
     return;
   }
 
@@ -4918,6 +5294,18 @@ drawerContent.addEventListener('submit', (event) => {
 });
 
 drawerBackdrop.addEventListener('click', closePartnerDrawer);
+
+document.querySelector('[data-sidebar-collapse]')?.addEventListener('click', () => {
+  setSidebarCollapsed(!document.body.classList.contains('is-sidebar-collapsed'));
+});
+
+document.addEventListener('pointerdown', (event) => {
+  const target = event.target instanceof Element
+    ? event.target.closest('button, a, input, select, textarea, [role="button"]')
+    : null;
+  triggerInteractionBeam(target);
+});
+
 sidebarOpenButton.addEventListener('click', openSidebar);
 sidebarCloseButton.addEventListener('click', closeSidebar);
 sidebarBackdrop.addEventListener('click', closeSidebar);
