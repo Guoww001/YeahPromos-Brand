@@ -7,15 +7,26 @@ import {
   toggleNavigationGroup,
 } from './app-core.mjs?v=merchant-reference-18';
 import {
+  applyRecruitmentAction,
+  clearRecruitmentCriterion,
   createRecruitmentState,
+  cycleRecruitmentFeatured,
   filterRecruitmentRecords,
+  getRecruitmentActiveCriteria,
+  getRecruitmentRecordGroup,
+  getRecruitmentRecordStatus,
   getRecruitmentPage,
   recruitmentData,
+  recruitmentGroupOptions,
   recruitmentPageIds,
+  resetRecruitmentView,
   selectRecruitmentTab,
+  setRecruitmentInvitePage,
+  toggleRecruitmentMessage,
+  updateRecruitmentGroup,
   updateRecruitmentFilter,
   updateRecruitmentSearch,
-} from './recruitment.mjs';
+} from './recruitment.mjs?v=merchant-reference-22';
 import {
   buildSmoothChartPath,
   createOverviewState,
@@ -44,6 +55,7 @@ let overviewState = createOverviewState();
 let operationsState = createOperationsState();
 let toastTimer;
 let lastDrawerTrigger = null;
+let recruitmentDrawerRecordId = null;
 
 
 const navigation = document.querySelector('[data-navigation]');
@@ -713,33 +725,57 @@ const renderRecruitmentTags = (items = [], className = '') => `
   </div>
 `;
 
-const renderRecruitmentFilterBar = (page, placeholder = 'Search by name or keyword') => `
-  <form class="recruitment-filterbar" data-recruitment-search-form>
-    <div class="recruitment-filterbar__fields">
-      ${page.filters.map((filter) => {
-        const selected = recruitmentState.filters[filter.id] ?? '';
-        return `
-          <label class="recruitment-filter">
-            <span>${escapeHtml(filter.label)}</span>
-            <select data-recruitment-filter data-filter-key="${filter.id}" aria-label="${escapeHtml(filter.label)}">
-              ${filter.options.map((option, index) => {
-                const value = index === 0 ? '' : option;
-                return `<option value="${escapeHtml(value)}"${selected === value ? ' selected' : ''}>${escapeHtml(option)}</option>`;
-              }).join('')}
-            </select>
-          </label>
-        `;
-      }).join('')}
-    </div>
-    <label class="recruitment-search">
-      <span>Search</span>
-      <span class="recruitment-search__control">
-        ${icon('globe')}
-        <input type="search" data-recruitment-search value="${escapeHtml(recruitmentState.search)}" placeholder="${escapeHtml(placeholder)}" />
-      </span>
-    </label>
-  </form>
-`;
+const renderRecruitmentFilterBar = (page, placeholder = 'Search by name or keyword') => {
+  const activeCriteria = getRecruitmentActiveCriteria(recruitmentState, page);
+  const searchValue = String(recruitmentState.search ?? '').trim();
+
+  return `
+    <form class="recruitment-filterbar" data-recruitment-search-form>
+      <div class="recruitment-filterbar__fields">
+        ${page.filters.map((filter) => {
+          const selected = recruitmentState.filters[filter.id] ?? '';
+          return `
+            <label class="recruitment-filter${selected ? ' has-value' : ''}">
+              <span>${escapeHtml(filter.label)}</span>
+              <select data-recruitment-filter data-filter-key="${filter.id}" aria-label="${escapeHtml(filter.label)}">
+                ${filter.options.map((option, index) => {
+                  const value = index === 0 ? '' : option;
+                  return `<option value="${escapeHtml(value)}"${selected === value ? ' selected' : ''}>${escapeHtml(option)}</option>`;
+                }).join('')}
+              </select>
+            </label>
+          `;
+        }).join('')}
+      </div>
+      <label class="recruitment-search${searchValue ? ' has-value' : ''}">
+        <span>Search</span>
+        <span class="recruitment-search__control">
+          ${icon('globe')}
+          <input type="search" data-recruitment-search value="${escapeHtml(recruitmentState.search)}" placeholder="${escapeHtml(placeholder)}" />
+          <button class="recruitment-search__clear" type="button" data-recruitment-clear="search" aria-label="Clear search"${searchValue ? '' : ' hidden'}>${icon('x')}</button>
+          <button class="recruitment-search__submit" type="submit" data-recruitment-search-submit aria-label="Apply search">${icon('arrow')}</button>
+        </span>
+      </label>
+      <div class="recruitment-filterbar__summary" aria-live="polite">
+        <div class="recruitment-filterbar__summary-lead">
+          <span class="recruitment-filterbar__status-dot" aria-hidden="true"></span>
+          <strong>${activeCriteria.length ? `${activeCriteria.length} active ${activeCriteria.length === 1 ? 'criterion' : 'criteria'}` : 'All matches'}</strong>
+          <span>${activeCriteria.length ? 'Refine the current directory view' : 'Use filters or search to narrow the partner set'}</span>
+        </div>
+        <div class="recruitment-filterbar__chips">
+          ${activeCriteria.map((criterion) => `
+            <button class="recruitment-criterion" type="button" data-recruitment-clear="${escapeHtml(criterion.id)}" aria-label="Remove ${escapeHtml(criterion.label)} filter">
+              <span>${escapeHtml(criterion.label)}</span>
+              <b>${escapeHtml(criterion.value)}</b>
+              ${icon('x')}
+            </button>
+          `).join('')}
+          ${activeCriteria.length ? '<button class="recruitment-filterbar__clear-all" type="button" data-recruitment-clear="all">Clear all</button>' : ''}
+        </div>
+      </div>
+    </form>
+  `;
+};
 
 const renderRecruitmentStats = (stats = []) => `
   <div class="recruitment-stat-grid">
@@ -816,6 +852,26 @@ const renderRecruitmentEmpty = (title, detail) => `
   </div>
 `;
 
+const recruitmentFeaturedVisibleCount = 3;
+
+const getRecruitmentFeaturedRecords = (pageId, records) => {
+  const offset = recruitmentState.featuredOffsets[pageId] ?? 0;
+  return records.slice(offset, offset + recruitmentFeaturedVisibleCount);
+};
+
+const renderRecruitmentCarouselControls = (pageId, total) => {
+  const offset = recruitmentState.featuredOffsets[pageId] ?? 0;
+  const lastOffset = Math.max(total - recruitmentFeaturedVisibleCount, 0);
+
+  return `
+    <div class="recruitment-carousel-controls" role="group" aria-label="Featured matches carousel">
+      <button class="recruitment-carousel-control recruitment-carousel-control--previous" type="button" data-recruitment-featured="-1" data-recruitment-featured-page="${pageId}" aria-label="Previous featured matches"${offset === 0 ? ' disabled' : ''}>${icon('arrow')}</button>
+      <span>${Math.min(offset + 1, Math.max(total, 1))}–${Math.min(offset + recruitmentFeaturedVisibleCount, total)} of ${total}</span>
+      <button class="recruitment-carousel-control" type="button" data-recruitment-featured="1" data-recruitment-featured-page="${pageId}" aria-label="Next featured matches"${offset >= lastOffset ? ' disabled' : ''}>${icon('arrow')}</button>
+    </div>
+  `;
+};
+
 const renderMediaStrip = (record) => `
   <div class="recruitment-media-strip" aria-label="${escapeHtml(record.name)} content preview">
     ${(record.media ?? []).slice(0, 5).map((label, index) => `
@@ -858,7 +914,7 @@ const renderInfluencerRow = (record) => `
     </div>
     ${renderMediaStrip(record)}
     <div class="recruitment-row-actions">
-      <button class="recruitment-button recruitment-button--primary" type="button" data-recruitment-action="invite" data-record-id="${record.id}">Invite</button>
+      <button class="recruitment-button recruitment-button--primary${recruitmentState.invitedIds.includes(record.id) ? ' is-complete' : ''}" type="button" data-recruitment-action="invite" data-record-id="${record.id}"${recruitmentState.invitedIds.includes(record.id) ? ' aria-pressed="true"' : ''}>${recruitmentState.invitedIds.includes(record.id) ? `${icon('check')} Invited` : 'Invite'}</button>
       <button class="recruitment-button recruitment-button--secondary" type="button" data-recruitment-action="message" data-record-id="${record.id}">${icon('message')} Message</button>
     </div>
   </article>
@@ -887,7 +943,7 @@ const renderPublisherCard = (record) => `
     ${renderRecruitmentTags(record.categories)}
     <div class="publisher-card__footer">
       <button class="recruitment-button recruitment-button--secondary" type="button" data-recruitment-action="message" data-record-id="${record.id}">${icon('message')} Message</button>
-      <button class="recruitment-button recruitment-button--primary" type="button" data-recruitment-action="invite" data-record-id="${record.id}">Invite</button>
+      <button class="recruitment-button recruitment-button--primary${recruitmentState.invitedIds.includes(record.id) ? ' is-complete' : ''}" type="button" data-recruitment-action="invite" data-record-id="${record.id}"${recruitmentState.invitedIds.includes(record.id) ? ' aria-pressed="true"' : ''}>${recruitmentState.invitedIds.includes(record.id) ? `${icon('check')} Invited` : 'Invite'}</button>
     </div>
   </article>
 `;
@@ -905,7 +961,7 @@ const renderPartnerCard = (record) => `
       <button class="recruitment-icon-link" type="button" data-recruitment-action="view" data-record-id="${record.id}" aria-label="View ${escapeHtml(record.name)}">${icon('arrow')}</button>
     </div>
     <div class="partner-card__meta">
-      <span class="recruitment-status-chip" data-tone="${record.status === 'Followed' ? 'neutral' : 'success'}">${escapeHtml(record.status)}</span>
+      <span class="recruitment-status-chip" data-tone="${getRecruitmentRecordStatus(recruitmentState, record) === 'Followed' ? 'neutral' : 'success'}">${escapeHtml(getRecruitmentRecordStatus(recruitmentState, record))}</span>
       <span>${escapeHtml(record.lastActivity)}</span>
     </div>
     ${renderRecruitmentTags(record.categories)}
@@ -914,16 +970,26 @@ const renderPartnerCard = (record) => `
       <span><small>Reach</small><strong>${escapeHtml(record.reach)}</strong></span>
     </div>
     <div class="partner-card__footer">
-      <button class="partner-group-button" type="button" data-recruitment-action="change-group" data-record-id="${record.id}">${escapeHtml(record.group)} ${icon('chevron')}</button>
+      <label class="partner-group-select">
+        <span class="sr-only">Partner group</span>
+        <select data-recruitment-group data-record-id="${record.id}" aria-label="Partner group for ${escapeHtml(record.name)}">
+          ${recruitmentGroupOptions.map((group) => `<option value="${escapeHtml(group)}"${getRecruitmentRecordGroup(recruitmentState, record) === group ? ' selected' : ''}>${escapeHtml(group)}</option>`).join('')}
+        </select>
+        ${icon('chevron')}
+      </label>
       <div class="recruitment-row-actions">
         <button class="recruitment-button recruitment-button--secondary" type="button" data-recruitment-action="message" data-record-id="${record.id}">${icon('message')} Message</button>
-        <button class="recruitment-button recruitment-button--quiet" type="button" data-recruitment-action="follow" data-record-id="${record.id}">Follow</button>
+        <button class="recruitment-button recruitment-button--quiet${recruitmentState.followedIds.includes(record.id) ? ' is-complete' : ''}" type="button" data-recruitment-action="follow" data-record-id="${record.id}" aria-pressed="${recruitmentState.followedIds.includes(record.id)}">${recruitmentState.followedIds.includes(record.id) ? `${icon('check')} Following` : 'Follow'}</button>
       </div>
     </div>
   </article>
 `;
 
-const renderApplicationRow = (record) => `
+const renderApplicationRow = (record) => {
+  const status = getRecruitmentRecordStatus(recruitmentState, record);
+  const isExpanded = recruitmentState.expandedMessageIds.includes(record.id);
+
+  return `
   <article class="application-row">
     <div class="application-row__identity">
       ${renderRecruitmentAvatar(record)}
@@ -938,14 +1004,18 @@ const renderApplicationRow = (record) => `
       <span>${escapeHtml(record.country)} · ${escapeHtml(record.followers)} followers</span>
       ${renderRecruitmentTags(record.categories)}
     </div>
-    <p class="application-row__message">${escapeHtml(record.message)}</p>
+    <div class="application-row__message-wrap">
+      <p class="application-row__message${isExpanded ? ' is-expanded' : ''}">${escapeHtml(record.message)}</p>
+      <button class="application-row__expand" type="button" data-recruitment-action="toggle-message" data-record-id="${record.id}" aria-expanded="${isExpanded}">${isExpanded ? 'Show less' : 'Show more'}</button>
+    </div>
     <div class="application-row__actions">
-      <button class="recruitment-button recruitment-button--secondary" type="button" data-recruitment-action="decline" data-record-id="${record.id}">Decline</button>
-      <button class="recruitment-button recruitment-button--primary" type="button" data-recruitment-action="approve" data-record-id="${record.id}">Approve</button>
+      <button class="recruitment-button recruitment-button--secondary${status === 'declined' ? ' is-complete' : ''}" type="button" data-recruitment-action="decline" data-record-id="${record.id}"${status === 'declined' ? ' disabled' : ''}>${status === 'declined' ? `${icon('check')} Declined` : 'Decline'}</button>
+      <button class="recruitment-button recruitment-button--primary${status === 'approved' ? ' is-complete' : ''}" type="button" data-recruitment-action="approve" data-record-id="${record.id}"${status === 'approved' ? ' disabled' : ''}>${status === 'approved' ? `${icon('check')} Approved` : 'Approve'}</button>
       <button class="recruitment-icon-link" type="button" data-recruitment-action="view" data-record-id="${record.id}" aria-label="View ${escapeHtml(record.name)} details">${icon('arrow')}</button>
     </div>
   </article>
 `;
+};
 
 const inviteStatusTone = (statusKey) => ({
   accepted: 'success',
@@ -953,12 +1023,22 @@ const inviteStatusTone = (statusKey) => ({
   expired: 'danger',
 }[statusKey] ?? 'neutral');
 
-const renderInviteTable = (records, page) => `
+const getInviteDisplayRecord = (record) => recruitmentState.resentIds.includes(record.id) && record.statusKey !== 'accepted'
+  ? { ...record, status: 'Pending', statusKey: 'pending' }
+  : record;
+
+const renderInviteTable = (records, page) => {
+  const totalPages = Math.max(Math.ceil(records.length / recruitmentState.invitePageSize), 1);
+  const currentPage = Math.min(recruitmentState.invitePage, totalPages);
+  const start = (currentPage - 1) * recruitmentState.invitePageSize;
+  const pageRecords = records.slice(start, start + recruitmentState.invitePageSize).map(getInviteDisplayRecord);
+
+  return `
   <section class="recruitment-panel recruitment-table-panel">
     <div class="recruitment-panel__header">
       <div>
         <span class="eyebrow">Invitation activity</span>
-        <h2>Recent invitations</h2>
+        <h2>${records.length} recent invitations</h2>
       </div>
       <button class="recruitment-button recruitment-button--primary" type="button" data-recruitment-action="invite">${icon('send')} Invite partner</button>
     </div>
@@ -966,7 +1046,7 @@ const renderInviteTable = (records, page) => `
       <table class="recruitment-table">
         <thead><tr>${page.columns.map((column) => `<th scope="col">${escapeHtml(column)}</th>`).join('')}</tr></thead>
         <tbody>
-          ${records.length ? records.map((record) => `
+          ${pageRecords.length ? pageRecords.map((record) => `
             <tr>
               <td>
                 <div class="table-identity">
@@ -981,7 +1061,7 @@ const renderInviteTable = (records, page) => `
               <td>
                 <div class="table-actions">
                   <button class="recruitment-button recruitment-button--quiet" type="button" data-recruitment-action="view" data-record-id="${record.id}">View</button>
-                  ${record.statusKey !== 'accepted' ? `<button class="recruitment-button recruitment-button--quiet" type="button" data-recruitment-action="resend" data-record-id="${record.id}">Resend</button>` : ''}
+                  ${record.statusKey !== 'accepted' ? `<button class="recruitment-button recruitment-button--quiet${recruitmentState.resentIds.includes(record.id) ? ' is-complete' : ''}" type="button" data-recruitment-action="resend" data-record-id="${record.id}">${recruitmentState.resentIds.includes(record.id) ? `${icon('check')} Resent` : 'Resend'}</button>` : ''}
                 </div>
               </td>
             </tr>
@@ -989,12 +1069,26 @@ const renderInviteTable = (records, page) => `
         </tbody>
       </table>
     </div>
+    <div class="recruitment-table-footbar">
+      <span>Showing ${records.length ? start + 1 : 0}–${Math.min(start + pageRecords.length, records.length)} of ${records.length} results</span>
+      <div class="recruitment-pagination" aria-label="Invitation history pagination">
+        <label>Rows
+          <select data-recruitment-page-size aria-label="Rows per page">
+            ${[5, 10, 20].map((size) => `<option value="${size}"${recruitmentState.invitePageSize === size ? ' selected' : ''}>${size}</option>`).join('')}
+          </select>
+        </label>
+        <button type="button" data-recruitment-page-change="previous" aria-label="Previous page"${currentPage === 1 ? ' disabled' : ''}>‹</button>
+        <span>${currentPage} / ${totalPages}</span>
+        <button type="button" data-recruitment-page-change="next" aria-label="Next page"${currentPage >= totalPages ? ' disabled' : ''}>›</button>
+      </div>
+    </div>
   </section>
 `;
+};
 
 const renderInfluencersPage = (page) => {
   const records = getRecruitmentRecords(page, recruitmentData.influencers);
-  const featured = recruitmentData.influencers.slice(0, 3);
+  const featured = getRecruitmentFeaturedRecords(page.id, recruitmentData.influencers);
 
   return `
     <div class="recruitment-module recruitment-module--discovery" data-recruitment-page="${page.id}">
@@ -1002,7 +1096,10 @@ const renderInfluencersPage = (page) => {
       <section class="recruitment-panel recruitment-featured-panel">
         <div class="recruitment-panel__header">
           <div><span class="eyebrow">Curated matches</span><h2>Featured influencers</h2></div>
-          <button class="recruitment-button recruitment-button--quiet" type="button" data-recruitment-action="refresh">Refresh matches ${icon('arrow')}</button>
+          <div class="recruitment-panel__header-actions">
+            ${renderRecruitmentCarouselControls(page.id, recruitmentData.influencers.length)}
+            <button class="recruitment-button recruitment-button--quiet" type="button" data-recruitment-action="refresh">Refresh matches ${icon('arrow')}</button>
+          </div>
         </div>
         <div class="influencer-featured-grid">${featured.map(renderInfluencerFeatured).join('')}</div>
       </section>
@@ -1021,7 +1118,7 @@ const renderInfluencersPage = (page) => {
 
 const renderPublishersPage = (page) => {
   const records = getRecruitmentRecords(page, recruitmentData.publishers);
-  const featured = recruitmentData.publishers.slice(0, 3);
+  const featured = getRecruitmentFeaturedRecords(page.id, recruitmentData.publishers);
 
   return `
     <div class="recruitment-module recruitment-module--discovery" data-recruitment-page="${page.id}">
@@ -1029,7 +1126,10 @@ const renderPublishersPage = (page) => {
       <section class="recruitment-panel publisher-featured-panel">
         <div class="recruitment-panel__header">
           <div><span class="eyebrow">Curated matches</span><h2>Publishers to explore</h2></div>
-          <span class="recruitment-panel__note">Updated today</span>
+          <div class="recruitment-panel__header-actions">
+            ${renderRecruitmentCarouselControls(page.id, recruitmentData.publishers.length)}
+            <span class="recruitment-panel__note">Updated today</span>
+          </div>
         </div>
         <div class="publisher-featured-grid">${featured.map(renderPublisherFeatured).join('')}</div>
       </section>
@@ -1050,10 +1150,11 @@ const renderPartnersPage = (page) => {
   const allRecords = getRecruitmentRecords(page, recruitmentData.partners);
   const selectedTab = recruitmentState.tabs[page.id] ?? 'joined';
   const records = allRecords.filter((record) => {
-    if (selectedTab === 'joined') return record.status === 'In relationship';
-    if (selectedTab === 'followed') return record.status === 'Followed';
-    if (selectedTab === 'new') return ['Invited', 'Pending'].includes(record.status);
-    return record.status === 'Blocked';
+    const status = getRecruitmentRecordStatus(recruitmentState, record);
+    if (selectedTab === 'joined') return status === 'In relationship';
+    if (selectedTab === 'followed') return status === 'Followed';
+    if (selectedTab === 'new') return ['Invited', 'Pending'].includes(status);
+    return status === 'Blocked';
   });
 
   return `
@@ -1080,7 +1181,7 @@ const renderPartnersPage = (page) => {
 const renderApplicationsPage = (page) => {
   const allRecords = getRecruitmentRecords(page, recruitmentData.applications);
   const selectedTab = recruitmentState.tabs[page.id] ?? 'new';
-  const records = allRecords.filter((record) => record.status === selectedTab);
+  const records = allRecords.filter((record) => getRecruitmentRecordStatus(recruitmentState, record) === selectedTab);
 
   return `
     <div class="recruitment-module recruitment-module--applications" data-recruitment-page="${page.id}">
@@ -1093,7 +1194,10 @@ const renderApplicationsPage = (page) => {
       <section class="recruitment-panel">
         <div class="recruitment-panel__header recruitment-panel__header--results">
           <div><span class="eyebrow">Application queue</span><h2>${records.length} applications in this view</h2></div>
-          <span class="recruitment-panel__note">Updated a few minutes ago</span>
+          <div class="recruitment-panel__header-actions">
+            <button class="recruitment-button recruitment-button--secondary" type="button" data-recruitment-action="export">${icon('download')} Export</button>
+            <span class="recruitment-panel__note">Updated a few minutes ago</span>
+          </div>
         </div>
         <div class="application-list">
           ${records.length ? records.map(renderApplicationRow).join('') : renderRecruitmentEmpty('No applications in this view', 'New partner applications will appear here when they are submitted.')}
@@ -3078,6 +3182,7 @@ const openPartnerDrawer = (partnerId, trigger) => {
   if (!partner) return;
 
   lastDrawerTrigger = trigger ?? document.activeElement;
+  recruitmentDrawerRecordId = null;
   state = { ...state, activePartnerId: partnerId };
   drawerContent.innerHTML = `
     <div class="drawer-header">
@@ -3126,16 +3231,93 @@ const openPartnerDrawer = (partnerId, trigger) => {
   });
 };
 
+const openRecruitmentDrawer = (record, trigger, variant = 'profile') => {
+  if (!record) return;
+
+  lastDrawerTrigger = trigger ?? document.activeElement;
+  recruitmentDrawerRecordId = record.id;
+  state = { ...state, activePartnerId: null };
+
+  const isMessage = variant === 'message';
+  const isInvite = variant === 'invite';
+  const title = isMessage ? `Message ${record.name}` : isInvite ? `Invite ${record.name}` : record.name;
+  const subtitle = record.email ?? `${record.type ?? 'Partner'} · ${record.country ?? record.channel ?? 'Partner workspace'}`;
+
+  if (isMessage || isInvite) {
+    drawerContent.innerHTML = `
+      <div class="drawer-header">
+        <div class="drawer-header__merchant">
+          ${renderRecruitmentAvatar(record, 'recruitment-avatar--large')}
+          <div><h2 id="merchant-drawer-title">${escapeHtml(title)}</h2><p>${escapeHtml(subtitle)}</p></div>
+        </div>
+        <button class="icon-button" type="button" data-drawer-close aria-label="Close partner details">${icon('x')}</button>
+      </div>
+      <form class="recruitment-drawer-form" data-recruitment-${isMessage ? 'message' : 'invite'}-form data-record-id="${escapeHtml(record.id)}">
+        <label><span>${isMessage ? 'Subject' : 'Partner email'}</span><input name="${isMessage ? 'subject' : 'email'}" type="${isMessage ? 'text' : 'email'}" value="${isMessage ? 'Partnership opportunity from YeahPromos' : escapeHtml(record.email ?? '')}" required /></label>
+        <label><span>${isMessage ? 'Message' : 'Personal note'}</span><textarea name="${isMessage ? 'message' : 'note'}" rows="5" placeholder="${isMessage ? 'Write a clear next step for this partner.' : 'Add context to make the invitation feel personal.'}" required></textarea></label>
+        <div class="drawer-actions">
+          <button class="button button--secondary" type="button" data-drawer-close>Cancel</button>
+          <button class="button button--primary" type="submit">${isMessage ? 'Send message' : 'Send invitation'}</button>
+        </div>
+      </form>
+    `;
+  } else {
+    const primaryLabel = record.commission ? 'Tracked commission' : record.audience ? 'Audience' : record.visits ? 'Monthly reach' : record.followers ? 'Followers' : 'Current status';
+    const primaryValue = record.commission ?? record.audience ?? record.visits ?? record.followers ?? record.status ?? '—';
+    const facts = record.email
+      ? [['Status', getInviteDisplayRecord(record).status], ['Channel', record.channel], ['Target', record.target], ['Sent', record.sentDate]]
+      : record.message
+        ? [['Status', getRecruitmentRecordStatus(recruitmentState, record)], ['Source', record.source], ['Channels', record.channels?.join(' · ')], ['Submitted', record.submitted]]
+        : record.group
+          ? [['Status', getRecruitmentRecordStatus(recruitmentState, record)], ['Group', getRecruitmentRecordGroup(recruitmentState, record)], ['Platform', record.platform], ['Last activity', record.lastActivity]]
+          : [['Type', record.type], ['Country', record.country], ['Categories', record.categories?.join(' · ')], ['Audience', record.followers ?? record.visits]];
+
+    drawerContent.innerHTML = `
+      <div class="drawer-header">
+        <div class="drawer-header__merchant">
+          ${renderRecruitmentAvatar(record, 'recruitment-avatar--large')}
+          <div><h2 id="merchant-drawer-title">${escapeHtml(title)}</h2><p>${escapeHtml(subtitle)}</p></div>
+        </div>
+        <button class="icon-button" type="button" data-drawer-close aria-label="Close partner details">${icon('x')}</button>
+      </div>
+      <section class="drawer-section">
+        <p class="drawer-section__label">Relationship snapshot</p>
+        <div class="drawer-commission"><span>${escapeHtml(primaryLabel)}</span><strong>${escapeHtml(primaryValue)}</strong></div>
+      </section>
+      <section class="drawer-section">
+        <p class="drawer-section__label">Partner profile</p>
+        <div class="drawer-facts">${facts.map(([label, value]) => `<div class="drawer-fact"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value ?? '—')}</strong></div>`).join('')}</div>
+      </section>
+      <div class="drawer-actions">
+        ${!record.email ? `<button class="button button--secondary" type="button" data-recruitment-drawer-action="message" data-record-id="${escapeHtml(record.id)}">${icon('message')} Message</button>` : ''}
+        ${record.statusKey === 'accepted' || record.status === 'Accepted' ? '' : `<button class="button button--primary" type="button" data-recruitment-drawer-action="invite" data-record-id="${escapeHtml(record.id)}">${icon('send')} Invite partner</button>`}
+      </div>
+    `;
+  }
+
+  drawer.hidden = false;
+  document.body.classList.add('is-overlay-open');
+  requestAnimationFrame(() => {
+    drawer.classList.add('is-open');
+    drawerBackdrop.classList.add('is-open');
+    drawer.querySelector('[data-drawer-close]')?.focus();
+  });
+};
+
 const closePartnerDrawer = () => {
   const activePartnerId = state.activePartnerId;
+  const activeRecruitmentRecordId = recruitmentDrawerRecordId;
   drawer.classList.remove('is-open');
   drawerBackdrop.classList.remove('is-open');
   window.setTimeout(() => {
-    const fallbackTrigger = document.querySelector(`[data-partner-view="${activePartnerId}"]`);
+    const fallbackTrigger = activeRecruitmentRecordId
+      ? document.querySelector(`[data-recruitment-action="view"][data-record-id="${activeRecruitmentRecordId}"]`)
+      : document.querySelector(`[data-partner-view="${activePartnerId}"]`);
     const focusTarget = lastDrawerTrigger?.isConnected ? lastDrawerTrigger : fallbackTrigger;
 
     drawer.hidden = true;
     state = { ...state, activePartnerId: null };
+    recruitmentDrawerRecordId = null;
     document.body.classList.remove('is-overlay-open');
     focusTarget?.focus();
     lastDrawerTrigger = null;
@@ -3200,6 +3382,115 @@ overviewPage.addEventListener('change', (event) => {
 const getActiveRecruitmentPageId = () => state.activeNavigationChild ?? state.activeNavigationId;
 const getActiveOperationsPageId = () => state.activeNavigationChild ?? state.activeNavigationId;
 
+const getRecruitmentRecordById = (recordId) => [
+  ...recruitmentData.influencers,
+  ...recruitmentData.publishers,
+  ...recruitmentData.partners,
+  ...recruitmentData.applications,
+  ...recruitmentData.invites,
+].find((record) => record.id === recordId);
+
+const downloadRecruitmentCsv = (pageId) => {
+  const page = getRecruitmentPage(pageId);
+  const source = pageId === 'discover-influencers'
+    ? recruitmentData.influencers
+    : pageId === 'discover-publishers'
+      ? recruitmentData.publishers
+      : pageId === 'my-partners'
+        ? recruitmentData.partners
+        : pageId === 'applications'
+          ? recruitmentData.applications
+          : recruitmentData.invites;
+  const columns = pageId === 'applications'
+    ? ['name', 'type', 'country', 'status', 'submitted']
+    : pageId === 'invite-history'
+      ? ['name', 'email', 'channel', 'status', 'sentDate']
+      : ['name', 'type', 'country', 'status'];
+  const csvCell = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`;
+  const csv = [columns.join(','), ...source.map((record) => columns.map((column) => csvCell(column === 'status' ? getRecruitmentRecordStatus(recruitmentState, record) : record[column])).join(','))].join('\n');
+  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `yeahpromos-${page.id}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
+};
+
+const handleRecruitmentAction = (action, trigger) => {
+  const actionId = action.dataset.recruitmentAction ?? action.dataset.recruitmentDrawerAction;
+  const record = getRecruitmentRecordById(action.dataset.recordId);
+  const pageId = getActiveRecruitmentPageId();
+
+  if (actionId === 'view') {
+    if (record) openRecruitmentDrawer(record, action);
+    else showToast('Details view is ready');
+    return;
+  }
+
+  if (actionId === 'message') {
+    if (record) openRecruitmentDrawer(record, action, 'message');
+    else showToast('Message composer is ready');
+    return;
+  }
+
+  if (actionId === 'invite') {
+    recruitmentState = record ? applyRecruitmentAction(recruitmentState, 'invite', record.id) : recruitmentState;
+    if (record) renderRecruitmentPage(pageId);
+    openRecruitmentDrawer(record ?? { id: 'invite-composer', name: 'New partner', initial: '+', type: 'Partner' }, action, 'invite');
+    return;
+  }
+
+  if (actionId === 'follow') {
+    recruitmentState = applyRecruitmentAction(recruitmentState, 'follow', record?.id);
+    renderRecruitmentPage(pageId);
+    showToast(record ? `${record.name} ${recruitmentState.followedIds.includes(record.id) ? 'added to followed partners' : 'removed from followed partners'}` : 'Partner follow state updated');
+    return;
+  }
+
+  if (actionId === 'approve' || actionId === 'decline') {
+    recruitmentState = applyRecruitmentAction(recruitmentState, actionId, record?.id);
+    renderRecruitmentPage(pageId);
+    showToast(record ? `${record.name} ${actionId === 'approve' ? 'approved' : 'declined'}` : `Application ${actionId}d`);
+    return;
+  }
+
+  if (actionId === 'toggle-message') {
+    recruitmentState = toggleRecruitmentMessage(recruitmentState, record?.id);
+    renderRecruitmentPage(pageId);
+    return;
+  }
+
+  if (actionId === 'resend') {
+    recruitmentState = applyRecruitmentAction(recruitmentState, 'resend', record?.id);
+    renderRecruitmentPage(pageId);
+    showToast(record ? `Invitation resent to ${record.name}` : 'Invitation resent');
+    return;
+  }
+
+  if (actionId === 'export') {
+    downloadRecruitmentCsv(pageId);
+    showToast('Recruitment CSV export prepared');
+    return;
+  }
+
+  if (actionId === 'refresh') {
+    recruitmentState = {
+      ...recruitmentState,
+      featuredOffsets: { ...recruitmentState.featuredOffsets, [pageId]: 0 },
+    };
+    renderRecruitmentPage(pageId);
+    showToast('Featured matches refreshed');
+    return;
+  }
+
+  const actionMessages = {
+    sync: 'Partner sync started',
+  };
+  showToast(actionMessages[actionId] ?? 'Recruitment action is ready');
+};
+
 modulePage.addEventListener('submit', (event) => {
   const workspaceForm = event.target.closest('[data-workspace-search-form]');
   if (workspaceForm) {
@@ -3216,7 +3507,7 @@ modulePage.addEventListener('submit', (event) => {
   if (!form) return;
   event.preventDefault();
   const search = form.querySelector('[data-recruitment-search]')?.value ?? '';
-  recruitmentState = updateRecruitmentSearch(recruitmentState, search);
+  recruitmentState = setRecruitmentInvitePage(updateRecruitmentSearch(recruitmentState, search), 1);
   renderRecruitmentPage(getActiveRecruitmentPageId());
   showToast(search ? `Search updated to “${search}”` : 'Search cleared');
 });
@@ -3233,15 +3524,33 @@ modulePage.addEventListener('change', (event) => {
 
   const filter = event.target.closest('[data-recruitment-filter]');
   const sort = event.target.closest('[data-recruitment-sort]');
+  const group = event.target.closest('[data-recruitment-group]');
+  const pageSize = event.target.closest('[data-recruitment-page-size]');
   const pageId = getActiveRecruitmentPageId();
+
+  if (group) {
+    const record = getRecruitmentRecordById(group.dataset.recordId);
+    recruitmentState = updateRecruitmentGroup(recruitmentState, group.dataset.recordId, group.value);
+    renderRecruitmentPage(pageId);
+    showToast(record ? `${record.name} moved to ${group.value}` : `Partner group updated to ${group.value}`);
+    return;
+  }
+
+  if (pageSize) {
+    recruitmentState = setRecruitmentInvitePage(recruitmentState, 1, pageSize.value);
+    renderRecruitmentPage(pageId);
+    showToast(`Showing ${pageSize.value} invitations per page`);
+    return;
+  }
+
   if (filter) {
-    recruitmentState = updateRecruitmentFilter(recruitmentState, filter.dataset.filterKey, filter.value);
+    recruitmentState = setRecruitmentInvitePage(updateRecruitmentFilter(recruitmentState, filter.dataset.filterKey, filter.value), 1);
     renderRecruitmentPage(pageId);
     showToast(`${filter.getAttribute('aria-label') ?? 'Filter'} updated`);
     return;
   }
   if (sort) {
-    recruitmentState = { ...recruitmentState, sort: sort.value };
+    recruitmentState = setRecruitmentInvitePage({ ...recruitmentState, sort: sort.value }, 1);
     renderRecruitmentPage(pageId);
     showToast('Result order updated');
   }
@@ -3283,10 +3592,43 @@ modulePage.addEventListener('click', (event) => {
     return;
   }
 
+  const recruitmentClear = event.target.closest('[data-recruitment-clear]');
+  if (recruitmentClear) {
+    const criterion = recruitmentClear.dataset.recruitmentClear;
+    const pageId = getActiveRecruitmentPageId();
+    recruitmentState = criterion === 'all'
+      ? resetRecruitmentView(recruitmentState)
+      : clearRecruitmentCriterion(recruitmentState, criterion);
+    renderRecruitmentPage(pageId);
+    showToast(criterion === 'all' ? 'Recruitment filters cleared' : `${criterion === 'search' ? 'Search' : 'Filter'} removed`);
+    return;
+  }
+
+  const featuredControl = event.target.closest('[data-recruitment-featured]');
+  if (featuredControl) {
+    const pageId = featuredControl.dataset.recruitmentFeaturedPage;
+    const total = pageId === 'discover-influencers' ? recruitmentData.influencers.length : recruitmentData.publishers.length;
+    recruitmentState = cycleRecruitmentFeatured(recruitmentState, pageId, Number(featuredControl.dataset.recruitmentFeatured), total);
+    renderRecruitmentPage(pageId);
+    showToast('Featured matches updated');
+    return;
+  }
+
+  const pageChange = event.target.closest('[data-recruitment-page-change]');
+  if (pageChange) {
+    const page = getRecruitmentPage(getActiveRecruitmentPageId());
+    const records = getRecruitmentRecords(page, recruitmentData.invites);
+    const totalPages = Math.max(Math.ceil(records.length / recruitmentState.invitePageSize), 1);
+    const delta = pageChange.dataset.recruitmentPageChange === 'next' ? 1 : -1;
+    recruitmentState = setRecruitmentInvitePage(recruitmentState, Math.min(Math.max(recruitmentState.invitePage + delta, 1), totalPages));
+    renderRecruitmentPage(page.id);
+    return;
+  }
+
   const tab = event.target.closest('[data-recruitment-tab]');
   if (tab) {
     const pageId = getActiveRecruitmentPageId();
-    recruitmentState = selectRecruitmentTab(recruitmentState, pageId, tab.dataset.recruitmentTab);
+    recruitmentState = setRecruitmentInvitePage(selectRecruitmentTab(recruitmentState, pageId, tab.dataset.recruitmentTab), 1);
     renderRecruitmentPage(pageId);
     showToast(`${tab.textContent.trim().replace(/\s+/g, ' ')} selected`);
     return;
@@ -3294,27 +3636,18 @@ modulePage.addEventListener('click', (event) => {
 
   const action = event.target.closest('[data-recruitment-action]');
   if (!action) return;
-  const records = [
-    ...recruitmentData.influencers,
-    ...recruitmentData.publishers,
-    ...recruitmentData.partners,
-    ...recruitmentData.applications,
-    ...recruitmentData.invites,
-  ];
-  const record = records.find((item) => item.id === action.dataset.recordId);
-  const actionMessages = {
-    invite: record ? `Invite prepared for ${record.name}` : 'Invite partner flow is ready',
-    message: record ? `Message composer opened for ${record.name}` : 'Message composer is ready',
-    follow: record ? `${record.name} added to followed partners` : 'Partner follow flow is ready',
-    'change-group': record ? `Group selector opened for ${record.name}` : 'Group selector is ready',
-    sync: 'Partner sync started',
-    refresh: 'Featured matches refreshed',
-    approve: record ? `${record.name} approved` : 'Application approved',
-    decline: record ? `${record.name} declined` : 'Application declined',
-    view: record ? `Opening details for ${record.name}` : 'Details view is ready',
-    resend: record ? `Invitation resent to ${record.name}` : 'Invitation resent',
-  };
-  showToast(actionMessages[action.dataset.recruitmentAction] ?? 'Action is ready for product integration');
+  handleRecruitmentAction(action, action);
+});
+
+modulePage.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape') return;
+  const search = event.target.closest('[data-recruitment-search]');
+  if (!search?.value) return;
+
+  event.preventDefault();
+  recruitmentState = clearRecruitmentCriterion(recruitmentState, 'search');
+  renderRecruitmentPage(getActiveRecruitmentPageId());
+  showToast('Search cleared');
 });
 
 
@@ -4238,6 +4571,22 @@ document.addEventListener('click', (event) => {
 
 drawerContent.addEventListener('click', (event) => {
   if (event.target.closest('[data-drawer-close]')) closePartnerDrawer();
+
+  const recruitmentDrawerAction = event.target.closest('[data-recruitment-drawer-action]');
+  if (recruitmentDrawerAction) handleRecruitmentAction(recruitmentDrawerAction, recruitmentDrawerAction);
+});
+
+drawerContent.addEventListener('submit', (event) => {
+  const messageForm = event.target.closest('[data-recruitment-message-form]');
+  const inviteForm = event.target.closest('[data-recruitment-invite-form]');
+  if (!messageForm && !inviteForm) return;
+
+  event.preventDefault();
+  const record = getRecruitmentRecordById(event.target.dataset.recordId);
+  closePartnerDrawer();
+  showToast(inviteForm
+    ? `Invitation sent${record ? ` to ${record.name}` : ''}`
+    : `Message sent${record ? ` to ${record.name}` : ''}`);
 });
 
 drawerBackdrop.addEventListener('click', closePartnerDrawer);
