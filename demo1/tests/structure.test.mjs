@@ -75,7 +75,7 @@ test('app entry remains syntactically valid after conflict resolution', () => {
 });
 
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
-  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-22"><\/script>/);
+  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-23"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);
   assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
   assert.match(html, /data-module-page/);
@@ -421,6 +421,39 @@ test('finance page reuses the README red navigation tokens', () => {
   assert.match(css, /nav-child\[data-nav-child="balance-payments"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--finance-selected-red\)/i);
 });
 
+test('transaction history has its own routed Finance workspace', () => {
+  assert.match(html, /data-transaction-history-page/);
+  assert.match(html, /Transaction history/);
+  assert.match(html, /data-transaction-history-summary/);
+  assert.match(html, /data-transaction-history-time-range/);
+  assert.match(html, /data-transaction-history-filter="orderStatus"/);
+  assert.match(html, /data-transaction-history-filter="amazonBrand"/);
+  assert.match(html, /data-transaction-history-search/);
+  assert.match(html, /data-transaction-history-select-all/);
+  assert.match(html, /data-transaction-history-rows/);
+  assert.match(html, /data-transaction-history-pagination/);
+  assert.match(appJs, /isTransactionHistoryPage/);
+  assert.match(appJs, /renderTransactionHistoryPage/);
+  assert.match(appJs, /getFilteredTransactionHistoryRows/);
+  assert.match(appJs, /data-transaction-history-action/);
+  assert.match(data, /transactionHistoryPageData/);
+  assert.match(data, /YP-250512-0001/);
+  assert.match(data, /Locked commission/);
+  assert.match(readme, /Finance > Transaction history/);
+});
+
+test('transaction history reuses readable Finance tokens and safe demo actions', () => {
+  assert.match(css, /body\.is-transaction-history-page[\s\S]*--transaction-history-red:\s*#e60000/i);
+  assert.match(css, /--transaction-history-soft-red:\s*#fde8e8/i);
+  assert.match(css, /--transaction-history-selected-red:\s*#ff312e/i);
+  assert.match(css, /nav-child\[data-nav-child="transaction-history"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--transaction-history-selected-red\)/i);
+  assert.match(css, /\.transaction-history-table th[\s\S]*font-size:\s*10px/);
+  assert.match(css, /\.transaction-history-table td[\s\S]*font-size:\s*10px/);
+  assert.match(readme, /Approve \/ Void/);
+  assert.match(readme, /Transaction history 使用 `#1F2937`/);
+  assert.match(readme, /不提交真实交易、不导出业务数据/);
+});
+
 test('commission rules invoices has its own routed, filterable table shell', () => {
   assert.match(html, /data-invoices-page/);
   assert.match(html, /Invoices \(73\)/);
@@ -480,7 +513,7 @@ test('finance neutral text uses contrast-ready dark gray tokens', () => {
 });
 
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
-  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-22"><\/script>/);
+  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-23"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);
   assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
 });
@@ -519,8 +552,8 @@ test('overview follows the reference dashboard hierarchy', () => {
 });
 
 test('preview busts the entry cache for the reference dashboard skin', () => {
-  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-22"/);
-  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-22"/);
+  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-23"/);
+  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-23"/);
 });
 
 test('reference dashboard keeps flat cards and red action controls', () => {

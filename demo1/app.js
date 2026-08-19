@@ -1,4 +1,4 @@
-import { apiCredentialsPageData, attributionPageData, bannersImagesPageData, brandIntegrationPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, couponsPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData, recruitmentPageSettingsData, restrictionRulesPageData, teamAccountsPageData } from './data.mjs?v=merchant-reference-22';
+import { apiCredentialsPageData, attributionPageData, bannersImagesPageData, brandIntegrationPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, couponsPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData, recruitmentPageSettingsData, restrictionRulesPageData, teamAccountsPageData, transactionHistoryPageData } from './data.mjs?v=merchant-reference-23';
 import {
   createDashboardState,
   isNavigationItemActive,
@@ -133,6 +133,12 @@ const financePayoutSchedule = document.querySelector('[data-finance-payout-sched
 const financePaymentMethods = document.querySelector('[data-finance-payment-methods]');
 const financePayoutRows = document.querySelector('[data-finance-payout-rows]');
 const financeResultCount = document.querySelector('[data-finance-result-count]');
+const transactionHistoryPage = document.querySelector('[data-transaction-history-page]');
+const transactionHistorySummary = document.querySelector('[data-transaction-history-summary]');
+const transactionHistoryRows = document.querySelector('[data-transaction-history-rows]');
+const transactionHistoryResultCount = document.querySelector('[data-transaction-history-result-count]');
+const transactionHistoryPagination = document.querySelector('[data-transaction-history-pagination]');
+const transactionHistorySelectAll = document.querySelector('[data-transaction-history-select-all]');
 const invoicesPage = document.querySelector('[data-invoices-page]');
 const invoicesDateRange = document.querySelector('[data-invoices-date-range]');
 const invoicesRows = document.querySelector('[data-invoices-rows]');
@@ -267,6 +273,26 @@ const restrictionRulesState = {
 
 const financeState = {
   trendPeriod: '30d',
+};
+
+const transactionHistoryState = {
+  search: '',
+  page: 1,
+  pageSize: transactionHistoryPageData.pageSize,
+  expandedIds: new Set(),
+  selectedIds: new Set(),
+  filters: {
+    timeRange: 'last-7d',
+    orderStatus: 'all',
+    skuStatus: 'all',
+    transactionType: 'all',
+    group: 'all',
+    publisher: 'all',
+    channel: 'all',
+    commissionRule: 'all',
+    country: 'all',
+    amazonBrand: 'all',
+  },
 };
 
 const invoicesState = {
@@ -1975,6 +2001,166 @@ const renderFinancePage = () => {
   renderFinancePayoutRows();
 };
 
+const transactionHistoryFilterConfig = [
+  ['orderStatus', 'Order status', 'orderStatuses'],
+  ['skuStatus', 'SKU status', 'skuStatuses'],
+  ['transactionType', 'Transaction type', 'transactionTypes'],
+  ['group', 'Group', 'groups'],
+  ['publisher', 'Publisher', 'publishers'],
+  ['channel', 'Channel', 'channels'],
+  ['commissionRule', 'Commission rule', 'commissionRules'],
+  ['country', 'Country', 'countries'],
+  ['amazonBrand', 'Amazon brand', 'amazonBrands'],
+];
+
+const getFilteredTransactionHistoryRows = () => {
+  const query = transactionHistoryState.search.trim().toLowerCase();
+  const { filters } = transactionHistoryState;
+
+  return transactionHistoryPageData.rows.filter((row) => {
+    const searchable = [
+      row.id,
+      row.commissionId,
+      row.couponCode,
+      row.country,
+      row.amazonBrand,
+      row.publisher,
+      row.channel,
+      ...row.items.flatMap((item) => [item.name, item.sku]),
+    ].join(' ').toLowerCase();
+    const matchesSearch = !query || searchable.includes(query);
+    const matchesOrderStatus = filters.orderStatus === 'all' || row.status === filters.orderStatus;
+    const matchesSkuStatus = filters.skuStatus === 'all' || row.skuStatus === filters.skuStatus;
+    const matchesTransactionType = filters.transactionType === 'all' || row.transactionType === filters.transactionType;
+    const matchesGroup = filters.group === 'all' || row.group === filters.group;
+    const matchesPublisher = filters.publisher === 'all' || row.publisher === filters.publisher;
+    const matchesChannel = filters.channel === 'all' || row.channel === filters.channel;
+    const matchesCommissionRule = filters.commissionRule === 'all' || row.commissionRule === filters.commissionRule;
+    const matchesCountry = filters.country === 'all' || row.country === filters.country;
+    const matchesAmazonBrand = filters.amazonBrand === 'all' || row.amazonBrand === filters.amazonBrand;
+
+    return matchesSearch && matchesOrderStatus && matchesSkuStatus && matchesTransactionType && matchesGroup
+      && matchesPublisher && matchesChannel && matchesCommissionRule && matchesCountry && matchesAmazonBrand;
+  });
+};
+
+const isDefaultTransactionHistoryView = () => transactionHistoryState.search.trim() === ''
+  && transactionHistoryState.filters.orderStatus === 'all'
+  && transactionHistoryState.filters.skuStatus === 'all'
+  && transactionHistoryState.filters.transactionType === 'all'
+  && transactionHistoryState.filters.group === 'all'
+  && transactionHistoryState.filters.publisher === 'all'
+  && transactionHistoryState.filters.channel === 'all'
+  && transactionHistoryState.filters.commissionRule === 'all'
+  && transactionHistoryState.filters.country === 'all'
+  && transactionHistoryState.filters.amazonBrand === 'all';
+
+const renderTransactionHistorySummary = () => {
+  if (!transactionHistorySummary) return;
+
+  transactionHistorySummary.innerHTML = transactionHistoryPageData.summary.map((metric) => `
+    <article class="transaction-history-summary-card transaction-history-summary-card--${metric.tone}">
+      <span class="transaction-history-summary-card__icon">${icon(metric.icon)}</span>
+      <div class="transaction-history-summary-card__copy">
+        <span>${escapeHtml(metric.label)} <button class="inline-info transaction-history-info" type="button" data-transaction-history-action="summary-info" data-transaction-history-label="${escapeHtml(metric.label)}" aria-label="About ${escapeHtml(metric.label)}">${icon('info')}</button></span>
+        <strong>${escapeHtml(metric.value)}</strong>
+        <small class="transaction-history-summary-card__note transaction-history-summary-card__note--${metric.noteTone}">${escapeHtml(metric.note)}</small>
+      </div>
+    </article>
+  `).join('');
+};
+
+const renderTransactionHistoryPagination = (totalPages) => {
+  if (!transactionHistoryPagination) return;
+
+  const currentPage = transactionHistoryState.page;
+  const pageNumbers = totalPages <= 6
+    ? Array.from({ length: totalPages }, (_, index) => index + 1)
+    : Array.from(new Set([1, 2, 3, currentPage, totalPages])).filter((page) => page >= 1 && page <= totalPages).sort((a, b) => a - b);
+  const pageMarkup = [];
+  pageNumbers.forEach((page, index) => {
+    if (index > 0 && page - pageNumbers[index - 1] > 1) pageMarkup.push('<span class="transaction-history-pagination__ellipsis">…</span>');
+    pageMarkup.push(`<button type="button" class="${page === currentPage ? 'is-current' : ''}" ${page === currentPage ? 'aria-current="page"' : ''} data-transaction-history-page-number="${page}">${page}</button>`);
+  });
+
+  transactionHistoryPagination.innerHTML = `
+    <button type="button" aria-label="Previous transaction history page" data-transaction-history-page-number="${Math.max(1, currentPage - 1)}" ${currentPage === 1 ? 'disabled' : ''}>‹</button>
+    ${pageMarkup.join('')}
+    <button type="button" aria-label="Next transaction history page" data-transaction-history-page-number="${Math.min(totalPages, currentPage + 1)}" ${currentPage === totalPages ? 'disabled' : ''}>›</button>
+  `;
+};
+
+const renderTransactionHistoryRows = () => {
+  if (!transactionHistoryRows) return;
+
+  const filteredRows = getFilteredTransactionHistoryRows();
+  const resultCount = isDefaultTransactionHistoryView() ? transactionHistoryPageData.totalCount : filteredRows.length;
+  const totalPages = Math.max(1, Math.ceil(resultCount / transactionHistoryState.pageSize));
+  transactionHistoryState.page = Math.min(transactionHistoryState.page, totalPages);
+  const startIndex = (transactionHistoryState.page - 1) * transactionHistoryState.pageSize;
+  const visibleRows = filteredRows.slice(startIndex, startIndex + transactionHistoryState.pageSize);
+
+  transactionHistoryPage?.querySelectorAll('[data-transaction-history-filter]').forEach((select) => {
+    select.value = transactionHistoryState.filters[select.dataset.transactionHistoryFilter] ?? 'all';
+  });
+  if (transactionHistoryPage) {
+    const timeRange = transactionHistoryPage.querySelector('[data-transaction-history-time-range]');
+    if (timeRange) timeRange.value = transactionHistoryState.filters.timeRange;
+    const search = transactionHistoryPage.querySelector('[data-transaction-history-search]');
+    if (search && search.value !== transactionHistoryState.search) search.value = transactionHistoryState.search;
+  }
+
+  transactionHistoryRows.innerHTML = visibleRows.length
+    ? visibleRows.map((row) => {
+      const isExpanded = transactionHistoryState.expandedIds.has(row.id);
+      const isSelected = transactionHistoryState.selectedIds.has(row.id);
+      const itemPreview = row.items.map((item) => escapeHtml(item.name)).join(', ');
+      const [commissionValue, commissionRate] = row.commission.split(' ');
+      return `
+        <tr class="transaction-history-row${isExpanded ? ' is-expanded' : ''}" data-transaction-history-row="${escapeHtml(row.id)}">
+          <td class="transaction-history-cell--check">
+            <label class="transaction-history-checkbox">
+              <input type="checkbox" data-transaction-history-select="${escapeHtml(row.id)}" ${isSelected ? 'checked' : ''} aria-label="Select transaction ${escapeHtml(row.id)}" />
+              <span aria-hidden="true"></span>
+            </label>
+          </td>
+          <td class="transaction-history-cell--order"><strong>${escapeHtml(row.id)}</strong></td>
+          <td class="transaction-history-cell--date"><time datetime="${escapeHtml(row.datetime)}">${escapeHtml(row.date)}</time></td>
+          <td class="transaction-history-cell--items"><button type="button" class="transaction-history-items-toggle" data-transaction-history-action="toggle-items" data-transaction-history-id="${escapeHtml(row.id)}" aria-expanded="${isExpanded}" aria-label="${isExpanded ? 'Collapse' : 'Expand'} items for ${escapeHtml(row.id)}"><strong>${row.itemCount}</strong><svg><use href="#icon-chevron"></use></svg></button><span title="${itemPreview}">${itemPreview}</span></td>
+          <td>${escapeHtml(row.quantity)}</td>
+          <td>${escapeHtml(row.country)}</td>
+          <td class="transaction-history-cell--amount"><strong>${escapeHtml(row.salesAmount)}</strong></td>
+          <td><span class="transaction-history-commission-id">${escapeHtml(row.commissionId)}</span></td>
+          <td class="transaction-history-cell--commission"><strong>${escapeHtml(commissionValue)}</strong><small>${escapeHtml(commissionRate ?? '')}</small></td>
+          <td>${escapeHtml(row.couponCode)}</td>
+          <td><span class="transaction-history-group">(${escapeHtml(row.group)})</span></td>
+          <td><span class="transaction-history-status transaction-history-status--${escapeHtml(row.statusTone)}"><i aria-hidden="true"></i>${escapeHtml(row.status)}</span></td>
+          <td class="transaction-history-cell--action"><button type="button" class="transaction-history-row-action" data-transaction-history-action="row-menu" data-transaction-history-id="${escapeHtml(row.id)}" aria-label="More actions for ${escapeHtml(row.id)}">${icon('more')}</button></td>
+        </tr>
+        ${isExpanded ? `<tr class="transaction-history-items-row"><td colspan="13"><div class="transaction-history-items-panel"><strong>Items in ${escapeHtml(row.id)}</strong><div>${row.items.map((item) => `<span><b>${escapeHtml(item.name)}</b><small>${escapeHtml(item.sku)} · Qty ${escapeHtml(item.quantity)}</small></span>`).join('')}</div></div></td></tr>` : ''}
+      `;
+    }).join('')
+    : '<tr><td class="transaction-history-empty" colspan="13"><strong>No transactions found</strong><span>Try another search or filter combination.</span></td></tr>';
+
+  const selectedVisible = visibleRows.filter((row) => transactionHistoryState.selectedIds.has(row.id)).length;
+  if (transactionHistorySelectAll) {
+    transactionHistorySelectAll.checked = visibleRows.length > 0 && selectedVisible === visibleRows.length;
+    transactionHistorySelectAll.indeterminate = selectedVisible > 0 && selectedVisible < visibleRows.length;
+  }
+  if (transactionHistoryResultCount) {
+    const from = resultCount ? startIndex + 1 : 0;
+    const to = resultCount ? Math.min(startIndex + visibleRows.length, resultCount) : 0;
+    transactionHistoryResultCount.textContent = `Showing ${from} to ${to} of ${resultCount.toLocaleString()} results`;
+  }
+  renderTransactionHistoryPagination(totalPages);
+};
+
+const renderTransactionHistoryPage = () => {
+  if (!transactionHistoryPage) return;
+  renderTransactionHistorySummary();
+  renderTransactionHistoryRows();
+};
+
 const getFilteredInvoices = () => {
   const normalizedSearch = invoicesState.search.trim().toLowerCase();
   const { filters } = invoicesState;
@@ -2992,6 +3178,7 @@ const renderPage = () => {
   const isCommissionRulesPage = state.activeNavigationChild === 'commission-rules-list';
   const isRestrictionRulesPage = state.activeNavigationChild === 'restriction-rules';
   const isFinancePage = state.activeNavigationChild === 'balance-payments';
+  const isTransactionHistoryPage = ['transaction-history', 'finance-transactions'].includes(state.activeNavigationChild);
   const isInvoicesPage = state.activeNavigationChild === 'commission-invoices' || state.activeNavigationChild === 'invoices';
   const isHelpCenterPage = state.activeNavigationId === 'help-center';
   const isTeamAccountsPage = state.activeNavigationChild === 'team-accounts';
@@ -3001,13 +3188,14 @@ const renderPage = () => {
   const isMessagesPage = ['all-messages', 'partner-messages', 'system-alerts', 'archived-messages'].includes(state.activeNavigationChild);
   const isCouponsPage = state.activeNavigationChild === 'coupons';
   const isProductsAssetsPage = state.activeNavigationChild === 'banners-images';
-  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isRestrictionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage || isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage;
+  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isRestrictionRulesPage || isFinancePage || isTransactionHistoryPage || isInvoicesPage || isHelpCenterPage || isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage;
 
   document.body.classList.toggle('is-campaign-page', isCampaignPage);
   document.body.classList.toggle('is-attribution-page', isAttributionPage);
   document.body.classList.toggle('is-commission-rules-page', isCommissionRulesPage);
   document.body.classList.toggle('is-restriction-rules-page', isRestrictionRulesPage);
   document.body.classList.toggle('is-finance-page', isFinancePage);
+  document.body.classList.toggle('is-transaction-history-page', isTransactionHistoryPage);
   document.body.classList.toggle('is-invoices-page', isInvoicesPage);
   document.body.classList.toggle('is-commission-invoices-page', state.activeNavigationChild === 'commission-invoices');
   document.body.classList.toggle('is-finance-invoices-page', state.activeNavigationChild === 'invoices');
@@ -3046,6 +3234,8 @@ const renderPage = () => {
             ? 'Control paid-search terms, channels, regions, and partner eligibility for your programs.'
           : isFinancePage
             ? 'Track your account balance, commissions, payouts, and payment methods.'
+            : isTransactionHistoryPage
+              ? 'View and manage all transactions across your partner program.'
             : isInvoicesPage
               ? 'Review, filter, and download demo invoice records for the selected workspace.'
             : isHelpCenterPage
@@ -3065,11 +3255,11 @@ const renderPage = () => {
             : isProductsAssetsPage
               ? 'Manage your creative assets and organize them into folders for easy access and use across campaigns.'
             : recruitmentPage?.description ?? operationsPage?.description ?? context.current.label + ' workspace preview for the current brand scope.';
-  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isRestrictionRulesPage || isFinancePage || isInvoicesPage || isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage
+  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isRestrictionRulesPage || isFinancePage || isTransactionHistoryPage || isInvoicesPage || isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage
     ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isRestrictionRulesPage || isInvoicesPage ? 'Commission & Rules' : isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage ? 'Integrations & Settings' : isMessagesPage ? 'Messages & Notifications' : isCouponsPage || isProductsAssetsPage ? 'Products & Assets' : 'Finance')
     : isHelpCenterPage ? 'Help center'
     : isOverview ? t('shell.merchantWorkspace', 'Merchant workspace') : context.parent.label;
-  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isRestrictionRulesPage ? 'Restriction rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isTeamAccountsPage ? 'Team accounts' : isRecruitmentSettingsPage ? 'Recruitment page' : isBrandIntegrationPage ? 'Brand integration' : isApiCredentialsPage ? 'API credentials' : isMessagesPage ? context.current.label : isCouponsPage ? 'Coupons' : isProductsAssetsPage ? 'Banners & images' : isOverview ? 'Overview' : context.current.label;
+  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isRestrictionRulesPage ? 'Restriction rules' : isFinancePage ? 'Balance & payments' : isTransactionHistoryPage ? 'Transaction history' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isTeamAccountsPage ? 'Team accounts' : isRecruitmentSettingsPage ? 'Recruitment page' : isBrandIntegrationPage ? 'Brand integration' : isApiCredentialsPage ? 'API credentials' : isMessagesPage ? context.current.label : isCouponsPage ? 'Coupons' : isProductsAssetsPage ? 'Banners & images' : isOverview ? 'Overview' : context.current.label;
   breadcrumbCurrent.setAttribute('aria-current', 'page');
   overviewPage.hidden = !isOverview;
   modulePage.hidden = isOverview || (!recruitmentPage && !operationsPage);
@@ -3078,6 +3268,7 @@ const renderPage = () => {
   commissionRulesPage.hidden = !isCommissionRulesPage;
   restrictionRulesPage.hidden = !isRestrictionRulesPage;
   financePage.hidden = !isFinancePage;
+  transactionHistoryPage.hidden = !isTransactionHistoryPage;
   invoicesPage.hidden = !isInvoicesPage;
   helpCenterPage.hidden = !isHelpCenterPage;
   teamAccountsPage.hidden = !isTeamAccountsPage;
@@ -3112,6 +3303,7 @@ const renderPage = () => {
   if (isCommissionRulesPage) renderCommissionRulesPage();
   if (isRestrictionRulesPage) renderRestrictionRulesPage();
   if (isFinancePage) renderFinancePage();
+  if (isTransactionHistoryPage) renderTransactionHistoryPage();
   if (isInvoicesPage) renderInvoicesPage();
   if (isHelpCenterPage) renderHelpCenterPage();
   if (isTeamAccountsPage) renderTeamAccountsPage();
@@ -3896,6 +4088,93 @@ if (financePage) {
       showToast('Deposit flow is ready for product integration');
     } else {
       showToast(`${actionName.replaceAll('-', ' ')} is ready for product integration`);
+    }
+  });
+}
+
+if (transactionHistoryPage) {
+  transactionHistoryPage.addEventListener('input', (event) => {
+    if (!event.target.matches('[data-transaction-history-search]')) return;
+    transactionHistoryState.search = event.target.value;
+    transactionHistoryState.page = 1;
+    renderTransactionHistoryRows();
+  });
+
+  transactionHistoryPage.addEventListener('change', (event) => {
+    const filter = event.target.closest('[data-transaction-history-filter]');
+    if (filter) {
+      transactionHistoryState.filters[filter.dataset.transactionHistoryFilter] = filter.value;
+      transactionHistoryState.page = 1;
+      renderTransactionHistoryRows();
+      showToast(`${filter.options[filter.selectedIndex].text} selected`);
+      return;
+    }
+
+    if (event.target.matches('[data-transaction-history-time-range]')) {
+      transactionHistoryState.filters.timeRange = event.target.value;
+      transactionHistoryState.page = 1;
+      renderTransactionHistoryRows();
+      showToast(`${event.target.options[event.target.selectedIndex].text} selected`);
+      return;
+    }
+
+    const checkbox = event.target.closest('[data-transaction-history-select]');
+    if (checkbox) {
+      if (checkbox.checked) transactionHistoryState.selectedIds.add(checkbox.dataset.transactionHistorySelect);
+      else transactionHistoryState.selectedIds.delete(checkbox.dataset.transactionHistorySelect);
+      renderTransactionHistoryRows();
+      return;
+    }
+
+    if (event.target.matches('[data-transaction-history-select-all]')) {
+      const visibleIds = getFilteredTransactionHistoryRows().slice(
+        (transactionHistoryState.page - 1) * transactionHistoryState.pageSize,
+        transactionHistoryState.page * transactionHistoryState.pageSize,
+      ).map((row) => row.id);
+      if (event.target.checked) visibleIds.forEach((id) => transactionHistoryState.selectedIds.add(id));
+      else visibleIds.forEach((id) => transactionHistoryState.selectedIds.delete(id));
+      renderTransactionHistoryRows();
+    }
+  });
+
+  transactionHistoryPage.addEventListener('submit', (event) => {
+    if (!event.target.matches('[data-transaction-history-search-form]')) return;
+    event.preventDefault();
+    showToast(transactionHistoryState.search ? `Searching transactions for “${transactionHistoryState.search}”` : 'Showing all transactions');
+  });
+
+  transactionHistoryPage.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-transaction-history-action]');
+    const pageNumber = event.target.closest('[data-transaction-history-page-number]');
+
+    if (pageNumber && !pageNumber.disabled) {
+      transactionHistoryState.page = Number(pageNumber.dataset.transactionHistoryPageNumber);
+      renderTransactionHistoryRows();
+      return;
+    }
+    if (!action) return;
+    event.stopPropagation();
+
+    const actionName = action.dataset.transactionHistoryAction;
+    const transactionId = action.dataset.transactionHistoryId;
+    if (actionName === 'toggle-items') {
+      if (transactionHistoryState.expandedIds.has(transactionId)) transactionHistoryState.expandedIds.delete(transactionId);
+      else transactionHistoryState.expandedIds.add(transactionId);
+      renderTransactionHistoryRows();
+    } else if (actionName === 'row-menu') {
+      showToast(`${transactionId} actions are ready for product integration`);
+    } else if (actionName === 'summary-info') {
+      showToast(`${action.dataset.transactionHistoryLabel} details are ready for product integration`);
+    } else if (actionName === 'bulk-approve-void') {
+      showToast('Bulk approve / void requires confirmation and an audit reason');
+    } else if (actionName === 'export') {
+      showToast('Transaction CSV export is ready for download');
+    } else if (actionName === 'add-transaction') {
+      showToast('Add transaction flow is ready for product integration');
+    } else if (actionName === 'columns') {
+      showToast('Transaction column settings are ready for product integration');
+    } else if (actionName === 'sort') {
+      showToast('Transaction date sorting is ready for product integration');
     }
   });
 }
