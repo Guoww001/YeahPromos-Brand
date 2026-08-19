@@ -87,6 +87,7 @@ const sidebar = document.querySelector('[data-sidebar]');
 const sidebarBackdrop = document.querySelector('[data-sidebar-backdrop]');
 const sidebarOpenButton = document.querySelector('[data-sidebar-open]');
 const sidebarCloseButton = document.querySelector('[data-sidebar-close]');
+const sidebarCollapseButton = document.querySelector('[data-sidebar-collapse]');
 const campaignPage = document.querySelector('[data-campaign-page]');
 const campaignMetrics = document.querySelector('[data-campaign-metrics]');
 const campaignTabs = document.querySelector('[data-campaign-tabs]');
@@ -416,6 +417,8 @@ const renderNavigation = () => {
           <button
             class="nav-item${isActive ? ' is-active' : ''}"
             type="button"
+            aria-label="${localizedNavigationLabel(item)}"
+            title="${localizedNavigationLabel(item)}"
             data-nav-item="${item.id}"
             ${hasChildren ? `data-nav-group="${item.id}" aria-expanded="${isExpanded}"` : ''}
             ${isActive && !state.activeNavigationChild ? 'aria-current="page"' : ''}
@@ -3530,6 +3533,50 @@ const closeSidebar = () => {
   sidebarOpenButton.focus();
 };
 
+const updateCollapsedNavigationA11y = (collapsed) => {
+  navigation.querySelectorAll('.nav-children').forEach((children) => {
+    children.inert = collapsed;
+    children.setAttribute('aria-hidden', String(collapsed));
+  });
+};
+
+const setSidebarCollapsed = (collapsed) => {
+  document.body.classList.toggle('is-sidebar-collapsed', collapsed);
+  sidebarCollapseButton?.setAttribute('aria-pressed', String(collapsed));
+  sidebarCollapseButton?.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+  sidebarCollapseButton?.setAttribute('title', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+  updateCollapsedNavigationA11y(collapsed);
+};
+
+sidebarCollapseButton?.addEventListener('click', () => {
+  setSidebarCollapsed(!document.body.classList.contains('is-sidebar-collapsed'));
+});
+
+const interactionBeamSelector = [
+  '.button',
+  '.icon-button',
+  '.nav-item',
+  '.nav-child',
+  '.metric-card',
+  '.quick-action',
+  '.sidebar__utility',
+  '.account-card',
+  '[role="tab"]',
+  '[role="button"]',
+].join(', ');
+
+const triggerInteractionBeam = (target) => {
+  if (target.matches(':disabled, [aria-disabled="true"]')) return;
+  target.classList.remove('has-interaction-beam');
+  requestAnimationFrame(() => target.classList.add('has-interaction-beam'));
+  window.setTimeout(() => target.classList.remove('has-interaction-beam'), 520);
+};
+
+document.addEventListener('pointerdown', (event) => {
+  const target = event.target instanceof Element ? event.target.closest(interactionBeamSelector) : null;
+  if (target) triggerInteractionBeam(target);
+});
+
 navigation.addEventListener('click', (event) => {
   const groupButton = event.target.closest('[data-nav-group]');
   const childButton = event.target.closest('[data-nav-child]');
@@ -3543,8 +3590,10 @@ navigation.addEventListener('click', (event) => {
   if (!itemButton) return;
 
   if (groupButton) {
+    if (document.body.classList.contains('is-sidebar-collapsed')) setSidebarCollapsed(false);
     state = toggleNavigationGroup(state, groupButton.dataset.navGroup);
     renderNavigation();
+    updateCollapsedNavigationA11y(document.body.classList.contains('is-sidebar-collapsed'));
     return;
   }
 
