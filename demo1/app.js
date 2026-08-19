@@ -1,4 +1,4 @@
-import { apiCredentialsPageData, attributionPageData, bannersImagesPageData, brandIntegrationPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData } from './data.mjs?v=merchant-reference-20';
+import { apiCredentialsPageData, attributionPageData, bannersImagesPageData, brandIntegrationPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, couponsPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData } from './data.mjs?v=merchant-reference-20';
 import {
   createDashboardState,
   isNavigationItemActive,
@@ -140,6 +140,13 @@ const brandIntegrationActions = document.querySelector('[data-brand-integration-
 const brandIntegrationHealth = document.querySelector('[data-brand-integration-health]');
 const brandIntegrationList = document.querySelector('[data-brand-integration-list]');
 const brandIntegrationActivity = document.querySelector('[data-brand-integration-activity]');
+const couponsPage = document.querySelector('[data-coupons-page]');
+const couponsTabs = document.querySelector('[data-coupons-tabs]');
+const couponsSearch = document.querySelector('[data-coupons-search]');
+const couponsRows = document.querySelector('[data-coupons-rows]');
+const couponsResultCount = document.querySelector('[data-coupons-result-count]');
+const couponsSelectAll = document.querySelector('[data-coupons-select-all]');
+const couponsDateLabel = document.querySelector('[data-coupons-date-label]');
 const messagesPage = document.querySelector('[data-messages-page]');
 const messagesPageActions = document.querySelector('[data-messages-page-actions]');
 const messagesTabs = document.querySelector('[data-messages-tabs]');
@@ -230,6 +237,17 @@ const invoicesState = {
 const helpCenterState = {
   search: '',
   visibleArticleCount: 5,
+};
+
+const couponsState = {
+  search: '',
+  dateRange: 'last-7d',
+  filters: {
+    status: 'all',
+    permission: 'all',
+    category: 'all',
+  },
+  selectedIds: new Set(),
 };
 
 const apiCredentialsState = {
@@ -2190,6 +2208,97 @@ const handleMessagesAction = (action) => {
   return true;
 };
 
+const getFilteredCoupons = () => {
+  const query = couponsState.search.trim().toLowerCase();
+
+  return couponsPageData.coupons.filter((coupon) => {
+    const matchesStatus = couponsState.filters.status === 'all' || coupon.status === couponsState.filters.status;
+    const matchesPermission = couponsState.filters.permission === 'all' || coupon.permission === couponsState.filters.permission;
+    const matchesCategory = couponsState.filters.category === 'all' || coupon.category === couponsState.filters.category;
+    const matchesSearch = !query || [coupon.code, coupon.offer, coupon.requirement, coupon.category, coupon.permission]
+      .some((value) => value.toLowerCase().includes(query));
+
+    return matchesStatus && matchesPermission && matchesCategory && matchesSearch;
+  });
+};
+
+const renderCouponsTabs = () => {
+  if (!couponsTabs) return;
+  couponsTabs.innerHTML = couponsPageData.tabs.map((tab) => `
+    <button class="products-coupon-tab${tab.id === 'coupons' ? ' is-active' : ''}" type="button" role="tab" aria-selected="${tab.id === 'coupons'}" data-coupons-tab="${tab.id}">
+      ${escapeHtml(tab.label)}
+    </button>
+  `).join('');
+};
+
+const renderCouponsFilters = () => {
+  if (!couponsPage) return;
+  const filterOptions = {
+    status: couponsPageData.filters.statuses,
+    permission: couponsPageData.filters.permissions,
+    category: couponsPageData.filters.categories,
+  };
+
+  Object.entries(filterOptions).forEach(([key, options]) => {
+    const select = couponsPage.querySelector(`[data-coupons-filter="${key}"]`);
+    if (!select) return;
+    select.innerHTML = options.map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join('');
+    select.value = couponsState.filters[key];
+  });
+};
+
+const renderCouponsRows = () => {
+  if (!couponsRows) return;
+  const visibleCoupons = getFilteredCoupons();
+
+  couponsRows.innerHTML = visibleCoupons.length
+    ? visibleCoupons.map((coupon) => `
+        <tr class="${couponsState.selectedIds.has(coupon.id) ? 'is-selected' : ''}" data-coupons-row="${coupon.id}">
+          <td class="products-coupon-check-cell">
+            <label class="products-coupon-checkbox">
+              <input type="checkbox" data-coupons-select="${coupon.id}" aria-label="Select ${escapeHtml(coupon.code)}"${couponsState.selectedIds.has(coupon.id) ? ' checked' : ''} />
+              <span aria-hidden="true"></span>
+            </label>
+          </td>
+          <td class="products-coupon-code"><strong>${escapeHtml(coupon.code)}</strong></td>
+          <td class="products-coupon-offer"><strong>${escapeHtml(coupon.offer)}</strong><span>${escapeHtml(coupon.requirement)}</span></td>
+          <td class="products-coupon-category">${escapeHtml(coupon.category)}</td>
+          <td class="products-coupon-dates"><span>${escapeHtml(coupon.validFrom)}</span><i aria-hidden="true">~</i><span>${escapeHtml(coupon.validTo)}</span></td>
+          <td class="products-coupon-usage">${coupon.usage.toLocaleString()} / ${coupon.usageLimit.toLocaleString()}</td>
+          <td><span class="products-coupon-status products-coupon-status--${coupon.statusTone}"><i></i>${escapeHtml(coupon.status)}</span></td>
+          <td class="products-coupon-actions">
+            <button type="button" data-coupons-action="edit" data-coupons-code="${escapeHtml(coupon.code)}" aria-label="Edit ${escapeHtml(coupon.code)}">${icon('edit')}</button>
+            <button type="button" data-coupons-action="delete" data-coupons-code="${escapeHtml(coupon.code)}" aria-label="Delete ${escapeHtml(coupon.code)}">${icon('trash')}</button>
+          </td>
+        </tr>
+      `).join('')
+    : '<tr><td class="products-coupon-empty" colspan="8"><strong>No coupons found</strong><span>Try changing the filters or search keywords.</span></td></tr>';
+
+  const visibleIds = visibleCoupons.map((coupon) => coupon.id);
+  const selectedVisibleCount = visibleIds.filter((id) => couponsState.selectedIds.has(id)).length;
+  if (couponsSelectAll) {
+    couponsSelectAll.checked = visibleIds.length > 0 && selectedVisibleCount === visibleIds.length;
+    couponsSelectAll.indeterminate = selectedVisibleCount > 0 && selectedVisibleCount < visibleIds.length;
+  }
+  if (couponsResultCount) {
+    const isDefaultView = couponsState.search === '' && Object.values(couponsState.filters).every((value) => value === 'all');
+    couponsResultCount.textContent = isDefaultView
+      ? `1 – ${couponsPageData.totalCount} of ${couponsPageData.totalCount}`
+      : visibleCoupons.length
+        ? `1 – ${visibleCoupons.length} of ${visibleCoupons.length}`
+        : '0 of 0';
+  }
+};
+
+const renderCouponsPage = () => {
+  if (!couponsPage) return;
+  renderCouponsTabs();
+  renderCouponsFilters();
+  if (couponsSearch) couponsSearch.value = couponsState.search;
+  if (couponsDateLabel) couponsDateLabel.textContent = 'May 05, 2025';
+  renderCouponsRows();
+};
+
 const getFilteredProductsAssets = () => {
   const query = productsAssetsState.search.trim().toLowerCase();
   const filtered = bannersImagesPageData.assets.filter((asset) => {
@@ -2379,8 +2488,9 @@ const renderPage = () => {
   const isBrandIntegrationPage = state.activeNavigationChild === 'brand-integration';
   const isApiCredentialsPage = state.activeNavigationChild === 'api-credentials';
   const isMessagesPage = ['all-messages', 'partner-messages', 'system-alerts', 'archived-messages'].includes(state.activeNavigationChild);
+  const isCouponsPage = state.activeNavigationChild === 'coupons';
   const isProductsAssetsPage = state.activeNavigationChild === 'banners-images';
-  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isProductsAssetsPage;
+  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage;
 
   document.body.classList.toggle('is-campaign-page', isCampaignPage);
   document.body.classList.toggle('is-attribution-page', isAttributionPage);
@@ -2393,6 +2503,7 @@ const renderPage = () => {
   document.body.classList.toggle('is-brand-integration-page', isBrandIntegrationPage);
   document.body.classList.toggle('is-api-credentials-page', isApiCredentialsPage);
   document.body.classList.toggle('is-messages-page', isMessagesPage);
+  document.body.classList.toggle('is-products-coupons-page', isCouponsPage);
   document.body.classList.toggle('is-products-assets-page', isProductsAssetsPage);
   if (helpCenterUtility) {
     helpCenterUtility.classList.toggle('is-active', isHelpCenterPage);
@@ -2429,14 +2540,16 @@ const renderPage = () => {
               ? 'Create and manage API keys to authenticate and authorize access to the YeahPromos Merchant API. Keep your credentials secure and never share them publicly.'
             : isMessagesPage
               ? 'Stay connected with your partners and never miss an important update.'
+            : isCouponsPage
+              ? 'Create, manage, and track promotional coupons for your partners and campaigns.'
             : isProductsAssetsPage
               ? 'Manage your creative assets and organize them into folders for easy access and use across campaigns.'
             : recruitmentPage?.description ?? operationsPage?.description ?? context.current.label + ' workspace preview for the current brand scope.';
-  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isProductsAssetsPage
-    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isInvoicesPage ? 'Commission & Rules' : isBrandIntegrationPage || isApiCredentialsPage ? 'Integrations & Settings' : isMessagesPage ? 'Messages & Notifications' : isProductsAssetsPage ? 'Products & Assets' : 'Finance')
+  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage
+    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isInvoicesPage ? 'Commission & Rules' : isBrandIntegrationPage || isApiCredentialsPage ? 'Integrations & Settings' : isMessagesPage ? 'Messages & Notifications' : isCouponsPage || isProductsAssetsPage ? 'Products & Assets' : 'Finance')
     : isHelpCenterPage ? 'Help center'
     : isOverview ? t('shell.merchantWorkspace', 'Merchant workspace') : context.parent.label;
-  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isBrandIntegrationPage ? 'Brand integration' : isApiCredentialsPage ? 'API credentials' : isMessagesPage ? context.current.label : isProductsAssetsPage ? 'Banners & images' : isOverview ? 'Overview' : context.current.label;
+  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isBrandIntegrationPage ? 'Brand integration' : isApiCredentialsPage ? 'API credentials' : isMessagesPage ? context.current.label : isCouponsPage ? 'Coupons' : isProductsAssetsPage ? 'Banners & images' : isOverview ? 'Overview' : context.current.label;
   breadcrumbCurrent.setAttribute('aria-current', 'page');
   overviewPage.hidden = !isOverview;
   modulePage.hidden = isOverview || (!recruitmentPage && !operationsPage);
@@ -2449,6 +2562,7 @@ const renderPage = () => {
   brandIntegrationPage.hidden = !isBrandIntegrationPage;
   apiCredentialsPage.hidden = !isApiCredentialsPage;
   messagesPage.hidden = !isMessagesPage;
+  couponsPage.hidden = !isCouponsPage;
   productsAssetsPage.hidden = !isProductsAssetsPage;
   modulePlaceholder.hidden = isOverview || isMainPage || Boolean(recruitmentPage || operationsPage);
   if (pageActions) pageActions.hidden = !isAttributionPage;
@@ -2476,6 +2590,7 @@ const renderPage = () => {
   if (isBrandIntegrationPage) renderBrandIntegrationPage();
   if (isApiCredentialsPage) renderApiCredentialsPage();
   if (isMessagesPage) renderMessagesPage();
+  if (isCouponsPage) renderCouponsPage();
   if (isProductsAssetsPage) renderProductsAssetsPage();
 };
 
@@ -3226,6 +3341,81 @@ if (messagesPage) {
     if (!event.target.matches('[data-messages-reply-form]')) return;
     event.preventDefault();
     submitMessageReply();
+  });
+}
+
+if (couponsPage) {
+  couponsPage.addEventListener('input', (event) => {
+    if (!event.target.matches('[data-coupons-search]')) return;
+    couponsState.search = event.target.value;
+    renderCouponsRows();
+  });
+
+  couponsPage.addEventListener('change', (event) => {
+    const filter = event.target.closest('[data-coupons-filter]');
+    if (filter) {
+      couponsState.filters[filter.dataset.couponsFilter] = filter.value;
+      renderCouponsPage();
+      showToast(`${filter.options[filter.selectedIndex].text} selected`);
+      return;
+    }
+
+    if (event.target.matches('[data-coupons-select-all]')) {
+      const visibleIds = getFilteredCoupons().map((coupon) => coupon.id);
+      if (event.target.checked) visibleIds.forEach((id) => couponsState.selectedIds.add(id));
+      else visibleIds.forEach((id) => couponsState.selectedIds.delete(id));
+      renderCouponsRows();
+      return;
+    }
+
+    const checkbox = event.target.closest('[data-coupons-select]');
+    if (checkbox) {
+      if (checkbox.checked) couponsState.selectedIds.add(checkbox.dataset.couponsSelect);
+      else couponsState.selectedIds.delete(checkbox.dataset.couponsSelect);
+      renderCouponsRows();
+    }
+  });
+
+  couponsPage.addEventListener('submit', (event) => {
+    if (!event.target.matches('[data-coupons-filter-form]')) return;
+    event.preventDefault();
+    renderCouponsPage();
+    couponsSearch?.focus();
+    showToast(couponsState.search ? `Searching coupons for “${couponsState.search}”` : 'Showing all coupons');
+  });
+
+  couponsPage.addEventListener('click', (event) => {
+    const tab = event.target.closest('[data-coupons-tab]');
+    if (tab) {
+      const tabId = tab.dataset.couponsTab;
+      if (tabId === 'banners-images') navigateTo(tabId);
+      else if (tabId === 'texts-emails') showToast('Texts & emails is ready for product integration');
+      else renderCouponsPage();
+      return;
+    }
+
+    const action = event.target.closest('[data-coupons-action]');
+    if (!action) return;
+    const actionName = action.dataset.couponsAction;
+    const couponCode = action.dataset.couponsCode;
+
+    if (actionName === 'reset') {
+      couponsState.search = '';
+      couponsState.filters = { status: 'all', permission: 'all', category: 'all' };
+      couponsState.selectedIds.clear();
+      renderCouponsPage();
+      showToast('Coupon filters reset');
+    } else if (actionName === 'date-range') {
+      showToast(`${couponsPageData.dateRangeLabel} selected`);
+    } else if (actionName === 'add-coupon') {
+      showToast('Add coupon flow is ready for product integration');
+    } else if (actionName === 'edit') {
+      showToast(`Edit ${couponCode} is ready for product integration`);
+    } else if (actionName === 'delete') {
+      showToast(`Delete ${couponCode} is ready for product integration`);
+    } else if (actionName === 'page' || actionName === 'next-page' || actionName === 'previous-page') {
+      showToast('Coupon pagination is ready for product integration');
+    }
   });
 }
 

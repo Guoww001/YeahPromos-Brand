@@ -1186,6 +1186,108 @@
             </div>
           </section>
 
+          <section class="products-coupons-page products-assets-module" data-coupons-page hidden aria-labelledby="coupons-page-title">
+            <h2 id="coupons-page-title" class="sr-only">Coupons</h2>
+
+            <div class="products-coupon-tabs" data-coupons-tabs role="tablist" aria-label="Products &amp; Assets categories"></div>
+
+            <form class="products-coupon-filters" data-coupons-filter-form aria-label="Coupon filters">
+              <div class="products-coupon-filters__row">
+                <label class="products-coupon-field products-coupon-field--date">
+                  <span>Date range</span>
+                  <button class="products-coupon-date" type="button" data-coupons-action="date-range" aria-label="Coupon date range">
+                    <svg aria-hidden="true"><use href="#icon-calendar"></use></svg>
+                    <span data-coupons-date-label>May 05, 2025</span>
+                    <i aria-hidden="true">~</i>
+                    <span>May 12, 2025</span>
+                    <svg class="products-coupon-date__end-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
+                  </button>
+                </label>
+                <label class="products-coupon-field">
+                  <span>Status</span>
+                  <span class="products-coupon-select">
+                    <select data-coupons-filter="status" aria-label="Filter coupons by status"></select>
+                    <svg aria-hidden="true"><use href="#icon-chevron"></use></svg>
+                  </span>
+                </label>
+                <label class="products-coupon-field">
+                  <span>Permission</span>
+                  <span class="products-coupon-select">
+                    <select data-coupons-filter="permission" aria-label="Filter coupons by permission"></select>
+                    <svg aria-hidden="true"><use href="#icon-chevron"></use></svg>
+                  </span>
+                </label>
+                <label class="products-coupon-field products-coupon-field--search">
+                  <span>Search keywords</span>
+                  <input type="search" data-coupons-search placeholder="Search by code or description" autocomplete="off" />
+                </label>
+              </div>
+              <div class="products-coupon-filters__row products-coupon-filters__row--actions">
+                <label class="products-coupon-field">
+                  <span>Category</span>
+                  <span class="products-coupon-select">
+                    <select data-coupons-filter="category" aria-label="Filter coupons by category"></select>
+                    <svg aria-hidden="true"><use href="#icon-chevron"></use></svg>
+                  </span>
+                </label>
+                <div class="products-coupon-filters__actions">
+                  <button class="products-coupon-button products-coupon-button--primary" type="submit">Search</button>
+                  <button class="products-coupon-button products-coupon-button--secondary" type="button" data-coupons-action="reset">Reset</button>
+                </div>
+              </div>
+            </form>
+
+            <section class="products-coupon-table-panel products-assets-panel" aria-label="Coupon list">
+              <div class="products-coupon-table-toolbar">
+                <button class="products-coupon-button products-coupon-button--primary" type="button" data-coupons-action="add-coupon">
+                  <svg aria-hidden="true"><use href="#icon-plus"></use></svg>
+                  Add coupon
+                </button>
+              </div>
+              <div class="products-assets-table-scroll">
+                <table class="products-assets-table products-coupon-table">
+                  <caption class="sr-only">Coupons</caption>
+                  <colgroup>
+                    <col class="products-coupon-col--check" />
+                    <col class="products-coupon-col--code" />
+                    <col class="products-coupon-col--offer" />
+                    <col class="products-coupon-col--category" />
+                    <col class="products-coupon-col--dates" />
+                    <col class="products-coupon-col--usage" />
+                    <col class="products-coupon-col--status" />
+                    <col class="products-coupon-col--actions" />
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th scope="col">
+                        <label class="products-coupon-checkbox">
+                          <input type="checkbox" data-coupons-select-all aria-label="Select all visible coupons" />
+                          <span aria-hidden="true"></span>
+                        </label>
+                      </th>
+                      <th scope="col">Coupon code</th>
+                      <th scope="col">Offer</th>
+                      <th scope="col">Category</th>
+                      <th scope="col">Valid dates</th>
+                      <th scope="col">Usage</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody data-coupons-rows></tbody>
+                </table>
+              </div>
+              <div class="products-assets-table-footbar products-coupon-table-footbar">
+                <p data-coupons-result-count>1 – 6 of 6</p>
+                <div class="products-assets-pagination" aria-label="Coupon pagination">
+                  <button type="button" aria-label="Previous page" data-coupons-action="previous-page" disabled>‹</button>
+                  <button type="button" class="is-current" aria-current="page" data-coupons-action="page" data-coupons-page-number="1">1</button>
+                  <button type="button" aria-label="Next page" data-coupons-action="next-page">›</button>
+                </div>
+              </div>
+            </section>
+          </section>
+
           <section class="products-assets-page products-assets-module" data-products-assets-page hidden aria-labelledby="products-assets-page-title">
             <h2 id="products-assets-page-title" class="sr-only">Banners &amp; images</h2>
 

@@ -275,6 +275,37 @@ test('banners page keeps asset states readable and keyboard-addressable', () => 
   assert.match(readme, /Banners & images 使用 `#1F2937`/);
 });
 
+test('products and assets coupons page has its own routed filterable table', () => {
+  assert.match(html, /data-coupons-page/);
+  assert.match(html, /data-coupons-tabs/);
+  assert.match(html, /data-coupons-filter="status"/);
+  assert.match(html, /data-coupons-filter="permission"/);
+  assert.match(html, /data-coupons-filter="category"/);
+  assert.match(html, /data-coupons-search/);
+  assert.match(html, /data-coupons-rows/);
+  assert.match(html, /Coupon code/);
+  assert.match(html, /Add coupon/);
+  assert.match(appJs, /isCouponsPage/);
+  assert.match(appJs, /renderCouponsPage/);
+  assert.match(appJs, /getFilteredCoupons/);
+  assert.match(data, /couponsPageData/);
+  assert.match(data, /SUMMER20/);
+  assert.match(readme, /Products & Assets > Coupons/);
+});
+
+test('coupons page keeps status contrast and keyboard-addressable filters', () => {
+  assert.match(css, /body\.is-products-coupons-page[\s\S]*--coupons-red:\s*#e60000/i);
+  assert.match(css, /--coupons-soft-red:\s*#fde8e8/i);
+  assert.match(css, /\.products-coupon-filters__row[\s\S]*grid-template-columns/);
+  assert.match(css, /\.products-coupon-status--active[\s\S]*color:\s*#167346/);
+  assert.match(css, /\.products-coupon-status--expired[\s\S]*color:\s*#4b5563/);
+  assert.match(css, /\.products-coupons-page \.products-coupon-table th[\s\S]*font-size:\s*11px/);
+  assert.match(css, /\.products-coupons-page \.products-coupon-table td[\s\S]*font-size:\s*12px/);
+  assert.match(appJs, /data-coupons-select-all/);
+  assert.match(readme, /Coupons 的日期范围、筛选器/);
+  assert.match(readme, /Coupons 使用 `#1F2937`/);
+});
+
 test('finance page reuses the README red navigation tokens', () => {
   assert.match(css, /body\.is-finance-page[\s\S]*--finance-red:\s*#e60000/i);
   assert.match(css, /--finance-soft-red:\s*#fde8e8/i);
