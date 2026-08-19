@@ -1,4 +1,4 @@
-import { attributionPageData, campaignPageData, dashboardData } from './data.mjs';
+import { attributionPageData, campaignPageData, commissionRulesPageData, dashboardData } from './data.mjs';
 import {
   createDashboardState,
   selectDemoState,
@@ -58,6 +58,14 @@ const attributionCoverage = document.querySelector('[data-attribution-coverage]'
 const attributionDistribution = document.querySelector('[data-attribution-distribution]');
 const attributionRules = document.querySelector('[data-attribution-rules]');
 const attributionAudit = document.querySelector('[data-attribution-audit]');
+const commissionRulesPage = document.querySelector('[data-commission-rules-page]');
+const commissionRulesActions = document.querySelector('[data-commission-rules-actions]');
+const commissionRulesSummary = document.querySelector('[data-commission-rules-summary]');
+const commissionRulesRows = document.querySelector('[data-commission-rules-rows]');
+const commissionRulesSearch = document.querySelector('[data-commission-rules-search]');
+const commissionRulesSelectAll = document.querySelector('[data-commission-rules-select-all]');
+const commissionRulesResultCount = document.querySelector('[data-commission-rules-result-count]');
+const commissionRulesDetail = document.querySelector('[data-commission-rules-detail]');
 
 const campaignState = {
   activeTab: 'all',
@@ -89,11 +97,23 @@ const campaignDateRangeDays = {
 };
 
 const campaignReferenceDate = Date.parse('2025-05-16T23:59:59Z');
-const campaignCurrentOwner = 'Taylor Morgan';
+const campaignCurrentOwner = 'Demo Owner A';
 
 const attributionState = {
   activeModel: attributionPageData.activeModel,
   isDirty: false,
+};
+
+const commissionRulesState = {
+  search: '',
+  selectedRuleId: commissionRulesPageData.selectedRuleId,
+  filters: {
+    status: 'all',
+    partnerType: 'all',
+    channel: 'all',
+    effectiveDate: 'all',
+  },
+  selectedIds: new Set([commissionRulesPageData.selectedRuleId]),
 };
 
 const icon = (name, className = '') => `
@@ -574,14 +594,211 @@ const renderAttributionPage = () => {
     .join('');
 };
 
+const getFilteredCommissionRules = () => {
+  const { search, filters } = commissionRulesState;
+  const normalizedSearch = search.trim().toLowerCase();
+  const referenceDate = Date.parse('2025-05-12T23:59:59Z');
+
+  return commissionRulesPageData.rules.filter((rule) => {
+    const matchesSearch = !normalizedSearch || [
+      rule.name,
+      rule.ruleId,
+      rule.scopePrimary,
+      rule.scopeSecondary,
+      rule.scopeSummary,
+      rule.status,
+      rule.baseCommission,
+    ].some((value) => value.toLowerCase().includes(normalizedSearch));
+    const matchesStatus = filters.status === 'all' || rule.status === filters.status;
+    const matchesPartnerType = filters.partnerType === 'all' || rule.partnerType === filters.partnerType;
+    const matchesChannel = filters.channel === 'all' || rule.channel === filters.channel;
+    const effectiveDate = Date.parse(rule.effectiveAt);
+    const ageInDays = (referenceDate - effectiveDate) / 86400000;
+    const matchesEffectiveDate = filters.effectiveDate === 'all'
+      || (filters.effectiveDate === '30d' && ageInDays <= 30)
+      || (filters.effectiveDate === '90d' && ageInDays <= 90)
+      || (filters.effectiveDate === '2025' && new Date(effectiveDate).getUTCFullYear() === 2025);
+
+    return matchesSearch && matchesStatus && matchesPartnerType && matchesChannel && matchesEffectiveDate;
+  });
+};
+
+const renderCommissionRulesSummary = () => {
+  if (!commissionRulesSummary) return;
+
+  commissionRulesSummary.innerHTML = commissionRulesPageData.metrics
+    .map((metric) => `
+      <article class="commission-rules-summary-card commission-rules-summary-card--${metric.tone}">
+        <div class="commission-rules-summary-card__copy">
+          <span>${metric.label}</span>
+          <strong>${metric.value}</strong>
+          <small>${metric.note}</small>
+        </div>
+        <span class="commission-rules-summary-card__icon">${icon(metric.icon)}</span>
+      </article>
+    `)
+    .join('');
+};
+
+const updateCommissionRulesSelection = () => {
+  const visibleIds = getFilteredCommissionRules().map((rule) => rule.id);
+  const visibleSelected = visibleIds.filter((id) => commissionRulesState.selectedIds.has(id));
+
+  if (commissionRulesSelectAll) {
+    commissionRulesSelectAll.checked = visibleIds.length > 0 && visibleSelected.length === visibleIds.length;
+    commissionRulesSelectAll.indeterminate = visibleSelected.length > 0 && visibleSelected.length < visibleIds.length;
+  }
+};
+
+const renderCommissionRulesRows = () => {
+  if (!commissionRulesRows) return;
+
+  const filteredRules = getFilteredCommissionRules();
+  commissionRulesRows.innerHTML = filteredRules.length
+    ? filteredRules.map((rule) => `
+        <tr class="${rule.id === commissionRulesState.selectedRuleId ? 'is-selected' : ''}" data-commission-rules-row="${rule.id}">
+          <td class="commission-rules-cell--check">
+            <label class="commission-rules-checkbox">
+              <input type="checkbox" data-commission-rules-select="${rule.id}" ${commissionRulesState.selectedIds.has(rule.id) ? 'checked' : ''} aria-label="Select ${rule.name}" />
+              <span aria-hidden="true"></span>
+            </label>
+          </td>
+          <td class="commission-rules-cell--name">
+            <strong>${rule.name}</strong>
+            <small>${rule.ruleId}</small>
+          </td>
+          <td class="commission-rules-cell--scope">
+            <strong>${rule.scopePrimary}</strong>
+            <small>${rule.scopeSecondary}</small>
+          </td>
+          <td class="commission-rules-cell--rate"><strong>${rule.baseCommission}</strong><small>${rule.unit} rate</small></td>
+          <td class="commission-rules-cell--bonus">
+            <strong>${rule.bonusRate}</strong>
+            <small>${rule.bonusThreshold || 'No bonus'}</small>
+          </td>
+          <td class="commission-rules-cell--attribution">
+            <strong>${rule.attributionWindow}</strong>
+            <small>${rule.attributionType}</small>
+          </td>
+          <td class="commission-rules-cell--effective"><strong>${rule.effectiveDate}</strong></td>
+          <td><span class="commission-rules-status commission-rules-status--${rule.statusTone}"><i></i>${rule.status}</span></td>
+          <td class="commission-rules-cell--actions">
+            <button type="button" data-commission-rules-action="edit" data-commission-rules-rule="${rule.name}" aria-label="Edit ${rule.name}">${icon('edit')}</button>
+            <button type="button" data-commission-rules-action="row-menu" data-commission-rules-rule="${rule.name}" aria-label="More actions for ${rule.name}">${icon('more')}</button>
+          </td>
+        </tr>
+      `).join('')
+    : '<tr><td class="commission-rules-empty" colspan="9"><strong>No commission rules found</strong><span>Try changing your search or filters.</span></td></tr>';
+
+  if (commissionRulesResultCount) {
+    const total = commissionRulesPageData.rules.length;
+    commissionRulesResultCount.textContent = filteredRules.length
+      ? `Showing 1 to ${filteredRules.length} of ${total} rules`
+      : `Showing 0 of ${total} rules`;
+  }
+
+  updateCommissionRulesSelection();
+};
+
+const renderCommissionRulesDetail = () => {
+  if (!commissionRulesDetail) return;
+
+  const rule = commissionRulesPageData.rules.find((item) => item.id === commissionRulesState.selectedRuleId);
+  if (!rule) {
+    commissionRulesDetail.hidden = true;
+    commissionRulesDetail.innerHTML = '';
+    commissionRulesPage?.classList.add('is-detail-closed');
+    return;
+  }
+
+  const detail = commissionRulesPageData.details[rule.id] ?? {
+    description: `Applies to ${rule.scopePrimary.toLowerCase()} across ${rule.scopeSecondary.toLowerCase()}.`,
+    scope: `${rule.scopePrimary} · ${rule.scopeSecondary}`,
+    attributionWindow: rule.attributionWindow,
+    attributionType: rule.attributionType,
+    effectiveDate: rule.effectiveDate,
+    lastUpdated: rule.lastUpdated,
+    updatedBy: 'Demo Admin',
+    tiers: [{ label: 'Base rate', amount: 'All sales', base: rule.baseCommission, bonus: rule.bonusRate }],
+    conditions: ['Applies to eligible partner traffic', 'Excludes invalid or cancelled orders'],
+    performance: { period: 'Selected period', clicks: '—', conversions: '—', commission: '—' },
+  };
+
+  commissionRulesDetail.hidden = false;
+  commissionRulesPage?.classList.remove('is-detail-closed');
+  commissionRulesDetail.innerHTML = `
+    <div class="commission-rules-detail__header">
+      <div>
+        <span class="eyebrow">Selected rule</span>
+        <h2 id="commission-rules-detail-title">${rule.name}</h2>
+        <p>${rule.ruleId}</p>
+      </div>
+      <button class="icon-button" type="button" data-commission-rules-action="close-detail" aria-label="Close rule details">${icon('x')}</button>
+    </div>
+    <p class="commission-rules-detail__description">${detail.description}</p>
+
+    <div class="commission-rules-detail__facts">
+      <div><span>Scope</span><strong>${detail.scope}</strong></div>
+      <div><span>Attribution window</span><strong>${detail.attributionWindow} <small>(${detail.attributionType})</small></strong></div>
+      <div><span>Effective date</span><strong>${detail.effectiveDate}</strong></div>
+      <div><span>Last updated</span><strong>${detail.lastUpdated} by ${detail.updatedBy}</strong></div>
+    </div>
+
+    <section class="commission-rules-detail__section">
+      <div class="commission-rules-detail__section-header">
+        <div><h3>Commission structure</h3><p>Rates are applied by qualifying sales amount.</p></div>
+        <button type="button" class="commission-rules-detail__edit" data-commission-rules-action="edit-rates">Edit rates</button>
+      </div>
+      <div class="commission-rules-tier-table">
+        <div class="commission-rules-tier-row commission-rules-tier-row--header"><span>Tier</span><span>Sales amount (USD)</span><span>Base commission</span><span>Bonus</span><span class="sr-only">Actions</span></div>
+        ${detail.tiers.map((tier) => `
+          <div class="commission-rules-tier-row">
+            <strong>${tier.label}</strong>
+            <span>${tier.amount}</span>
+            <span>${tier.base}</span>
+            <span>${tier.bonus}</span>
+            <span class="commission-rules-tier-actions">
+              <button type="button" data-commission-rules-action="edit-tier" aria-label="Edit ${tier.label}">${icon('edit')}</button>
+              <button type="button" data-commission-rules-action="delete-tier" aria-label="Delete ${tier.label}">${icon('trash')}</button>
+            </span>
+          </div>
+        `).join('')}
+      </div>
+    </section>
+
+    <section class="commission-rules-detail__section commission-rules-conditions">
+      <div class="commission-rules-detail__section-header"><div><h3>Conditions</h3></div><button type="button" class="commission-rules-detail__edit" data-commission-rules-action="edit-conditions">Edit</button></div>
+      <ul>${detail.conditions.map((condition) => `<li>${condition}</li>`).join('')}</ul>
+    </section>
+
+    <section class="commission-rules-detail__section commission-rules-performance">
+      <div class="commission-rules-detail__section-header"><div><h3>Rule performance</h3><p>${detail.performance.period}</p></div></div>
+      <div class="commission-rules-performance-grid">
+        <div><span>Clicks</span><strong>${detail.performance.clicks}</strong></div>
+        <div><span>Conversions</span><strong>${detail.performance.conversions}</strong></div>
+        <div><span>Commission</span><strong>${detail.performance.commission}</strong></div>
+      </div>
+    </section>
+  `;
+};
+
+const renderCommissionRulesPage = () => {
+  if (!commissionRulesPage) return;
+  renderCommissionRulesSummary();
+  renderCommissionRulesRows();
+  renderCommissionRulesDetail();
+};
+
 const renderPage = () => {
   const context = findNavigationContext(state.activeNavigationChild ?? state.activeNavigationId);
   const isOverview = state.activeNavigationId === 'overview' && !state.activeNavigationChild;
   const isCampaignPage = state.activeNavigationChild === 'all-campaigns';
   const isAttributionPage = state.activeNavigationChild === 'attribution-rules';
+  const isCommissionRulesPage = state.activeNavigationChild === 'commission-rules-list';
 
   document.body.classList.toggle('is-campaign-page', isCampaignPage);
   document.body.classList.toggle('is-attribution-page', isAttributionPage);
+  document.body.classList.toggle('is-commission-rules-page', isCommissionRulesPage);
   pageTitle.textContent = isOverview ? 'Business overview' : context.current.label;
   pageDescription.textContent = isOverview
     ? 'Monitor your affiliate program performance and partner activity.'
@@ -589,23 +806,28 @@ const renderPage = () => {
       ? 'View, manage, and analyze all your campaigns in one place.'
       : isAttributionPage
         ? 'Configure how conversions are attributed across channels and partners.'
+        : isCommissionRulesPage
+          ? 'Manage base commission rates, bonuses, attribution windows, and rule conditions for your partners.'
       : `${context.current.label} workspace preview for the current brand scope.`;
-  breadcrumbParent.textContent = isCampaignPage ? 'Campaigns' : isAttributionPage ? 'Commission & Rules' : 'Merchant workspace';
-  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isOverview ? 'Overview' : context.current.label;
+  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage ? (isCampaignPage ? 'Campaigns' : 'Commission & Rules') : 'Merchant workspace';
+  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isOverview ? 'Overview' : context.current.label;
   breadcrumbCurrent.setAttribute('aria-current', 'page');
   overviewPage.hidden = !isOverview;
   campaignPage.hidden = !isCampaignPage;
   attributionPage.hidden = !isAttributionPage;
-  modulePlaceholder.hidden = isOverview || isCampaignPage || isAttributionPage;
+  commissionRulesPage.hidden = !isCommissionRulesPage;
+  modulePlaceholder.hidden = isOverview || isCampaignPage || isAttributionPage || isCommissionRulesPage;
   if (pageActions) pageActions.hidden = !isAttributionPage;
+  if (commissionRulesActions) commissionRulesActions.hidden = !isCommissionRulesPage;
 
-  if (!isOverview && !isCampaignPage && !isAttributionPage) {
+  if (!isOverview && !isCampaignPage && !isAttributionPage && !isCommissionRulesPage) {
     modulePlaceholder.querySelector('[data-module-title]').textContent = context.current.label;
     modulePlaceholder.querySelector('[data-module-parent]').textContent = context.parent.label;
   }
 
   if (isCampaignPage) renderCampaignPage();
   if (isAttributionPage) renderAttributionPage();
+  if (isCommissionRulesPage) renderCommissionRulesPage();
 };
 
 const renderAll = () => {
@@ -852,6 +1074,71 @@ if (campaignPage) {
   });
 }
 
+if (commissionRulesPage) {
+  commissionRulesPage.addEventListener('input', (event) => {
+    if (!event.target.matches('[data-commission-rules-search]')) return;
+    commissionRulesState.search = event.target.value;
+    renderCommissionRulesRows();
+  });
+
+  commissionRulesPage.addEventListener('change', (event) => {
+    const filter = event.target.closest('[data-commission-rules-filter]');
+    if (filter) {
+      commissionRulesState.filters[filter.dataset.commissionRulesFilter] = filter.value;
+      renderCommissionRulesRows();
+      return;
+    }
+
+    const ruleCheckbox = event.target.closest('[data-commission-rules-select]');
+    if (ruleCheckbox) {
+      if (ruleCheckbox.checked) commissionRulesState.selectedIds.add(ruleCheckbox.dataset.commissionRulesSelect);
+      else commissionRulesState.selectedIds.delete(ruleCheckbox.dataset.commissionRulesSelect);
+      updateCommissionRulesSelection();
+      return;
+    }
+
+    if (event.target.matches('[data-commission-rules-select-all]')) {
+      const visibleIds = getFilteredCommissionRules().map((rule) => rule.id);
+      if (event.target.checked) visibleIds.forEach((id) => commissionRulesState.selectedIds.add(id));
+      else visibleIds.forEach((id) => commissionRulesState.selectedIds.delete(id));
+      renderCommissionRulesRows();
+    }
+  });
+
+  commissionRulesPage.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-commission-rules-action]');
+    if (action) {
+      event.stopPropagation();
+      const actionName = action.dataset.commissionRulesAction;
+      if (actionName === 'close-detail') {
+        commissionRulesState.selectedRuleId = null;
+        renderCommissionRulesDetail();
+      } else if (actionName === 'next-page' || actionName === 'more-filters' || actionName === 'settings') {
+        showToast(`${actionName.replace('-', ' ')} is ready for product integration`);
+      } else if (actionName === 'edit' || actionName === 'row-menu') {
+        showToast(`${action.dataset.commissionRulesRule} ${actionName === 'edit' ? 'edit' : 'more actions'} is ready for product integration`);
+      } else if (actionName === 'edit-rates' || actionName === 'edit-conditions' || actionName === 'edit-tier' || actionName === 'delete-tier') {
+        showToast(`${actionName.replaceAll('-', ' ')} is ready for product integration`);
+      }
+      return;
+    }
+
+    const pageNumber = event.target.closest('[data-commission-rules-page-number]');
+    if (pageNumber) {
+      event.stopPropagation();
+      showToast(`Commission rules page ${pageNumber.dataset.commissionRulesPageNumber} is ready for product integration`);
+      return;
+    }
+
+    const row = event.target.closest('[data-commission-rules-row]');
+    if (!row || event.target.closest('input')) return;
+    event.stopPropagation();
+    commissionRulesState.selectedRuleId = row.dataset.commissionRulesRow;
+    renderCommissionRulesRows();
+    renderCommissionRulesDetail();
+  });
+}
+
 if (attributionPage) {
   attributionPage.addEventListener('change', (event) => {
     if (!event.target.matches('[data-attribution-model]')) return;
@@ -874,6 +1161,13 @@ document.addEventListener('click', (event) => {
   const partnerView = event.target.closest('[data-partner-view]');
   if (partnerView) {
     openPartnerDrawer(partnerView.dataset.partnerView, partnerView);
+    return;
+  }
+
+  const commissionAction = event.target.closest('[data-commission-action]');
+  if (commissionAction) {
+    const action = commissionAction.dataset.commissionAction;
+    if (action === 'create') showToast('Commission rule editor is ready for product integration');
     return;
   }
 
