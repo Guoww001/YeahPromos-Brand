@@ -70,8 +70,36 @@ test('commission rules reuses the README red navigation tokens', () => {
   assert.match(css, /nav-child\[data-nav-child="commission-rules-list"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--commission-rules-selected-red\)/i);
 });
 
+test('balance and payments has its own routed finance page shell', () => {
+  assert.match(html, /data-finance-page/);
+  assert.match(html, /Balance &amp; payments/);
+  assert.match(html, /data-finance-summary/);
+  assert.match(html, /data-finance-chart/);
+  assert.match(html, /data-finance-payout-schedule/);
+  assert.match(html, /data-finance-payment-methods/);
+  assert.match(html, /data-finance-payout-rows/);
+  assert.match(appJs, /isFinancePage/);
+  assert.match(appJs, /renderFinancePage/);
+  assert.match(data, /financeBalancePageData/);
+  assert.match(data, /demoOnly:\s*true/);
+});
+
+test('finance page reuses the README red navigation tokens', () => {
+  assert.match(css, /body\.is-finance-page[\s\S]*--finance-red:\s*#e60000/i);
+  assert.match(css, /--finance-soft-red:\s*#fde8e8/i);
+  assert.match(css, /--finance-selected-red:\s*#ff312e/i);
+  assert.match(css, /nav-child\[data-nav-child="balance-payments"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--finance-selected-red\)/i);
+});
+
+test('public demo data does not include credential or personal-data patterns', () => {
+  assert.doesNotMatch(html, /Guowv|Taylor Morgan|Alex Rivera|Jamie Lee|Brand Admin\s*·\s*US Store/);
+  assert.doesNotMatch(data, /(api[_-]?key|client[_-]?secret|password|cvc|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY)/i);
+  assert.doesNotMatch(data, /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  assert.match(data, /masked:\s*'•••• 0000'/);
+});
+
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
-  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-1"><\/script>/);
+  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-2"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);
   assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
 });
@@ -98,8 +126,8 @@ test('overview follows the reference dashboard hierarchy', () => {
 });
 
 test('preview busts the entry cache for the reference dashboard skin', () => {
-  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-1"/);
-  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-1"/);
+  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-2"/);
+  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-2"/);
 });
 
 test('reference dashboard keeps flat cards and red action controls', () => {

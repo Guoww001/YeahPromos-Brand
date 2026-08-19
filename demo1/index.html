@@ -9,7 +9,7 @@
       content="YeahPromos merchant business overview demo"
     />
     <title>Business Overview · YeahPromos</title>
-    <link rel="stylesheet" href="./styles.css?v=merchant-reference-1" />
+    <link rel="stylesheet" href="./styles.css?v=merchant-reference-2" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -51,6 +51,9 @@
       <symbol id="icon-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 10v6M12 7h.01" /></symbol>
       <symbol id="icon-star" viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z" /></symbol>
       <symbol id="icon-grip" viewBox="0 0 24 24"><circle cx="8" cy="6" r="1" /><circle cx="16" cy="6" r="1" /><circle cx="8" cy="12" r="1" /><circle cx="16" cy="12" r="1" /><circle cx="8" cy="18" r="1" /><circle cx="16" cy="18" r="1" /></symbol>
+      <symbol id="icon-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 10h18M7 15h4" /></symbol>
+      <symbol id="icon-bank" viewBox="0 0 24 24"><path d="m3 9 9-6 9 6M5 10v8M9 10v8M15 10v8M19 10v8M3 20h18" /></symbol>
+      <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></symbol>
     </svg>
 
     <div class="app-shell">
@@ -80,7 +83,7 @@
           </div>
 
           <button class="account-card" type="button" data-demo-action="Account menu">
-            <span class="account-card__avatar">G</span>
+            <span class="account-card__avatar">D</span>
             <span class="account-card__copy">
               <strong>Demo Admin</strong>
               <small>Demo Admin · Demo Store</small>
@@ -146,6 +149,12 @@
                 <button class="button button--primary" type="button" data-commission-action="create">
                   <svg><use href="#icon-plus"></use></svg>
                   Create rule
+                </button>
+              </div>
+              <div class="page-header__page-actions finance-page-actions" data-finance-actions hidden>
+                <button class="button button--primary" type="button" data-finance-action="deposit">
+                  <svg><use href="#icon-plus"></use></svg>
+                  Deposit funds
                 </button>
               </div>
             </div>
@@ -643,6 +652,100 @@
             </div>
           </section>
 
+          <section class="finance-page" data-finance-page hidden aria-labelledby="finance-page-title">
+            <h2 id="finance-page-title" class="sr-only">Balance &amp; payments</h2>
+
+            <div class="finance-summary-grid" data-finance-summary></div>
+
+            <div class="finance-main-grid">
+              <article class="finance-card finance-trend-card" aria-labelledby="finance-trend-title">
+                <div class="finance-card__header">
+                  <div>
+                    <h2 id="finance-trend-title">Balance trend <button class="inline-info finance-info" type="button" data-finance-action="trend-info" aria-label="About balance trend"><svg><use href="#icon-info"></use></svg></button></h2>
+                  </div>
+                  <label class="finance-period-select">
+                    <span class="sr-only">Choose balance trend period</span>
+                    <select data-finance-period aria-label="Choose balance trend period">
+                      <option value="30d">Last 30 days</option>
+                      <option value="90d">Last 90 days</option>
+                      <option value="year">This year</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="finance-chart" data-finance-chart aria-label="Balance trend chart"></div>
+                <div class="finance-trend-summary" data-finance-trend-summary></div>
+              </article>
+
+              <article class="finance-card finance-payout-card" aria-labelledby="finance-payout-title">
+                <div class="finance-card__header">
+                  <h2 id="finance-payout-title">Payout schedule <button class="inline-info finance-info" type="button" data-finance-action="payout-info" aria-label="About payout schedule"><svg><use href="#icon-info"></use></svg></button></h2>
+                </div>
+                <div class="finance-payout-list" data-finance-payout-schedule></div>
+                <div class="finance-card__footer">Estimated payout cycle: Every 2 weeks <button class="inline-info finance-info" type="button" data-finance-action="cycle-info" aria-label="About estimated payout cycle"><svg><use href="#icon-info"></use></svg></button></div>
+              </article>
+
+              <article class="finance-card finance-methods-card" aria-labelledby="finance-methods-title">
+                <div class="finance-card__header">
+                  <h2 id="finance-methods-title">Payment methods</h2>
+                  <button class="button button--secondary finance-manage-button" type="button" data-finance-action="manage-methods">Manage</button>
+                </div>
+                <div class="finance-methods-list" data-finance-payment-methods></div>
+                <div class="finance-card__footer finance-methods-footer">
+                  <span>Add or manage your payout methods securely.</span>
+                  <button class="finance-add-method" type="button" data-finance-action="add-method"><svg><use href="#icon-plus"></use></svg> Add method</button>
+                </div>
+              </article>
+            </div>
+
+            <section class="finance-card finance-activity-card" aria-labelledby="finance-activity-title">
+              <div class="finance-section-header">
+                <div>
+                  <h2 id="finance-activity-title">Recent payout activity</h2>
+                  <p>Review recent completed payouts and their references.</p>
+                </div>
+                <button class="button button--secondary finance-view-all" type="button" data-finance-action="view-all">View all</button>
+              </div>
+              <div class="finance-table-scroll">
+                <table class="finance-table">
+                  <caption class="sr-only">Recent payout activity</caption>
+                  <colgroup>
+                    <col class="finance-col--id" />
+                    <col class="finance-col--date" />
+                    <col class="finance-col--amount" />
+                    <col class="finance-col--method" />
+                    <col class="finance-col--status" />
+                    <col class="finance-col--description" />
+                    <col class="finance-col--reference" />
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th scope="col">Payout ID</th>
+                      <th scope="col">Date</th>
+                      <th scope="col">Amount</th>
+                      <th scope="col">Method</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Description</th>
+                      <th scope="col">Reference</th>
+                    </tr>
+                  </thead>
+                  <tbody data-finance-payout-rows></tbody>
+                </table>
+              </div>
+              <div class="finance-activity-footer">
+                <span data-finance-result-count>Showing 1 to 5 of 24 results</span>
+                <div class="finance-pagination" aria-label="Payout activity pagination">
+                  <button type="button" aria-label="Previous page" disabled>‹</button>
+                  <button type="button" class="is-current" aria-current="page" data-finance-action="page" data-finance-page-number="1">1</button>
+                  <button type="button" data-finance-action="page" data-finance-page-number="2">2</button>
+                  <button type="button" data-finance-action="page" data-finance-page-number="3">3</button>
+                  <span>…</span>
+                  <button type="button" data-finance-action="page" data-finance-page-number="5">5</button>
+                  <button type="button" aria-label="Next page" data-finance-action="page" data-finance-page-number="2">›</button>
+                </div>
+              </div>
+            </section>
+          </section>
+
           <section class="module-placeholder card" data-module-placeholder hidden aria-live="polite">
             <div class="module-placeholder__mark">◎</div>
             <span class="eyebrow" data-module-parent>Workspace</span>
@@ -680,6 +783,6 @@
       <button type="button" data-toast-close aria-label="Dismiss notification"><svg><use href="#icon-x"></use></svg></button>
     </div>
 
-    <script type="module" src="./app.js?v=merchant-reference-1"></script>
+    <script type="module" src="./app.js?v=merchant-reference-2"></script>
   </body>
 </html>

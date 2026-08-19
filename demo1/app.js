@@ -1,4 +1,4 @@
-import { attributionPageData, campaignPageData, commissionRulesPageData, dashboardData } from './data.mjs';
+import { attributionPageData, campaignPageData, commissionRulesPageData, dashboardData, financeBalancePageData } from './data.mjs';
 import {
   createDashboardState,
   selectDemoState,
@@ -66,6 +66,16 @@ const commissionRulesSearch = document.querySelector('[data-commission-rules-sea
 const commissionRulesSelectAll = document.querySelector('[data-commission-rules-select-all]');
 const commissionRulesResultCount = document.querySelector('[data-commission-rules-result-count]');
 const commissionRulesDetail = document.querySelector('[data-commission-rules-detail]');
+const financePage = document.querySelector('[data-finance-page]');
+const financeActions = document.querySelector('[data-finance-actions]');
+const financeSummary = document.querySelector('[data-finance-summary]');
+const financeChart = document.querySelector('[data-finance-chart]');
+const financeTrendSummary = document.querySelector('[data-finance-trend-summary]');
+const financePeriodSelect = document.querySelector('[data-finance-period]');
+const financePayoutSchedule = document.querySelector('[data-finance-payout-schedule]');
+const financePaymentMethods = document.querySelector('[data-finance-payment-methods]');
+const financePayoutRows = document.querySelector('[data-finance-payout-rows]');
+const financeResultCount = document.querySelector('[data-finance-result-count]');
 
 const campaignState = {
   activeTab: 'all',
@@ -114,6 +124,10 @@ const commissionRulesState = {
     effectiveDate: 'all',
   },
   selectedIds: new Set([commissionRulesPageData.selectedRuleId]),
+};
+
+const financeState = {
+  trendPeriod: '30d',
 };
 
 const icon = (name, className = '') => `
@@ -789,16 +803,154 @@ const renderCommissionRulesPage = () => {
   renderCommissionRulesDetail();
 };
 
+const renderFinanceSummary = () => {
+  if (!financeSummary) return;
+
+  financeSummary.innerHTML = financeBalancePageData.summary
+    .map((metric) => `
+      <article class="finance-summary-card finance-summary-card--${metric.tone}">
+        <div class="finance-summary-card__copy">
+          <span>${metric.label} <button class="inline-info finance-info" type="button" data-finance-action="summary-info" data-finance-label="${metric.label}" aria-label="About ${metric.label}"><svg><use href="#icon-info"></use></svg></button></span>
+          <strong>${metric.value}</strong>
+          <small class="finance-summary-card__note finance-summary-card__note--${metric.noteTone}">${metric.note}</small>
+        </div>
+        <span class="finance-summary-card__icon">${icon(metric.icon)}</span>
+      </article>
+    `)
+    .join('');
+};
+
+const renderFinanceTrend = () => {
+  if (!financeChart || !financeTrendSummary) return;
+
+  const trend = financeBalancePageData.trend;
+  const period = trend.periods[financeState.trendPeriod] ?? trend.periods['30d'];
+  const chartWidth = 680;
+  const chartHeight = 164;
+  const chartPaddingX = 9;
+  const chartPaddingY = 13;
+  const maxValue = 25000;
+  const usableWidth = chartWidth - chartPaddingX * 2;
+  const usableHeight = chartHeight - chartPaddingY * 2;
+  const points = period.points.map((point, index) => ({
+    ...point,
+    x: chartPaddingX + (usableWidth * index) / Math.max(1, period.points.length - 1),
+    y: chartPaddingY + usableHeight * (1 - point.value / maxValue),
+  }));
+  const linePath = points.map((point, index) => `${index ? 'L' : 'M'} ${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ');
+  const areaPath = `${linePath} L ${points.at(-1).x.toFixed(1)} ${chartHeight - chartPaddingY} L ${points[0].x.toFixed(1)} ${chartHeight - chartPaddingY} Z`;
+  const tooltipPoint = points[period.tooltip.index] ?? points[Math.floor(points.length / 2)];
+  const tooltipX = Math.min(Math.max(tooltipPoint.x - 43, 2), chartWidth - 88);
+  const tooltipY = Math.max(2, tooltipPoint.y - 51);
+
+  if (financePeriodSelect) financePeriodSelect.value = financeState.trendPeriod;
+  financeChart.innerHTML = `
+    <div class="finance-chart__axis-y" aria-hidden="true">${period.yAxis.map((label) => `<span>${label}</span>`).join('')}</div>
+    <div class="finance-chart__plot">
+      <svg viewBox="0 0 ${chartWidth} ${chartHeight}" role="img" aria-label="${period.label} account balance trend">
+        <defs>
+          <linearGradient id="finance-trend-fill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ff4c4c" stop-opacity=".2" />
+            <stop offset="100%" stop-color="#ff4c4c" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        <g class="finance-chart__grid" aria-hidden="true">
+          ${period.yAxis.map((_, index) => {
+            const y = chartPaddingY + (usableHeight * index) / Math.max(1, period.yAxis.length - 1);
+            return `<line x1="${chartPaddingX}" y1="${y.toFixed(1)}" x2="${chartWidth - chartPaddingX}" y2="${y.toFixed(1)}" />`;
+          }).join('')}
+        </g>
+        <path class="finance-chart__area" d="${areaPath}" />
+        <path class="finance-chart__line" d="${linePath}" />
+        <circle class="finance-chart__point" cx="${tooltipPoint.x.toFixed(1)}" cy="${tooltipPoint.y.toFixed(1)}" r="4.5" />
+        <g class="finance-chart__tooltip" transform="translate(${tooltipX.toFixed(1)} ${tooltipY.toFixed(1)})">
+          <rect width="86" height="42" rx="4" />
+          <text x="43" y="15">${period.points[period.tooltip.index]?.label ?? 'Selected date'}</text>
+          <text class="finance-chart__tooltip-value" x="43" y="32">${period.tooltip.value}</text>
+        </g>
+      </svg>
+      <div class="finance-chart__axis-x" aria-hidden="true">${period.xAxis.map((label) => `<span>${label}</span>`).join('')}</div>
+    </div>
+  `;
+
+  financeTrendSummary.innerHTML = [
+    ['Opening balance', trend.openingBalance, 'neutral'],
+    ['Total credits', trend.totalCredits, 'positive'],
+    ['Total debits', trend.totalDebits, 'negative'],
+    ['Closing balance', trend.closingBalance, 'neutral'],
+  ].map(([label, value, tone]) => `<div class="finance-trend-stat"><span>${label}</span><strong class="finance-trend-stat--${tone}">${value}</strong></div>`).join('');
+};
+
+const renderFinancePayoutSchedule = () => {
+  if (!financePayoutSchedule) return;
+
+  financePayoutSchedule.innerHTML = financeBalancePageData.payoutSchedule
+    .map((payout) => `
+      <div class="finance-payout-row">
+        <div><strong>${payout.date}</strong><small>${payout.relative}</small></div>
+        <div><strong>${payout.amount}</strong><span class="finance-schedule-status finance-schedule-status--${payout.tone}">${payout.status}</span></div>
+      </div>
+    `)
+    .join('');
+};
+
+const renderFinancePaymentMethods = () => {
+  if (!financePaymentMethods) return;
+
+  financePaymentMethods.innerHTML = financeBalancePageData.paymentMethods
+    .map((method) => `
+      <div class="finance-method-row">
+        <span class="finance-method-brand finance-method-brand--${method.brandTone}">
+          ${method.brandTone === 'visa' ? 'VISA' : method.brandTone === 'mastercard' ? '<i></i><i></i>' : icon('bank')}
+        </span>
+        <div class="finance-method-copy"><strong>${method.brand} ending in ${method.masked.replace('•••• ', '')} ${method.primary ? '<em>Primary</em>' : ''}</strong><small>${method.expiry}</small></div>
+        <button type="button" class="finance-method-menu" data-finance-action="method-menu" data-finance-method="${method.brand}" aria-label="More actions for ${method.brand}">${icon('more')}</button>
+      </div>
+    `)
+    .join('');
+};
+
+const renderFinancePayoutRows = () => {
+  if (!financePayoutRows) return;
+
+  financePayoutRows.innerHTML = financeBalancePageData.recentPayouts
+    .map((payout) => `
+      <tr>
+        <td><strong>${payout.id}</strong></td>
+        <td>${payout.date}</td>
+        <td><strong>${payout.amount}</strong></td>
+        <td><span class="finance-table-method finance-table-method--${payout.methodTone}">${payout.method}</span></td>
+        <td><span class="finance-paid-status"><i></i>${payout.status}</span></td>
+        <td>${payout.description}</td>
+        <td>${payout.reference}</td>
+      </tr>
+    `)
+    .join('');
+
+  if (financeResultCount) financeResultCount.textContent = `Showing 1 to ${financeBalancePageData.recentPayouts.length} of 24 results`;
+};
+
+const renderFinancePage = () => {
+  if (!financePage) return;
+  renderFinanceSummary();
+  renderFinanceTrend();
+  renderFinancePayoutSchedule();
+  renderFinancePaymentMethods();
+  renderFinancePayoutRows();
+};
+
 const renderPage = () => {
   const context = findNavigationContext(state.activeNavigationChild ?? state.activeNavigationId);
   const isOverview = state.activeNavigationId === 'overview' && !state.activeNavigationChild;
   const isCampaignPage = state.activeNavigationChild === 'all-campaigns';
   const isAttributionPage = state.activeNavigationChild === 'attribution-rules';
   const isCommissionRulesPage = state.activeNavigationChild === 'commission-rules-list';
+  const isFinancePage = state.activeNavigationChild === 'balance-payments';
 
   document.body.classList.toggle('is-campaign-page', isCampaignPage);
   document.body.classList.toggle('is-attribution-page', isAttributionPage);
   document.body.classList.toggle('is-commission-rules-page', isCommissionRulesPage);
+  document.body.classList.toggle('is-finance-page', isFinancePage);
   pageTitle.textContent = isOverview ? 'Business overview' : context.current.label;
   pageDescription.textContent = isOverview
     ? 'Monitor your affiliate program performance and partner activity.'
@@ -808,19 +960,25 @@ const renderPage = () => {
         ? 'Configure how conversions are attributed across channels and partners.'
         : isCommissionRulesPage
           ? 'Manage base commission rates, bonuses, attribution windows, and rule conditions for your partners.'
+          : isFinancePage
+            ? 'Track your account balance, commissions, payouts, and payment methods.'
       : `${context.current.label} workspace preview for the current brand scope.`;
-  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage ? (isCampaignPage ? 'Campaigns' : 'Commission & Rules') : 'Merchant workspace';
-  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isOverview ? 'Overview' : context.current.label;
+  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage
+    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage ? 'Commission & Rules' : 'Finance')
+    : 'Merchant workspace';
+  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isOverview ? 'Overview' : context.current.label;
   breadcrumbCurrent.setAttribute('aria-current', 'page');
   overviewPage.hidden = !isOverview;
   campaignPage.hidden = !isCampaignPage;
   attributionPage.hidden = !isAttributionPage;
   commissionRulesPage.hidden = !isCommissionRulesPage;
-  modulePlaceholder.hidden = isOverview || isCampaignPage || isAttributionPage || isCommissionRulesPage;
+  financePage.hidden = !isFinancePage;
+  modulePlaceholder.hidden = isOverview || isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage;
   if (pageActions) pageActions.hidden = !isAttributionPage;
   if (commissionRulesActions) commissionRulesActions.hidden = !isCommissionRulesPage;
+  if (financeActions) financeActions.hidden = !isFinancePage;
 
-  if (!isOverview && !isCampaignPage && !isAttributionPage && !isCommissionRulesPage) {
+  if (!isOverview && !isCampaignPage && !isAttributionPage && !isCommissionRulesPage && !isFinancePage) {
     modulePlaceholder.querySelector('[data-module-title]').textContent = context.current.label;
     modulePlaceholder.querySelector('[data-module-parent]').textContent = context.parent.label;
   }
@@ -828,6 +986,7 @@ const renderPage = () => {
   if (isCampaignPage) renderCampaignPage();
   if (isAttributionPage) renderAttributionPage();
   if (isCommissionRulesPage) renderCommissionRulesPage();
+  if (isFinancePage) renderFinancePage();
 };
 
 const renderAll = () => {
@@ -1139,6 +1298,34 @@ if (commissionRulesPage) {
   });
 }
 
+if (financePage) {
+  financePage.addEventListener('change', (event) => {
+    if (!event.target.matches('[data-finance-period]')) return;
+    financeState.trendPeriod = event.target.value;
+    renderFinanceTrend();
+    showToast(`Balance trend updated to ${event.target.options[event.target.selectedIndex].text}`);
+  });
+
+  financePage.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-finance-action]');
+    if (!action) return;
+    event.stopPropagation();
+
+    const actionName = action.dataset.financeAction;
+    if (actionName === 'page') {
+      showToast(`Payout activity page ${action.dataset.financePageNumber} is ready for product integration`);
+    } else if (actionName === 'method-menu') {
+      showToast(`${action.dataset.financeMethod} payment method actions are ready for product integration`);
+    } else if (actionName === 'summary-info') {
+      showToast(`${action.dataset.financeLabel} details are ready for product integration`);
+    } else if (actionName === 'deposit') {
+      showToast('Deposit flow is ready for product integration');
+    } else {
+      showToast(`${actionName.replaceAll('-', ' ')} is ready for product integration`);
+    }
+  });
+}
+
 if (attributionPage) {
   attributionPage.addEventListener('change', (event) => {
     if (!event.target.matches('[data-attribution-model]')) return;
@@ -1168,6 +1355,13 @@ document.addEventListener('click', (event) => {
   if (commissionAction) {
     const action = commissionAction.dataset.commissionAction;
     if (action === 'create') showToast('Commission rule editor is ready for product integration');
+    return;
+  }
+
+  const financeAction = event.target.closest('[data-finance-action]');
+  if (financeAction) {
+    const action = financeAction.dataset.financeAction;
+    if (action === 'deposit') showToast('Deposit flow is ready for product integration');
     return;
   }
 
