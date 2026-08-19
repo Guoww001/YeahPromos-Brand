@@ -10,6 +10,7 @@ const html = readFileSync(resolve(demoDirectory, 'index.html'), 'utf8');
 const css = readFileSync(resolve(demoDirectory, 'styles.css'), 'utf8');
 const appJs = readFileSync(resolve(demoDirectory, 'app.js'), 'utf8');
 const data = readFileSync(resolve(demoDirectory, 'data.mjs'), 'utf8');
+const readme = readFileSync(resolve(demoDirectory, 'README.md'), 'utf8');
 
 test('page provides the required sidebar and dashboard regions', () => {
   assert.match(html, /data-sidebar/);
@@ -98,8 +99,29 @@ test('public demo data does not include credential or personal-data patterns', (
   assert.match(data, /masked:\s*'•••• 0000'/);
 });
 
+test('finance typography preserves readability and lightweight chart annotations', () => {
+  assert.match(css, /body\.is-finance-page[\s\S]*--finance-font-body:\s*11px/);
+  assert.match(css, /body\.is-finance-page[\s\S]*--finance-font-secondary:\s*10px/);
+  assert.match(css, /\.finance-chart__tooltip text[\s\S]*font-weight:\s*400/);
+  assert.match(css, /\.finance-chart__tooltip \.finance-chart__tooltip-value[\s\S]*font-size:\s*12px[\s\S]*font-weight:\s*600/);
+  assert.match(css, /\.finance-table th[\s\S]*font-size:\s*var\(--finance-font-secondary\)/);
+  assert.match(css, /\.finance-table td[\s\S]*font-size:\s*var\(--finance-font-body\)/);
+  assert.match(readme, /可读性与无障碍/);
+  assert.match(readme, /主要正文、表格数据和表单控件文字不小于/);
+});
+
+test('finance neutral text uses contrast-ready dark gray tokens', () => {
+  assert.match(css, /body\.is-finance-page[\s\S]*--finance-text-strong:\s*#1f2937/);
+  assert.match(css, /body\.is-finance-page[\s\S]*--finance-text-secondary:\s*#374151/);
+  assert.match(css, /body\.is-finance-page[\s\S]*--finance-text-muted:\s*#4b5563/);
+  assert.match(css, /\.finance-table td[\s\S]*color:\s*var\(--finance-text-secondary\)/);
+  assert.match(css, /\.finance-chart__axis-y[\s\S]*color:\s*var\(--finance-text-muted\)/);
+  assert.match(css, /\.finance-paid-status[\s\S]*color:\s*var\(--finance-success-text\)/);
+  assert.match(readme, /对比度与灰阶/);
+});
+
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
-  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-2"><\/script>/);
+  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-3"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);
   assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
 });
@@ -126,8 +148,8 @@ test('overview follows the reference dashboard hierarchy', () => {
 });
 
 test('preview busts the entry cache for the reference dashboard skin', () => {
-  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-2"/);
-  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-2"/);
+  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-3"/);
+  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-3"/);
 });
 
 test('reference dashboard keeps flat cards and red action controls', () => {
