@@ -13,6 +13,49 @@ const appJs = readFileSync(resolve(demoDirectory, 'app.js'), 'utf8');
 const data = readFileSync(resolve(demoDirectory, 'data.mjs'), 'utf8');
 const readme = readFileSync(resolve(demoDirectory, 'README.md'), 'utf8');
 
+function cssBraceDepth(source) {
+  let depth = 0;
+  let mode = 'normal';
+  let quote = '';
+
+  for (let index = 0; index < source.length; index += 1) {
+    const character = source[index];
+    const nextCharacter = source[index + 1];
+
+    if (mode === 'comment') {
+      if (character === '*' && nextCharacter === '/') {
+        mode = 'normal';
+        index += 1;
+      }
+      continue;
+    }
+
+    if (mode === 'string') {
+      if (character === '\\') {
+        index += 1;
+      } else if (character === quote) {
+        mode = 'normal';
+      }
+      continue;
+    }
+
+    if (character === '/' && nextCharacter === '*') {
+      mode = 'comment';
+      index += 1;
+    } else if (character === '"' || character === "'") {
+      mode = 'string';
+      quote = character;
+    } else if (character === '{') {
+      depth += 1;
+    } else if (character === '}') {
+      depth -= 1;
+      if (depth < 0) return depth;
+    }
+  }
+
+  return depth;
+}
+
 test('page provides the required sidebar and dashboard regions', () => {
   assert.match(html, /data-sidebar/);
   assert.match(html, /data-metrics-grid/);
@@ -29,6 +72,10 @@ test('page provides the required sidebar and dashboard regions', () => {
 test('app entry remains syntactically valid after conflict resolution', () => {
   const syntax = spawnSync(process.execPath, ['--check', resolve(demoDirectory, 'app.js')], { encoding: 'utf8' });
   assert.equal(syntax.status, 0, syntax.stderr || syntax.stdout);
+});
+
+test('stylesheet blocks remain balanced so routed page styles can load', () => {
+  assert.equal(cssBraceDepth(css), 0);
 });
 
 test('attribution rules has its own routed page shell and controls', () => {
