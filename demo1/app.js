@@ -1,4 +1,4 @@
-import { apiCredentialsPageData, attributionPageData, bannersImagesPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData } from './data.mjs?v=merchant-reference-19';
+import { apiCredentialsPageData, attributionPageData, bannersImagesPageData, brandIntegrationPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData } from './data.mjs?v=merchant-reference-20';
 import {
   createDashboardState,
   isNavigationItemActive,
@@ -135,6 +135,11 @@ const apiCredentialsFilterMenu = document.querySelector('[data-api-credentials-f
 const apiCredentialsRows = document.querySelector('[data-api-credentials-rows]');
 const apiCredentialsResultCount = document.querySelector('[data-api-credentials-result-count]');
 const apiCredentialsWebhooks = document.querySelector('[data-api-credentials-webhooks]');
+const brandIntegrationPage = document.querySelector('[data-brand-integration-page]');
+const brandIntegrationActions = document.querySelector('[data-brand-integration-actions]');
+const brandIntegrationHealth = document.querySelector('[data-brand-integration-health]');
+const brandIntegrationList = document.querySelector('[data-brand-integration-list]');
+const brandIntegrationActivity = document.querySelector('[data-brand-integration-activity]');
 const messagesPage = document.querySelector('[data-messages-page]');
 const messagesPageActions = document.querySelector('[data-messages-page-actions]');
 const messagesTabs = document.querySelector('[data-messages-tabs]');
@@ -1736,6 +1741,75 @@ const renderHelpCenterPage = () => {
   `).join('');
 };
 
+const renderBrandIntegrationPage = () => {
+  if (!brandIntegrationPage) return;
+
+  const { health, integrations, recentActivity } = brandIntegrationPageData;
+
+  if (brandIntegrationHealth) {
+    brandIntegrationHealth.innerHTML = `
+      <div class="brand-integration-health-visual">
+        <div class="brand-integration-health-ring" style="--health-value:${health.percentage}" role="img" aria-label="${health.percentage}% healthy in the last 24 hours">
+          <span><strong>${health.percentage}%</strong><small>Healthy</small></span>
+        </div>
+        <span class="brand-integration-health-window">${health.window}</span>
+      </div>
+      <ul class="brand-integration-health-legend">
+        ${health.counts.map((item) => `
+          <li><span><i class="brand-integration-health-dot brand-integration-health-dot--${item.tone}" aria-hidden="true"></i>${item.label}</span><strong>${item.value}</strong></li>
+        `).join('')}
+      </ul>
+    `;
+  }
+
+  if (brandIntegrationList) {
+    brandIntegrationList.innerHTML = integrations.map((integration) => `
+      <article class="brand-integration-row" data-brand-integration-row="${integration.id}">
+        <div class="brand-integration-provider">
+          <span class="brand-integration-provider-icon brand-integration-provider-icon--${integration.iconTone}">${icon(integration.icon)}</span>
+          <div class="brand-integration-provider-copy">
+            <strong>${escapeHtml(integration.name)}</strong>
+            <span class="brand-integration-status brand-integration-status--${integration.statusTone}"><i aria-hidden="true"></i>${escapeHtml(integration.status)}</span>
+            <small>Last sync: ${escapeHtml(integration.lastSync)}</small>
+          </div>
+        </div>
+        <div class="brand-integration-data-column">
+          <span class="brand-integration-column-label">Data scope</span>
+          <ul>
+            ${integration.scope.map((item) => `<li><i aria-hidden="true">✓</i>${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="brand-integration-data-column brand-integration-data-column--status">
+          <span class="brand-integration-column-label">Data status</span>
+          <ul>
+            ${integration.dataStatus.map((item) => `<li class="${item.value === 'Sync delayed' ? 'is-warning' : ''}"><i aria-hidden="true">${item.value === 'Sync delayed' ? '!' : '✓'}</i><span>${escapeHtml(item.value)}</span></li>`).join('')}
+          </ul>
+        </div>
+        <div class="brand-integration-row-actions">
+          <button class="brand-integration-manage-button${integration.actionTone === 'reconnect' ? ' is-reconnect' : ''}" type="button" data-brand-integration-action="${integration.actionTone === 'reconnect' ? 'reconnect' : 'manage'}" data-brand-integration-id="${integration.id}">
+            <svg><use href="#icon-${integration.actionTone === 'reconnect' ? 'refresh' : 'settings'}"></use></svg>
+            ${escapeHtml(integration.action)}
+          </button>
+          <button class="brand-integration-more-button" type="button" data-brand-integration-action="menu" data-brand-integration-id="${integration.id}" aria-label="More actions for ${escapeHtml(integration.name)}">${icon('more')}</button>
+        </div>
+      </article>
+    `).join('');
+  }
+
+  if (brandIntegrationActivity) {
+    brandIntegrationActivity.innerHTML = recentActivity.map((activity) => `
+      <li class="brand-integration-activity-row">
+        <span class="brand-integration-activity-icon brand-integration-provider-icon--${activity.iconTone}">${icon(activity.icon)}</span>
+        <span class="brand-integration-activity-copy">
+          <strong><i class="brand-integration-activity-dot brand-integration-activity-dot--${activity.tone}" aria-hidden="true"></i>${escapeHtml(activity.title)}</strong>
+          <small>${escapeHtml(activity.detail)}</small>
+          <time>${escapeHtml(activity.time)}</time>
+        </span>
+      </li>
+    `).join('');
+  }
+};
+
 const getFilteredApiCredentials = () => {
   const query = apiCredentialsState.search.trim().toLowerCase();
 
@@ -2302,10 +2376,11 @@ const renderPage = () => {
   const isFinancePage = state.activeNavigationChild === 'balance-payments';
   const isInvoicesPage = state.activeNavigationChild === 'commission-invoices' || state.activeNavigationChild === 'invoices';
   const isHelpCenterPage = state.activeNavigationId === 'help-center';
+  const isBrandIntegrationPage = state.activeNavigationChild === 'brand-integration';
   const isApiCredentialsPage = state.activeNavigationChild === 'api-credentials';
   const isMessagesPage = ['all-messages', 'partner-messages', 'system-alerts', 'archived-messages'].includes(state.activeNavigationChild);
   const isProductsAssetsPage = state.activeNavigationChild === 'banners-images';
-  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage || isApiCredentialsPage || isMessagesPage || isProductsAssetsPage;
+  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isProductsAssetsPage;
 
   document.body.classList.toggle('is-campaign-page', isCampaignPage);
   document.body.classList.toggle('is-attribution-page', isAttributionPage);
@@ -2315,6 +2390,7 @@ const renderPage = () => {
   document.body.classList.toggle('is-commission-invoices-page', state.activeNavigationChild === 'commission-invoices');
   document.body.classList.toggle('is-finance-invoices-page', state.activeNavigationChild === 'invoices');
   document.body.classList.toggle('is-help-center-page', isHelpCenterPage);
+  document.body.classList.toggle('is-brand-integration-page', isBrandIntegrationPage);
   document.body.classList.toggle('is-api-credentials-page', isApiCredentialsPage);
   document.body.classList.toggle('is-messages-page', isMessagesPage);
   document.body.classList.toggle('is-products-assets-page', isProductsAssetsPage);
@@ -2347,6 +2423,8 @@ const renderPage = () => {
               ? 'Review, filter, and download demo invoice records for the selected workspace.'
             : isHelpCenterPage
               ? 'Find answers, learn best practices, and get the support you need.'
+            : isBrandIntegrationPage
+              ? 'Connect your stores, marketplaces, and analytics tools to sync data and power your affiliate programs.'
             : isApiCredentialsPage
               ? 'Create and manage API keys to authenticate and authorize access to the YeahPromos Merchant API. Keep your credentials secure and never share them publicly.'
             : isMessagesPage
@@ -2354,11 +2432,11 @@ const renderPage = () => {
             : isProductsAssetsPage
               ? 'Manage your creative assets and organize them into folders for easy access and use across campaigns.'
             : recruitmentPage?.description ?? operationsPage?.description ?? context.current.label + ' workspace preview for the current brand scope.';
-  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isApiCredentialsPage || isMessagesPage || isProductsAssetsPage
-    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isInvoicesPage ? 'Commission & Rules' : isApiCredentialsPage ? 'Settings' : isMessagesPage ? 'Messages & Notifications' : isProductsAssetsPage ? 'Products & Assets' : 'Finance')
+  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isProductsAssetsPage
+    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isInvoicesPage ? 'Commission & Rules' : isBrandIntegrationPage || isApiCredentialsPage ? 'Integrations & Settings' : isMessagesPage ? 'Messages & Notifications' : isProductsAssetsPage ? 'Products & Assets' : 'Finance')
     : isHelpCenterPage ? 'Help center'
     : isOverview ? t('shell.merchantWorkspace', 'Merchant workspace') : context.parent.label;
-  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isApiCredentialsPage ? 'API credentials' : isMessagesPage ? context.current.label : isProductsAssetsPage ? 'Banners & images' : isOverview ? 'Overview' : context.current.label;
+  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isBrandIntegrationPage ? 'Brand integration' : isApiCredentialsPage ? 'API credentials' : isMessagesPage ? context.current.label : isProductsAssetsPage ? 'Banners & images' : isOverview ? 'Overview' : context.current.label;
   breadcrumbCurrent.setAttribute('aria-current', 'page');
   overviewPage.hidden = !isOverview;
   modulePage.hidden = isOverview || (!recruitmentPage && !operationsPage);
@@ -2368,6 +2446,7 @@ const renderPage = () => {
   financePage.hidden = !isFinancePage;
   invoicesPage.hidden = !isInvoicesPage;
   helpCenterPage.hidden = !isHelpCenterPage;
+  brandIntegrationPage.hidden = !isBrandIntegrationPage;
   apiCredentialsPage.hidden = !isApiCredentialsPage;
   messagesPage.hidden = !isMessagesPage;
   productsAssetsPage.hidden = !isProductsAssetsPage;
@@ -2375,6 +2454,7 @@ const renderPage = () => {
   if (pageActions) pageActions.hidden = !isAttributionPage;
   if (commissionRulesActions) commissionRulesActions.hidden = !isCommissionRulesPage;
   if (financeActions) financeActions.hidden = !isFinancePage;
+  if (brandIntegrationActions) brandIntegrationActions.hidden = !isBrandIntegrationPage;
   if (apiCredentialsActions) apiCredentialsActions.hidden = !isApiCredentialsPage;
   if (messagesPageActions) messagesPageActions.hidden = !isMessagesPage;
 
@@ -2393,6 +2473,7 @@ const renderPage = () => {
   if (isFinancePage) renderFinancePage();
   if (isInvoicesPage) renderInvoicesPage();
   if (isHelpCenterPage) renderHelpCenterPage();
+  if (isBrandIntegrationPage) renderBrandIntegrationPage();
   if (isApiCredentialsPage) renderApiCredentialsPage();
   if (isMessagesPage) renderMessagesPage();
   if (isProductsAssetsPage) renderProductsAssetsPage();
@@ -2971,6 +3052,37 @@ if (helpCenterPage) {
       showToast('Support tickets are ready for product integration');
     } else if (actionName === 'view-status') {
       showToast('System status page is ready for product integration');
+    }
+  });
+}
+
+if (brandIntegrationActions) {
+  brandIntegrationActions.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-brand-integration-action]');
+    if (!action) return;
+    if (action.dataset.brandIntegrationAction === 'add-integration') {
+      showToast('Add integration flow is ready for product integration');
+    }
+  });
+}
+
+if (brandIntegrationPage) {
+  brandIntegrationPage.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-brand-integration-action]');
+    if (!action) return;
+
+    const integration = brandIntegrationPageData.integrations.find((item) => item.id === action.dataset.brandIntegrationId);
+    const name = integration?.name ?? 'Integration';
+    if (action.dataset.brandIntegrationAction === 'manage') {
+      showToast(`${name} settings are ready for product integration`);
+    } else if (action.dataset.brandIntegrationAction === 'reconnect') {
+      showToast(`${name} reconnect flow is ready for product integration`);
+    } else if (action.dataset.brandIntegrationAction === 'menu') {
+      showToast(`${name} actions are ready for product integration`);
+    } else if (action.dataset.brandIntegrationAction === 'domain') {
+      showToast('Demo Store domain details are ready for product integration');
+    } else if (action.dataset.brandIntegrationAction === 'view-activity') {
+      showToast('Activity log is ready for product integration');
     }
   });
 }

@@ -9,7 +9,7 @@
       content="YeahPromos merchant business overview demo"
     />
     <title>Business Overview · YeahPromos</title>
-    <link rel="stylesheet" href="./styles.css?v=merchant-reference-19" />
+    <link rel="stylesheet" href="./styles.css?v=merchant-reference-20" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -21,6 +21,8 @@
       <symbol id="icon-store" viewBox="0 0 24 24"><path d="M4 10v9h16v-9M3 10l2-6h14l2 6" /><path d="M3 10a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0M9 19v-5h6v5" /></symbol>
       <symbol id="icon-chart" viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2" /></symbol>
       <symbol id="icon-bag" viewBox="0 0 24 24"><path d="M5 8h14l1 12H4L5 8Z" /><path d="M9 9V6a3 3 0 0 1 6 0v3" /></symbol>
+      <symbol id="icon-cart" viewBox="0 0 24 24"><path d="M4 5h2l1.6 10.2a2 2 0 0 0 2 1.8h7.7a2 2 0 0 0 1.9-1.4L21 8H7" /><circle cx="10" cy="20" r="1.2" /><circle cx="18" cy="20" r="1.2" /></symbol>
+      <symbol id="icon-amazon" viewBox="0 0 24 24"><text x="4.2" y="16.2" font-size="15" font-family="Georgia, serif" font-weight="700">a</text><path d="M5 19c4 2.2 9.5 2.1 14-.2M16 17.7l3 1.1-1.2 2.2" /></symbol>
       <symbol id="icon-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" /></symbol>
       <symbol id="icon-wallet" viewBox="0 0 24 24"><path d="M4 6h14a2 2 0 0 1 2 2v11H4a2 2 0 0 1-2-2V6h2Z" /><path d="M4 6V4h12v2M15 12h5" /></symbol>
       <symbol id="icon-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3" /><path d="M3 19c0-4 2-6 6-6s6 2 6 6M16 5a3 3 0 0 1 0 6M17 13c3 .4 4 2.4 4 6" /></symbol>
@@ -168,6 +170,12 @@
                 <button class="button button--primary" type="button" data-finance-action="deposit">
                   <svg><use href="#icon-plus"></use></svg>
                   Deposit funds
+                </button>
+              </div>
+              <div class="page-header__page-actions brand-integration-page-actions" data-brand-integration-actions hidden>
+                <button class="button button--primary" type="button" data-brand-integration-action="add-integration">
+                  <svg><use href="#icon-plus"></use></svg>
+                  Add integration
                 </button>
               </div>
               <div class="page-header__page-actions api-credentials-page-actions" data-api-credentials-actions hidden>
@@ -861,6 +869,59 @@
             </div>
           </section>
 
+          <section class="brand-integration-page" data-brand-integration-page hidden aria-labelledby="brand-integration-page-title">
+            <h2 id="brand-integration-page-title" class="sr-only">Brand integration</h2>
+
+            <div class="brand-integration-overview-grid">
+              <section class="brand-integration-card brand-integration-brand-card" aria-labelledby="brand-integration-brand-title">
+                <span class="brand-integration-eyebrow">Connected brand</span>
+                <div class="brand-integration-brand-grid">
+                  <div class="brand-integration-brand-identity">
+                    <span class="brand-integration-brand-icon"><svg><use href="#icon-store"></use></svg></span>
+                    <div>
+                      <div class="brand-integration-brand-name"><h2 id="brand-integration-brand-title">Demo Store</h2><span class="brand-integration-status brand-integration-status--connected"><i aria-hidden="true"></i>Active</span></div>
+                      <span class="brand-integration-detail-label">Primary domain</span>
+                      <button class="brand-integration-domain-link" type="button" data-brand-integration-action="domain">demo-store.com <svg><use href="#icon-external"></use></svg></button>
+                    </div>
+                  </div>
+
+                  <dl class="brand-integration-meta-list">
+                    <div><dt>Time zone</dt><dd>(GMT-04:00) New York, US</dd></div>
+                    <div><dt>Currency</dt><dd>USD – US Dollar</dd></div>
+                  </dl>
+
+                  <dl class="brand-integration-meta-list">
+                    <div><dt>Integration owner</dt><dd>Demo1 Admin</dd></div>
+                    <div><dt>Billing plan</dt><dd>Growth Plan</dd></div>
+                  </dl>
+                </div>
+              </section>
+
+              <section class="brand-integration-card brand-integration-health-card" aria-labelledby="brand-integration-health-title">
+                <h2 id="brand-integration-health-title">Sync health summary</h2>
+                <div data-brand-integration-health></div>
+              </section>
+            </div>
+
+            <div class="brand-integration-content-grid">
+              <section class="brand-integration-card brand-integration-integrations-card" aria-labelledby="brand-integration-integrations-title">
+                <div class="brand-integration-card-header">
+                  <h2 id="brand-integration-integrations-title">Integrations</h2>
+                </div>
+                <div class="brand-integration-list" data-brand-integration-list></div>
+              </section>
+
+              <aside class="brand-integration-card brand-integration-activity-card" aria-labelledby="brand-integration-activity-title">
+                <div class="brand-integration-card-header brand-integration-card-header--activity">
+                  <h2 id="brand-integration-activity-title">Recent activity</h2>
+                  <button class="brand-integration-view-button" type="button" data-brand-integration-action="view-activity">View all</button>
+                </div>
+                <ul class="brand-integration-activity-list" data-brand-integration-activity></ul>
+                <button class="brand-integration-activity-link" type="button" data-brand-integration-action="view-activity">View all activity logs <svg><use href="#icon-arrow"></use></svg></button>
+              </aside>
+            </div>
+          </section>
+
           <section class="api-credentials-page" data-api-credentials-page hidden aria-labelledby="api-credentials-content-title">
             <h2 id="api-credentials-content-title" class="sr-only">API credentials</h2>
 
@@ -1259,6 +1320,6 @@
       <button type="button" data-toast-close aria-label="Dismiss notification"><svg><use href="#icon-x"></use></svg></button>
     </div>
 
-    <script type="module" src="./app.js?v=merchant-reference-19"></script>
+    <script type="module" src="./app.js?v=merchant-reference-20"></script>
   </body>
 </html>
