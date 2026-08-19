@@ -191,6 +191,7 @@ export const dashboardData = {
       children: [
         { id: 'team-accounts', label: 'Team accounts' },
         { id: 'permissions', label: 'Permissions' },
+        { id: 'recruitment-page', label: 'Recruitment page' },
         { id: 'brand-integration', label: 'Brand integration' },
         { id: 'api-credentials', label: 'API credentials' },
       ],
@@ -959,6 +960,37 @@ export const teamAccountsPageData = {
   pageSize: 10,
 };
 
+export const recruitmentPageSettingsData = {
+  demoOnly: true,
+  status: 'published',
+  brands: [
+    { value: 'demo-brand', label: 'Demo Brand' },
+    { value: 'partner-boost', label: 'PartnerBoost' },
+    { value: 'northstar-demo', label: 'Northstar Demo' },
+  ],
+  queues: [
+    { value: 'new', label: 'New applications' },
+    { value: 'under-review', label: 'Under review' },
+    { value: 'custom', label: 'Custom review queue' },
+  ],
+  publicUrl: 'partners.yeahpromos.com/demo-brand',
+  title: 'Partner with Demo Brand',
+  description: 'Share products you love, reach new customers, and grow with a partner program built for you.',
+  cta: 'Apply to partner',
+  applicationFields: [
+    { id: 'full-name', label: 'Full name', detail: 'Required', required: true, enabled: true, icon: 'users' },
+    { id: 'email', label: 'Email address', detail: 'Required', required: true, enabled: true, icon: 'message' },
+    { id: 'website', label: 'Website or profile URL', detail: 'Optional', required: false, enabled: true, icon: 'globe' },
+    { id: 'platform', label: 'Primary platform', detail: 'Optional', required: false, enabled: true, icon: 'grid' },
+    { id: 'audience-size', label: 'Audience size', detail: 'Optional', required: false, enabled: false, icon: 'chart' },
+    { id: 'partner-note', label: 'Why do you want to partner?', detail: 'Optional', required: false, enabled: false, icon: 'edit' },
+  ],
+  checklist: [
+    { label: 'Brand connected', detail: 'Demo Store is active', tone: 'success' },
+    { label: 'Application queue selected', detail: 'New applications', tone: 'success' },
+    { label: 'Public link available', detail: 'Ready to share with partners', tone: 'success' },
+  ],
+};
 export const brandIntegrationPageData = {
   demoOnly: true,
   brand: {

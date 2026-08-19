@@ -1,4 +1,4 @@
-import { apiCredentialsPageData, attributionPageData, bannersImagesPageData, brandIntegrationPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, couponsPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData, teamAccountsPageData } from './data.mjs?v=merchant-reference-21';
+import { apiCredentialsPageData, attributionPageData, bannersImagesPageData, brandIntegrationPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, couponsPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData, recruitmentPageSettingsData, teamAccountsPageData } from './data.mjs?v=merchant-reference-22';
 import {
   createDashboardState,
   isNavigationItemActive,
@@ -151,6 +151,9 @@ const teamAccountsResultCount = document.querySelector('[data-team-accounts-resu
 const teamAccountsBrandFilter = document.querySelector('[data-team-accounts-brand-filter]');
 const teamAccountsPageSize = document.querySelector('[data-team-accounts-page-size]');
 const teamAccountsPagination = document.querySelector('[data-team-accounts-pagination]');
+const recruitmentPageSettings = document.querySelector('[data-recruitment-page-settings]');
+const recruitmentPageSettingsActions = document.querySelector('[data-recruitment-page-actions]');
+const recruitmentPagePreview = document.querySelector('[data-recruitment-page-preview]');
 const couponsPage = document.querySelector('[data-coupons-page]');
 const couponsTabs = document.querySelector('[data-coupons-tabs]');
 const couponsSearch = document.querySelector('[data-coupons-search]');
@@ -305,6 +308,15 @@ const teamAccountsState = {
   },
 };
 
+const recruitmentPageSettingsState = {
+  status: recruitmentPageSettingsData.status,
+  brand: recruitmentPageSettingsData.brands[0]?.value ?? 'demo-brand',
+  queue: recruitmentPageSettingsData.queues[0]?.value ?? 'new',
+  title: recruitmentPageSettingsData.title,
+  description: recruitmentPageSettingsData.description,
+  cta: recruitmentPageSettingsData.cta,
+  fields: Object.fromEntries(recruitmentPageSettingsData.applicationFields.map((field) => [field.id, field.enabled])),
+};
 const icon = (name, className = '') => `
   <svg class="${className}" aria-hidden="true">
     <use href="#icon-${name}"></use>
@@ -1943,6 +1955,78 @@ const renderTeamAccountsPage = () => {
   }
 };
 
+const getRecruitmentSettingsBrandLabel = () => recruitmentPageSettingsData.brands.find((brand) => brand.value === recruitmentPageSettingsState.brand)?.label ?? 'Demo Brand';
+const getRecruitmentSettingsQueueLabel = () => recruitmentPageSettingsData.queues.find((queue) => queue.value === recruitmentPageSettingsState.queue)?.label ?? 'New applications';
+
+const renderRecruitmentPagePreview = () => {
+  if (!recruitmentPagePreview) return;
+
+  const activeFields = recruitmentPageSettingsData.applicationFields.filter((field) => recruitmentPageSettingsState.fields[field.id]);
+  const brandLabel = getRecruitmentSettingsBrandLabel();
+  recruitmentPagePreview.innerHTML = `
+    <div class="recruitment-page-preview__browser-bar">
+      <span class="recruitment-page-preview__browser-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="recruitment-page-preview__browser-url">${escapeHtml(recruitmentPageSettingsData.publicUrl)}</span>
+      <button type="button" data-recruitment-page-action="preview" aria-label="Open recruitment page preview">${icon('external')}</button>
+    </div>
+    <div class="recruitment-page-preview__canvas${recruitmentPageSettingsState.status === 'disabled' ? ' is-disabled' : ''}">
+      <header class="recruitment-page-preview__header">
+        <span class="recruitment-page-preview__logo"><strong>YEAH</strong><b>P</b><strong>ROMOS</strong></span>
+        <span class="recruitment-page-preview__brand-name">${escapeHtml(brandLabel)}</span>
+      </header>
+      <div class="recruitment-page-preview__hero">
+        <span class="recruitment-page-preview__eyebrow">PARTNER PROGRAM</span>
+        <h3>${escapeHtml(recruitmentPageSettingsState.title)}</h3>
+        <p>${escapeHtml(recruitmentPageSettingsState.description)}</p>
+        <button type="button" class="recruitment-page-preview__cta" data-recruitment-page-action="preview-apply">${escapeHtml(recruitmentPageSettingsState.cta)} <svg><use href="#icon-arrow"></use></svg></button>
+      </div>
+      <div class="recruitment-page-preview__application">
+        <div class="recruitment-page-preview__application-heading"><span>01</span><div><strong>Tell us about you</strong><small>Complete the form to apply to this partner program.</small></div></div>
+        <div class="recruitment-page-preview__fields">
+          ${activeFields.slice(0, 4).map((field) => `<label><span>${escapeHtml(field.label)}${field.required ? ' *' : ''}</span><i>${field.id === 'email' ? 'name@example.com' : 'Enter your answer'}</i></label>`).join('')}
+        </div>
+        <span class="recruitment-page-preview__queue-note">Applications go to ${escapeHtml(getRecruitmentSettingsQueueLabel())}.</span>
+      </div>
+      ${recruitmentPageSettingsState.status === 'disabled' ? '<div class="recruitment-page-preview__disabled"><strong>Recruitment page is disabled</strong><span>Enable the page to accept new partner applications.</span></div>' : ''}
+    </div>
+  `;
+};
+
+const renderRecruitmentSettingsPage = () => {
+  if (!recruitmentPageSettings) return;
+
+  const brandSelect = recruitmentPageSettings.querySelector('[data-recruitment-page-setting="brand"]');
+  const queueSelect = recruitmentPageSettings.querySelector('[data-recruitment-page-setting="queue"]');
+  const titleInput = recruitmentPageSettings.querySelector('[data-recruitment-page-field="title"]');
+  const descriptionInput = recruitmentPageSettings.querySelector('[data-recruitment-page-field="description"]');
+  const ctaInput = recruitmentPageSettings.querySelector('[data-recruitment-page-field="cta"]');
+  const statusToggle = recruitmentPageSettings.querySelector('[data-recruitment-page-action="toggle-status"]');
+  const statusLabel = recruitmentPageSettings.querySelector('[data-recruitment-page-status-label]');
+  const statusPill = recruitmentPageSettings.querySelector('[data-recruitment-page-status-pill]');
+
+  if (brandSelect) brandSelect.value = recruitmentPageSettingsState.brand;
+  if (queueSelect) queueSelect.value = recruitmentPageSettingsState.queue;
+  if (titleInput) titleInput.value = recruitmentPageSettingsState.title;
+  if (descriptionInput) descriptionInput.value = recruitmentPageSettingsState.description;
+  if (ctaInput) ctaInput.value = recruitmentPageSettingsState.cta;
+
+  const isPublished = recruitmentPageSettingsState.status === 'published';
+  statusToggle?.setAttribute('aria-pressed', String(isPublished));
+  statusToggle?.classList.toggle('is-enabled', isPublished);
+  if (statusLabel) statusLabel.textContent = isPublished ? 'Published' : 'Disabled';
+  if (statusPill) {
+    statusPill.textContent = isPublished ? 'Published' : 'Disabled';
+    statusPill.classList.toggle('is-disabled', !isPublished);
+  }
+
+  recruitmentPageSettings.querySelectorAll('[data-recruitment-page-field-toggle]').forEach((input) => {
+    const fieldId = input.dataset.recruitmentPageFieldToggle;
+    input.checked = Boolean(recruitmentPageSettingsState.fields[fieldId]);
+    input.setAttribute('aria-checked', String(input.checked));
+  });
+
+  renderRecruitmentPagePreview();
+};
 const getFilteredApiCredentials = () => {
   const query = apiCredentialsState.search.trim().toLowerCase();
 
@@ -2601,12 +2685,13 @@ const renderPage = () => {
   const isInvoicesPage = state.activeNavigationChild === 'commission-invoices' || state.activeNavigationChild === 'invoices';
   const isHelpCenterPage = state.activeNavigationId === 'help-center';
   const isTeamAccountsPage = state.activeNavigationChild === 'team-accounts';
+  const isRecruitmentSettingsPage = state.activeNavigationChild === 'recruitment-page';
   const isBrandIntegrationPage = state.activeNavigationChild === 'brand-integration';
   const isApiCredentialsPage = state.activeNavigationChild === 'api-credentials';
   const isMessagesPage = ['all-messages', 'partner-messages', 'system-alerts', 'archived-messages'].includes(state.activeNavigationChild);
   const isCouponsPage = state.activeNavigationChild === 'coupons';
   const isProductsAssetsPage = state.activeNavigationChild === 'banners-images';
-  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage || isTeamAccountsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage;
+  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage || isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage;
 
   document.body.classList.toggle('is-campaign-page', isCampaignPage);
   document.body.classList.toggle('is-attribution-page', isAttributionPage);
@@ -2617,6 +2702,7 @@ const renderPage = () => {
   document.body.classList.toggle('is-finance-invoices-page', state.activeNavigationChild === 'invoices');
   document.body.classList.toggle('is-help-center-page', isHelpCenterPage);
   document.body.classList.toggle('is-team-accounts-page', isTeamAccountsPage);
+  document.body.classList.toggle('is-recruitment-page-settings-page', isRecruitmentSettingsPage);
   document.body.classList.toggle('is-brand-integration-page', isBrandIntegrationPage);
   document.body.classList.toggle('is-api-credentials-page', isApiCredentialsPage);
   document.body.classList.toggle('is-messages-page', isMessagesPage);
@@ -2653,6 +2739,8 @@ const renderPage = () => {
               ? 'Find answers, learn best practices, and get the support you need.'
             : isTeamAccountsPage
               ? 'Manage teammate access and permissions for your brands and programs.'
+            : isRecruitmentSettingsPage
+              ? 'Configure the public page where potential partners can discover and apply to your program.'
             : isBrandIntegrationPage
               ? 'Connect your stores, marketplaces, and analytics tools to sync data and power your affiliate programs.'
             : isApiCredentialsPage
@@ -2664,11 +2752,11 @@ const renderPage = () => {
             : isProductsAssetsPage
               ? 'Manage your creative assets and organize them into folders for easy access and use across campaigns.'
             : recruitmentPage?.description ?? operationsPage?.description ?? context.current.label + ' workspace preview for the current brand scope.';
-  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isTeamAccountsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage
-    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isInvoicesPage ? 'Commission & Rules' : isTeamAccountsPage || isBrandIntegrationPage || isApiCredentialsPage ? 'Integrations & Settings' : isMessagesPage ? 'Messages & Notifications' : isCouponsPage || isProductsAssetsPage ? 'Products & Assets' : 'Finance')
+  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage
+    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isInvoicesPage ? 'Commission & Rules' : isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage ? 'Integrations & Settings' : isMessagesPage ? 'Messages & Notifications' : isCouponsPage || isProductsAssetsPage ? 'Products & Assets' : 'Finance')
     : isHelpCenterPage ? 'Help center'
     : isOverview ? t('shell.merchantWorkspace', 'Merchant workspace') : context.parent.label;
-  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isTeamAccountsPage ? 'Team accounts' : isBrandIntegrationPage ? 'Brand integration' : isApiCredentialsPage ? 'API credentials' : isMessagesPage ? context.current.label : isCouponsPage ? 'Coupons' : isProductsAssetsPage ? 'Banners & images' : isOverview ? 'Overview' : context.current.label;
+  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isTeamAccountsPage ? 'Team accounts' : isRecruitmentSettingsPage ? 'Recruitment page' : isBrandIntegrationPage ? 'Brand integration' : isApiCredentialsPage ? 'API credentials' : isMessagesPage ? context.current.label : isCouponsPage ? 'Coupons' : isProductsAssetsPage ? 'Banners & images' : isOverview ? 'Overview' : context.current.label;
   breadcrumbCurrent.setAttribute('aria-current', 'page');
   overviewPage.hidden = !isOverview;
   modulePage.hidden = isOverview || (!recruitmentPage && !operationsPage);
@@ -2679,6 +2767,7 @@ const renderPage = () => {
   invoicesPage.hidden = !isInvoicesPage;
   helpCenterPage.hidden = !isHelpCenterPage;
   teamAccountsPage.hidden = !isTeamAccountsPage;
+  recruitmentPageSettings.hidden = !isRecruitmentSettingsPage;
   brandIntegrationPage.hidden = !isBrandIntegrationPage;
   apiCredentialsPage.hidden = !isApiCredentialsPage;
   messagesPage.hidden = !isMessagesPage;
@@ -2689,6 +2778,7 @@ const renderPage = () => {
   if (commissionRulesActions) commissionRulesActions.hidden = !isCommissionRulesPage;
   if (financeActions) financeActions.hidden = !isFinancePage;
   if (teamAccountsActions) teamAccountsActions.hidden = !isTeamAccountsPage;
+  if (recruitmentPageSettingsActions) recruitmentPageSettingsActions.hidden = !isRecruitmentSettingsPage;
   if (brandIntegrationActions) brandIntegrationActions.hidden = !isBrandIntegrationPage;
   if (apiCredentialsActions) apiCredentialsActions.hidden = !isApiCredentialsPage;
   if (messagesPageActions) messagesPageActions.hidden = !isMessagesPage;
@@ -2709,6 +2799,7 @@ const renderPage = () => {
   if (isInvoicesPage) renderInvoicesPage();
   if (isHelpCenterPage) renderHelpCenterPage();
   if (isTeamAccountsPage) renderTeamAccountsPage();
+  if (isRecruitmentSettingsPage) renderRecruitmentSettingsPage();
   if (isBrandIntegrationPage) renderBrandIntegrationPage();
   if (isApiCredentialsPage) renderApiCredentialsPage();
   if (isMessagesPage) renderMessagesPage();
@@ -3387,6 +3478,59 @@ if (teamAccountsPage) {
   });
 }
 
+if (recruitmentPageSettingsActions) {
+  recruitmentPageSettingsActions.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-recruitment-page-action]');
+    if (!action) return;
+
+    if (action.dataset.recruitmentPageAction === 'preview') {
+      showToast('Public recruitment page preview is ready for product integration');
+    } else if (action.dataset.recruitmentPageAction === 'save') {
+      showToast('Recruitment page settings saved in this demo');
+    }
+  });
+}
+
+if (recruitmentPageSettings) {
+  recruitmentPageSettings.addEventListener('input', (event) => {
+    const field = event.target.closest('[data-recruitment-page-field]');
+    if (!field) return;
+
+    recruitmentPageSettingsState[field.dataset.recruitmentPageField] = field.value;
+    renderRecruitmentPagePreview();
+  });
+
+  recruitmentPageSettings.addEventListener('change', (event) => {
+    const setting = event.target.closest('[data-recruitment-page-setting]');
+    if (setting) {
+      recruitmentPageSettingsState[setting.dataset.recruitmentPageSetting] = setting.value;
+      renderRecruitmentSettingsPage();
+      return;
+    }
+
+    const fieldToggle = event.target.closest('[data-recruitment-page-field-toggle]');
+    if (fieldToggle) {
+      recruitmentPageSettingsState.fields[fieldToggle.dataset.recruitmentPageFieldToggle] = fieldToggle.checked;
+      renderRecruitmentPagePreview();
+    }
+  });
+
+  recruitmentPageSettings.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-recruitment-page-action]');
+    if (!action) return;
+
+    const actionName = action.dataset.recruitmentPageAction;
+    if (actionName === 'toggle-status') {
+      recruitmentPageSettingsState.status = recruitmentPageSettingsState.status === 'published' ? 'disabled' : 'published';
+      renderRecruitmentSettingsPage();
+      showToast(recruitmentPageSettingsState.status === 'published' ? 'Recruitment page enabled' : 'Recruitment page disabled');
+    } else if (actionName === 'copy-link') {
+      showToast('Public recruitment page link is ready to copy');
+    } else if (actionName === 'preview' || actionName === 'preview-apply') {
+      showToast(actionName === 'preview-apply' ? 'Application form preview is ready for product integration' : 'Public recruitment page preview is ready for product integration');
+    }
+  });
+}
 if (brandIntegrationActions) {
   brandIntegrationActions.addEventListener('click', (event) => {
     const action = event.target.closest('[data-brand-integration-action]');
