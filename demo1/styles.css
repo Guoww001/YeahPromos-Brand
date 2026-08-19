@@ -7303,7 +7303,6 @@ body.is-attribution-page {
     gap: 7px;
   }
 }
-+
 /* Commission & Rules / Invoices */
 body.is-invoices-page {
   --invoices-red: #e60000;
