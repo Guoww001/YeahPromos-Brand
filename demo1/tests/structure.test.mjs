@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
@@ -23,6 +24,11 @@ test('page provides the required sidebar and dashboard regions', () => {
   assert.match(html, /data-toast/);
   assert.match(html, /data-action-center/);
   assert.match(html, /data-demo-state/);
+});
+
+test('app entry remains syntactically valid after conflict resolution', () => {
+  const syntax = spawnSync(process.execPath, ['--check', resolve(demoDirectory, 'app.js')], { encoding: 'utf8' });
+  assert.equal(syntax.status, 0, syntax.stderr || syntax.stdout);
 });
 
 test('attribution rules has its own routed page shell and controls', () => {
@@ -85,11 +91,63 @@ test('balance and payments has its own routed finance page shell', () => {
   assert.match(data, /demoOnly:\s*true/);
 });
 
+test('help center has its own routed support page shell', () => {
+  assert.match(html, /data-help-center-page/);
+  assert.match(html, /Help center/);
+  assert.match(html, /data-help-center-search/);
+  assert.match(html, /data-help-center-categories/);
+  assert.match(html, /data-help-center-articles/);
+  assert.match(html, /data-help-center-status/);
+  assert.match(appJs, /isHelpCenterPage/);
+  assert.match(appJs, /renderHelpCenterPage/);
+  assert.match(appJs, /visibleArticleCount/);
+  assert.match(data, /helpCenterPageData/);
+  assert.match(html, /All systems operational/);
+});
+
+test('help center reuses the README red navigation tokens', () => {
+  assert.match(css, /body\.is-help-center-page[\s\S]*--help-red:\s*#e60000/i);
+  assert.match(css, /--help-soft-red:\s*#fde8e8/i);
+  assert.match(css, /--help-selected-red:\s*#ff312e/i);
+  assert.match(css, /sidebar__utility\[data-help-center-utility\][\s\S]*background:\s*var\(--help-soft-red\)/i);
+  assert.match(readme, /Help center > Help center/);
+});
+
 test('finance page reuses the README red navigation tokens', () => {
   assert.match(css, /body\.is-finance-page[\s\S]*--finance-red:\s*#e60000/i);
   assert.match(css, /--finance-soft-red:\s*#fde8e8/i);
   assert.match(css, /--finance-selected-red:\s*#ff312e/i);
   assert.match(css, /nav-child\[data-nav-child="balance-payments"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--finance-selected-red\)/i);
+});
+
+test('commission rules invoices has its own routed, filterable table shell', () => {
+  assert.match(html, /data-invoices-page/);
+  assert.match(html, /Invoices \(73\)/);
+  assert.match(html, /data-invoices-date-range/);
+  assert.match(html, /data-invoices-filter="paymentMethod"/);
+  assert.match(html, /data-invoices-filter="paymentType"/);
+  assert.match(html, /data-invoices-filter="status"/);
+  assert.match(html, /data-invoices-filter="brand"/);
+  assert.match(html, /data-invoices-search/);
+  assert.match(html, /data-invoices-rows/);
+  assert.match(html, /Payment ID/);
+  assert.match(appJs, /Download invoice/);
+  assert.match(appJs, /isInvoicesPage/);
+  assert.match(appJs, /renderInvoicesPage/);
+  assert.match(appJs, /getFilteredInvoices/);
+  assert.match(data, /commission-invoices/);
+  assert.match(data, /commissionInvoicesPageData/);
+});
+
+test('invoices page uses readable dark-gray tokens and explicit status semantics', () => {
+  assert.match(css, /body\.is-invoices-page[\s\S]*--invoices-text-strong:\s*#1f2937/);
+  assert.match(css, /body\.is-invoices-page[\s\S]*--invoices-text:\s*#374151/);
+  assert.match(css, /body\.is-invoices-page[\s\S]*--invoices-text-muted:\s*#4b5563/);
+  assert.match(css, /\.invoices-table th[\s\S]*font-size:\s*11px/);
+  assert.match(css, /\.invoices-table td[\s\S]*font-size:\s*12px/);
+  assert.match(css, /\.invoices-status[\s\S]*font-size:\s*11px/);
+  assert.match(css, /\.invoices-status--paid[\s\S]*color:\s*#1f7a4d/);
+  assert.match(readme, /Invoices 页面中的日期控件、筛选器、发票表格/);
 });
 
 test('public demo data does not include credential or personal-data patterns', () => {

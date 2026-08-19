@@ -147,6 +147,7 @@ export const dashboardData = {
       children: [
         { id: 'commission-rules-list', label: 'Commission rules' },
         { id: 'attribution-rules', label: 'Attribution rules' },
+        { id: 'commission-invoices', label: 'Invoices' },
       ],
     },
     {
@@ -790,5 +791,153 @@ export const financeBalancePageData = {
     { id: 'PAYOUT-DEMO-0317', date: 'Mar 31, 2025 09:04 AM', amount: '$10,950.00', method: 'Mastercard · •••• 1111', methodTone: 'mastercard', status: 'Paid', description: 'Bi-weekly payout', reference: 'DEMO-9M2D8' },
     { id: 'PAYOUT-DEMO-0303', date: 'Mar 17, 2025 09:01 AM', amount: '$10,320.00', method: 'Bank · •••• 2222', methodTone: 'bank', status: 'Paid', description: 'Bi-weekly payout', reference: 'DEMO-4J1H6' },
     { id: 'PAYOUT-DEMO-0217', date: 'Mar 03, 2025 08:59 AM', amount: '$9,870.00', method: 'Bank · •••• 2222', methodTone: 'bank', status: 'Paid', description: 'Bi-weekly payout', reference: 'DEMO-7P5Q1' },
+  ],
+};
+
+export const helpCenterPageData = {
+  demoOnly: true,
+  categories: [
+    {
+      id: 'getting-started',
+      label: 'Getting started',
+      description: 'New to the platform? Learn the basics and set up your account for success.',
+      articles: 12,
+      guides: 5,
+      icon: 'rocket',
+      tone: 'coral',
+    },
+    {
+      id: 'partner-management',
+      label: 'Partner management',
+      description: 'Manage partners, review applications, and grow your affiliate network.',
+      articles: 18,
+      guides: 7,
+      icon: 'users',
+      tone: 'green',
+    },
+    {
+      id: 'payments-reporting',
+      label: 'Payments & reporting',
+      description: 'Understand commissions, payouts, and performance reports.',
+      articles: 14,
+      guides: 6,
+      icon: 'card',
+      tone: 'purple',
+    },
+  ],
+  articles: [
+    {
+      id: 'getting-started-with-yeahpromos',
+      title: 'Getting started with YeahPromos',
+      description: 'A step-by-step guide to set up your merchant account and launch your first program.',
+      category: 'Getting started',
+      updated: 'May 08, 2025',
+      datetime: '2025-05-08',
+    },
+    {
+      id: 'create-affiliate-program',
+      title: 'How to create an affiliate program',
+      description: 'Learn how to configure program settings, commission plans, and partner terms.',
+      category: 'Getting started',
+      updated: 'May 05, 2025',
+      datetime: '2025-05-05',
+    },
+    {
+      id: 'approve-partner-applications',
+      title: 'Review and approve partner applications',
+      description: 'How to review, approve, or decline applications from potential partners.',
+      category: 'Partner management',
+      updated: 'Apr 30, 2025',
+      datetime: '2025-04-30',
+    },
+    {
+      id: 'commissions-and-payouts',
+      title: 'Understanding commissions and payouts',
+      description: 'Learn how commissions are calculated, payouts are scheduled, and payment methods work.',
+      category: 'Payments & reporting',
+      updated: 'Apr 28, 2025',
+      datetime: '2025-04-28',
+    },
+    {
+      id: 'export-performance-reports',
+      title: 'Generate and export performance reports',
+      description: 'Create custom reports to track clicks, conversions, and earnings.',
+      category: 'Payments & reporting',
+      updated: 'Apr 26, 2025',
+      datetime: '2025-04-26',
+    },
+    {
+      id: 'invite-your-first-partner',
+      title: 'Invite your first partner',
+      description: 'Use partner discovery and invitations to build your first partner pipeline.',
+      category: 'Partner management',
+      updated: 'Apr 24, 2025',
+      datetime: '2025-04-24',
+    },
+    {
+      id: 'connect-your-store',
+      title: 'Connect your store and verify tracking',
+      description: 'Check your store connection, tracking provider, and first conversion signals.',
+      category: 'Getting started',
+      updated: 'Apr 22, 2025',
+      datetime: '2025-04-22',
+    },
+    {
+      id: 'read-performance-dashboard',
+      title: 'Read your performance dashboard',
+      description: 'Understand the metrics that explain partner activity, sales, and commission health.',
+      category: 'Payments & reporting',
+      updated: 'Apr 20, 2025',
+      datetime: '2025-04-20',
+    },
+  ],
+  systems: [
+    { id: 'platform', label: 'Platform', status: 'Operational' },
+    { id: 'partner-dashboard', label: 'Partner Dashboard', status: 'Operational' },
+    { id: 'email-delivery', label: 'Email Delivery', status: 'Operational' },
+    { id: 'payment-processing', label: 'Payment Processing', status: 'Operational' },
+  ],
+};
+
+export const commissionInvoicesPageData = {
+  demoOnly: true,
+  totalCount: 73,
+  dateRanges: [
+    { id: 'last-7d', label: 'May 05 – May 12, 2025' },
+    { id: 'last-30d', label: 'Apr 13 – May 12, 2025' },
+    { id: 'last-90d', label: 'Feb 12 – May 12, 2025' },
+  ],
+  filters: {
+    paymentMethod: [
+      { value: 'all', label: 'All methods' },
+      { value: 'Account credits', label: 'Account credits' },
+      { value: 'Credit card', label: 'Credit card' },
+      { value: 'Bank transfer', label: 'Bank transfer' },
+    ],
+    paymentType: [
+      { value: 'all', label: 'All types' },
+      { value: 'Publisher payout', label: 'Publisher payout' },
+      { value: 'Price plan fee', label: 'Price plan fee' },
+      { value: 'Account deposit', label: 'Account deposit' },
+    ],
+    status: [
+      { value: 'all', label: 'All statuses' },
+      { value: 'Paid', label: 'Paid' },
+      { value: 'Pending', label: 'Pending' },
+      { value: 'Failed', label: 'Failed' },
+    ],
+    brand: [
+      { value: 'all', label: 'All brands' },
+      { value: 'PartnerBoost', label: 'PartnerBoost' },
+      { value: 'PartnerMatic', label: 'PartnerMatic' },
+      { value: 'Northstar Demo', label: 'Northstar Demo' },
+    ],
+  },
+  rows: [
+    { id: 'INV-250512-0712', date: 'May 12, 2025 14:32', brand: 'PartnerBoost', paymentMethod: 'Account credits', paymentType: 'Publisher payout', description: 'Auto charged commission balance', amount: '-$0.00', status: 'Paid', statusTone: 'paid' },
+    { id: 'INV-250511-0611', date: 'May 11, 2025 22:18', brand: 'PartnerMatic', paymentMethod: 'Account credits', paymentType: 'Price plan fee', description: 'Fees for Standard Plan', amount: '-$50.00', status: 'Paid', statusTone: 'paid' },
+    { id: 'INV-250510-0438', date: 'May 10, 2025 21:06', brand: 'PartnerMatic', paymentMethod: 'Account credits', paymentType: 'Price plan fee', description: 'Fees for Standard Plan', amount: '-$50.00', status: 'Paid', statusTone: 'paid' },
+    { id: 'INV-250510-0437', date: 'May 10, 2025 21:06', brand: 'PartnerBoost', paymentMethod: 'Credit card', paymentType: 'Account deposit', description: 'Account balance top-up', amount: '$500.00', status: 'Paid', statusTone: 'paid' },
+    { id: 'INV-250509-0315', date: 'May 09, 2025 18:42', brand: 'Northstar Demo', paymentMethod: 'Bank transfer', paymentType: 'Publisher payout', description: 'Bi-weekly partner payout', amount: '-$320.00', status: 'Pending', statusTone: 'pending' },
   ],
 };

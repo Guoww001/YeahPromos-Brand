@@ -1,4 +1,4 @@
-import { attributionPageData, campaignPageData, commissionRulesPageData, dashboardData, financeBalancePageData } from './data.mjs?v=merchant-reference-18';
+import { attributionPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, dashboardData, financeBalancePageData, helpCenterPageData } from './data.mjs?v=merchant-reference-18';
 import {
   createDashboardState,
   isNavigationItemActive,
@@ -113,6 +113,18 @@ const financePayoutSchedule = document.querySelector('[data-finance-payout-sched
 const financePaymentMethods = document.querySelector('[data-finance-payment-methods]');
 const financePayoutRows = document.querySelector('[data-finance-payout-rows]');
 const financeResultCount = document.querySelector('[data-finance-result-count]');
+const invoicesPage = document.querySelector('[data-invoices-page]');
+const invoicesDateRange = document.querySelector('[data-invoices-date-range]');
+const invoicesRows = document.querySelector('[data-invoices-rows]');
+const invoicesResultCount = document.querySelector('[data-invoices-result-count]');
+const invoicesSelectAll = document.querySelector('[data-invoices-select-all]');
+const helpCenterPage = document.querySelector('[data-help-center-page]');
+const helpCenterCategories = document.querySelector('[data-help-center-categories]');
+const helpCenterArticles = document.querySelector('[data-help-center-articles]');
+const helpCenterSearch = document.querySelector('[data-help-center-search]');
+const helpCenterLoadMore = document.querySelector('[data-help-center-action="load-more-articles"]');
+const helpCenterStatus = document.querySelector('[data-help-center-status]');
+const helpCenterUtility = document.querySelector('[data-help-center-utility]');
 
 const campaignState = {
   activeTab: 'all',
@@ -167,6 +179,23 @@ const financeState = {
   trendPeriod: '30d',
 };
 
+const invoicesState = {
+  search: '',
+  dateRange: 'last-7d',
+  filters: {
+    paymentMethod: 'all',
+    paymentType: 'all',
+    status: 'all',
+    brand: 'all',
+  },
+  selectedIds: new Set(),
+};
+
+const helpCenterState = {
+  search: '',
+  visibleArticleCount: 5,
+};
+
 const icon = (name, className = '') => `
   <svg class="${className}" aria-hidden="true">
     <use href="#icon-${name}"></use>
@@ -179,6 +208,11 @@ const localizedPageTitle = (_pageId, fallback) => fallback;
 
 
 const findNavigationContext = (navigationId) => {
+  if (navigationId === 'help-center') {
+    const helpCenter = { id: 'help-center', label: 'Help center', icon: 'help' };
+    return { parent: helpCenter, current: helpCenter };
+  }
+
   for (const item of state.navigation) {
     if (item.id === navigationId) return { parent: { ...item, label: localizedNavigationLabel(item) }, current: { ...item, label: localizedNavigationLabel(item) } };
     const child = item.children?.find((entry) => entry.id === navigationId);
@@ -965,6 +999,7 @@ const renderUtilityNavigationState = () => {
     if (isActive) utility.setAttribute('aria-current', 'page');
     else utility.removeAttribute('aria-current');
   });
+};
 
 
 const getFilteredCampaigns = () => {
@@ -1510,6 +1545,133 @@ const renderFinancePage = () => {
   renderFinancePayoutRows();
 };
 
+const getFilteredInvoices = () => {
+  const normalizedSearch = invoicesState.search.trim().toLowerCase();
+  const { filters } = invoicesState;
+
+  return commissionInvoicesPageData.rows.filter((invoice) => {
+    const matchesSearch = !normalizedSearch || [
+      invoice.id,
+      invoice.date,
+      invoice.brand,
+      invoice.paymentMethod,
+      invoice.paymentType,
+      invoice.description,
+      invoice.amount,
+      invoice.status,
+    ].some((value) => value.toLowerCase().includes(normalizedSearch));
+    const matchesPaymentMethod = filters.paymentMethod === 'all' || invoice.paymentMethod === filters.paymentMethod;
+    const matchesPaymentType = filters.paymentType === 'all' || invoice.paymentType === filters.paymentType;
+    const matchesStatus = filters.status === 'all' || invoice.status === filters.status;
+    const matchesBrand = filters.brand === 'all' || invoice.brand === filters.brand;
+
+    return matchesSearch && matchesPaymentMethod && matchesPaymentType && matchesStatus && matchesBrand;
+  });
+};
+
+const updateInvoicesSelection = () => {
+  const visibleIds = getFilteredInvoices().map((invoice) => invoice.id);
+  const visibleSelected = visibleIds.filter((id) => invoicesState.selectedIds.has(id));
+
+  if (invoicesSelectAll) {
+    invoicesSelectAll.checked = visibleIds.length > 0 && visibleSelected.length === visibleIds.length;
+    invoicesSelectAll.indeterminate = visibleSelected.length > 0 && visibleSelected.length < visibleIds.length;
+  }
+};
+
+const renderInvoicesRows = () => {
+  if (!invoicesRows) return;
+
+  const filteredInvoices = getFilteredInvoices();
+  invoicesRows.innerHTML = filteredInvoices.length
+    ? filteredInvoices.map((invoice) => [
+      '<tr data-invoices-row="', invoice.id, '">',
+      '<td class="invoices-cell--check"><label class="invoices-checkbox">',
+      '<input type="checkbox" data-invoices-select="', invoice.id, '" ',
+      invoicesState.selectedIds.has(invoice.id) ? 'checked ' : '',
+      'aria-label="Select invoice ', invoice.id, '" /><span aria-hidden="true"></span></label></td>',
+      '<td class="invoices-cell--date">', invoice.date, '</td>',
+      '<td class="invoices-cell--id"><strong>', invoice.id, '</strong></td>',
+      '<td>', invoice.brand, '</td>',
+      '<td><span class="invoices-method invoices-method--', invoice.paymentMethod.toLowerCase().replaceAll(' ', '-'), '">', invoice.paymentMethod, '</span></td>',
+      '<td>', invoice.paymentType, '</td>',
+      '<td class="invoices-cell--description">', invoice.description, '</td>',
+      '<td class="invoices-cell--amount"><strong>', invoice.amount, '</strong></td>',
+      '<td><span class="invoices-status invoices-status--', invoice.statusTone, '"><i></i>', invoice.status, '</span></td>',
+      '<td class="invoices-cell--actions">',
+      '<button type="button" class="invoices-details-button" data-invoices-action="details" data-invoices-id="', invoice.id, '">Details</button>',
+      '<button type="button" class="invoices-download-button" data-invoices-action="download" data-invoices-id="', invoice.id, '" aria-label="Download invoice ', invoice.id, '">', icon('download'), '</button>',
+      '</td></tr>',
+    ].join('')).join('')
+    : '<tr><td class="invoices-empty" colspan="10"><strong>No invoices found</strong><span>Try changing your filters or search terms.</span></td></tr>';
+
+  if (invoicesResultCount) {
+    const total = commissionInvoicesPageData.totalCount;
+    invoicesResultCount.textContent = filteredInvoices.length
+      ? 'Showing 1 to ' + filteredInvoices.length + ' of ' + total + ' invoices'
+      : 'Showing 0 of ' + total + ' invoices';
+  }
+
+  updateInvoicesSelection();
+};
+
+const renderInvoicesPage = () => {
+  if (!invoicesPage) return;
+  if (invoicesDateRange) invoicesDateRange.value = invoicesState.dateRange;
+  renderInvoicesRows();
+};
+
+const getFilteredHelpArticles = () => {
+  const query = helpCenterState.search.trim().toLowerCase();
+  if (!query) return helpCenterPageData.articles;
+
+  return helpCenterPageData.articles.filter((article) => [
+    article.title,
+    article.description,
+    article.category,
+  ].some((value) => value.toLowerCase().includes(query)));
+};
+
+const renderHelpCenterPage = () => {
+  if (!helpCenterPage) return;
+
+  helpCenterCategories.innerHTML = helpCenterPageData.categories.map((category) => `
+    <button class="help-center-category help-center-category--${category.tone}" type="button" data-help-center-category="${category.id}" aria-label="Browse ${category.label} help">
+      <span class="help-center-category__top">
+        <span class="help-center-category__icon">${icon(category.icon)}</span>
+        ${icon('arrow', 'help-center-category__arrow')}
+      </span>
+      <strong>${category.label}</strong>
+      <span class="help-center-category__description">${category.description}</span>
+      <span class="help-center-category__meta"><b>${category.articles} articles</b><i aria-hidden="true">•</i><b>${category.guides} guides</b></span>
+    </button>
+  `).join('');
+
+  const filteredArticles = getFilteredHelpArticles();
+  const visibleArticles = filteredArticles.slice(0, helpCenterState.visibleArticleCount);
+  helpCenterArticles.innerHTML = visibleArticles.length
+    ? visibleArticles.map((article) => `
+        <article class="help-center-article">
+          <span class="help-center-article__icon">${icon('file')}</span>
+          <div class="help-center-article__copy">
+            <strong>${article.title}</strong>
+            <p>${article.description}</p>
+          </div>
+          <time datetime="${article.datetime}"><span>Updated</span>${article.updated}</time>
+        </article>
+      `).join('')
+    : '<div class="help-center-empty"><strong>No help articles found</strong><span>Try a different search term or browse a help category.</span></div>';
+
+  helpCenterLoadMore.hidden = filteredArticles.length <= visibleArticles.length;
+  helpCenterLoadMore.disabled = filteredArticles.length === 0;
+  helpCenterStatus.innerHTML = helpCenterPageData.systems.map((system) => `
+    <div class="help-center-status-row">
+      <span class="help-center-status-row__name"><i aria-hidden="true"></i>${system.label}</span>
+      <strong>${system.status}</strong>
+    </div>
+  `).join('');
+};
+
 const renderPage = () => {
   const context = findNavigationContext(state.activeNavigationChild ?? state.activeNavigationId);
   const isOverview = state.activeNavigationId === 'overview' && !state.activeNavigationChild;
@@ -1520,13 +1682,23 @@ const renderPage = () => {
   const isAttributionPage = state.activeNavigationChild === 'attribution-rules';
   const isCommissionRulesPage = state.activeNavigationChild === 'commission-rules-list';
   const isFinancePage = state.activeNavigationChild === 'balance-payments';
-  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage;
+  const isInvoicesPage = state.activeNavigationChild === 'commission-invoices' || state.activeNavigationChild === 'invoices';
+  const isHelpCenterPage = state.activeNavigationId === 'help-center';
+  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage;
 
   document.body.classList.toggle('is-campaign-page', isCampaignPage);
   document.body.classList.toggle('is-attribution-page', isAttributionPage);
   document.body.classList.toggle('is-commission-rules-page', isCommissionRulesPage);
   document.body.classList.toggle('is-finance-page', isFinancePage);
-
+  document.body.classList.toggle('is-invoices-page', isInvoicesPage);
+  document.body.classList.toggle('is-commission-invoices-page', state.activeNavigationChild === 'commission-invoices');
+  document.body.classList.toggle('is-finance-invoices-page', state.activeNavigationChild === 'invoices');
+  document.body.classList.toggle('is-help-center-page', isHelpCenterPage);
+  if (helpCenterUtility) {
+    helpCenterUtility.classList.toggle('is-active', isHelpCenterPage);
+    if (isHelpCenterPage) helpCenterUtility.setAttribute('aria-current', 'page');
+    else helpCenterUtility.removeAttribute('aria-current');
+  }
   const currentPageTitle = recruitmentPage?.title ?? operationsPage?.title ?? context.current.label;
   pageTitle.textContent = isOverview
     ? t('page.overview.title', 'Business overview')
@@ -1543,23 +1715,16 @@ const renderPage = () => {
           ? 'Manage base commission rates, bonuses, attribution windows, and rule conditions for your partners.'
           : isFinancePage
             ? 'Track your account balance, commissions, payouts, and payment methods.'
+            : isInvoicesPage
+              ? 'Review, filter, and download demo invoice records for the selected workspace.'
+            : isHelpCenterPage
+              ? 'Find answers, learn best practices, and get the support you need.'
             : recruitmentPage?.description ?? operationsPage?.description ?? context.current.label + ' workspace preview for the current brand scope.';
-  breadcrumbParent.textContent = isOverview
-    ? t('shell.merchantWorkspace', 'Merchant workspace')
-    : isMainPage
-      ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage ? 'Commission & Rules' : 'Finance')
-      : context.parent.label;
-  breadcrumbCurrent.textContent = isCampaignPage
-    ? 'All campaigns'
-    : isAttributionPage
-      ? 'Attribution rules'
-      : isCommissionRulesPage
-        ? 'Commission rules'
-        : isFinancePage
-          ? 'Balance & payments'
-          : isOverview
-            ? t('page.overview.title', 'Overview')
-            : localizedPageTitle(activePageId, currentPageTitle);
+  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage
+    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isInvoicesPage ? 'Commission & Rules' : 'Finance')
+    : isHelpCenterPage ? 'Help center'
+    : isOverview ? t('shell.merchantWorkspace', 'Merchant workspace') : context.parent.label;
+  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isOverview ? 'Overview' : context.current.label;
   breadcrumbCurrent.setAttribute('aria-current', 'page');
   overviewPage.hidden = !isOverview;
   modulePage.hidden = isOverview || (!recruitmentPage && !operationsPage);
@@ -1567,6 +1732,8 @@ const renderPage = () => {
   attributionPage.hidden = !isAttributionPage;
   commissionRulesPage.hidden = !isCommissionRulesPage;
   financePage.hidden = !isFinancePage;
+  invoicesPage.hidden = !isInvoicesPage;
+  helpCenterPage.hidden = !isHelpCenterPage;
   modulePlaceholder.hidden = isOverview || isMainPage || Boolean(recruitmentPage || operationsPage);
   if (pageActions) pageActions.hidden = !isAttributionPage;
   if (commissionRulesActions) commissionRulesActions.hidden = !isCommissionRulesPage;
@@ -1580,14 +1747,13 @@ const renderPage = () => {
     modulePlaceholder.querySelector('[data-module-title]').textContent = context.current.label;
     modulePlaceholder.querySelector('[data-module-parent]').textContent = context.parent.label;
   }
-    modulePlaceholder.querySelector('[data-module-title]').textContent = context.current.label;
-    modulePlaceholder.querySelector('[data-module-parent]').textContent = context.parent.label;
-  }
 
   if (isCampaignPage) renderCampaignPage();
   if (isAttributionPage) renderAttributionPage();
   if (isCommissionRulesPage) renderCommissionRulesPage();
   if (isFinancePage) renderFinancePage();
+  if (isInvoicesPage) renderInvoicesPage();
+  if (isHelpCenterPage) renderHelpCenterPage();
 };
 
 const renderAll = () => {
@@ -2071,6 +2237,101 @@ if (financePage) {
   });
 }
 
+if (invoicesPage) {
+  invoicesPage.addEventListener('input', (event) => {
+    if (!event.target.matches('[data-invoices-search]')) return;
+    invoicesState.search = event.target.value;
+    renderInvoicesRows();
+  });
+
+  invoicesPage.addEventListener('change', (event) => {
+    const filter = event.target.closest('[data-invoices-filter]');
+    if (filter) {
+      invoicesState.filters[filter.dataset.invoicesFilter] = filter.value;
+      renderInvoicesRows();
+      return;
+    }
+
+    if (event.target.matches('[data-invoices-date-range]')) {
+      invoicesState.dateRange = event.target.value;
+      showToast('Invoice date range updated to ' + event.target.options[event.target.selectedIndex].text);
+      return;
+    }
+
+    const checkbox = event.target.closest('[data-invoices-select]');
+    if (checkbox) {
+      if (checkbox.checked) invoicesState.selectedIds.add(checkbox.dataset.invoicesSelect);
+      else invoicesState.selectedIds.delete(checkbox.dataset.invoicesSelect);
+      updateInvoicesSelection();
+      return;
+    }
+
+    if (event.target.matches('[data-invoices-select-all]')) {
+      const visibleIds = getFilteredInvoices().map((invoice) => invoice.id);
+      if (event.target.checked) visibleIds.forEach((id) => invoicesState.selectedIds.add(id));
+      else visibleIds.forEach((id) => invoicesState.selectedIds.delete(id));
+      renderInvoicesRows();
+    }
+  });
+
+  invoicesPage.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-invoices-action]');
+    if (!action) return;
+    event.stopPropagation();
+
+    if (action.dataset.invoicesAction === 'details') {
+      showToast('Invoice ' + action.dataset.invoicesId + ' details are ready for product integration');
+    } else if (action.dataset.invoicesAction === 'download') {
+      showToast('Invoice ' + action.dataset.invoicesId + ' download is ready for product integration');
+    } else if (action.dataset.invoicesAction === 'page') {
+      showToast('Invoices page ' + action.dataset.invoicesPageNumber + ' is ready for product integration');
+    }
+  });
+}
+
+if (helpCenterPage) {
+  helpCenterPage.addEventListener('input', (event) => {
+    if (!event.target.matches('[data-help-center-search]')) return;
+    helpCenterState.search = event.target.value;
+    helpCenterState.visibleArticleCount = 5;
+    renderHelpCenterPage();
+  });
+
+  helpCenterPage.addEventListener('click', (event) => {
+    const category = event.target.closest('[data-help-center-category]');
+    if (category) {
+      const selectedCategory = helpCenterPageData.categories.find((item) => item.id === category.dataset.helpCenterCategory);
+      helpCenterState.search = selectedCategory?.label ?? '';
+      helpCenterState.visibleArticleCount = 5;
+      helpCenterSearch.value = helpCenterState.search;
+      renderHelpCenterPage();
+      showToast(`${selectedCategory?.label ?? 'Help'} articles selected`);
+      return;
+    }
+
+    const action = event.target.closest('[data-help-center-action]');
+    if (!action) return;
+
+    const actionName = action.dataset.helpCenterAction;
+    if (actionName === 'load-more-articles') {
+      helpCenterState.visibleArticleCount += 3;
+      renderHelpCenterPage();
+    } else if (actionName === 'view-all-articles') {
+      helpCenterState.search = '';
+      helpCenterState.visibleArticleCount = helpCenterPageData.articles.length;
+      helpCenterSearch.value = '';
+      renderHelpCenterPage();
+      showToast('Showing all help articles');
+    } else if (actionName === 'contact-support') {
+      showToast('Contact support is ready for product integration');
+    } else if (actionName === 'view-tickets') {
+      showToast('Support tickets are ready for product integration');
+    } else if (actionName === 'view-status') {
+      showToast('System status page is ready for product integration');
+    }
+  });
+}
+
 if (attributionPage) {
   attributionPage.addEventListener('change', (event) => {
     if (!event.target.matches('[data-attribution-model]')) return;
@@ -2148,6 +2409,14 @@ sidebarCloseButton.addEventListener('click', closeSidebar);
 sidebarBackdrop.addEventListener('click', closeSidebar);
 
 document.addEventListener('keydown', (event) => {
+  const activeElement = document.activeElement;
+  const isTyping = activeElement?.matches('input, select, textarea, [contenteditable="true"]');
+  if (event.key === '/' && document.body.classList.contains('is-help-center-page') && !isTyping) {
+    event.preventDefault();
+    helpCenterSearch?.focus();
+    return;
+  }
+
   if (event.key !== 'Escape') return;
 
   if (drawer.classList.contains('is-open')) {
