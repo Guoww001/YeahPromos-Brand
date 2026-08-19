@@ -432,8 +432,8 @@ test('products and assets banners page has its own routed asset workspace', () =
 test('banners page keeps asset states readable and keyboard-addressable', () => {
   assert.match(css, /\.is-products-assets-page \.page-header__filters[\s\S]*display:\s*none/);
   assert.match(css, /\.products-assets-grid[\s\S]*grid-template-columns:\s*repeat\(3/);
-  assert.match(css, /\.products-asset-card__status[\s\S]*font-size:\s*10px/);
-  assert.match(css, /\.products-assets-detail__facts dt[\s\S]*font-size:\s*10px/);
+  assert.match(css, /\.products-asset-card__status[\s\S]*font-size:\s*11px/);
+  assert.match(css, /\.products-assets-detail__facts dt[\s\S]*font-size:\s*11px/);
   assert.match(css, /\.products-assets-detail__facts dd[\s\S]*color:\s*var\(--color-text-soft\)/);
   assert.match(appJs, /aria-pressed/);
   assert.match(readme, /Banners & images 的资产卡片、筛选器/);
@@ -504,8 +504,8 @@ test('transaction history reuses readable Finance tokens and safe demo actions',
   assert.match(css, /--transaction-history-soft-red:\s*#fde8e8/i);
   assert.match(css, /--transaction-history-selected-red:\s*#ff312e/i);
   assert.match(css, /nav-child\[data-nav-child="transaction-history"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--transaction-history-selected-red\)/i);
-  assert.match(css, /\.transaction-history-table th[\s\S]*font-size:\s*10px/);
-  assert.match(css, /\.transaction-history-table td[\s\S]*font-size:\s*10px/);
+  assert.match(css, /\.transaction-history-table th[\s\S]*font-size:\s*11px/);
+  assert.match(css, /\.transaction-history-table td[\s\S]*font-size:\s*11px/);
   assert.match(readme, /Approve \/ Void/);
   assert.match(readme, /Transaction history 使用 `#1F2937`/);
   assert.match(readme, /不提交真实交易、不导出业务数据/);
@@ -549,14 +549,14 @@ test('public demo data does not include credential or personal-data patterns', (
 });
 
 test('finance typography preserves readability and lightweight chart annotations', () => {
-  assert.match(css, /body\.is-finance-page[\s\S]*--finance-font-body:\s*11px/);
-  assert.match(css, /body\.is-finance-page[\s\S]*--finance-font-secondary:\s*10px/);
+  assert.match(css, /body\.is-finance-page[\s\S]*--finance-font-body:\s*12px/);
+  assert.match(css, /body\.is-finance-page[\s\S]*--finance-font-secondary:\s*11px/);
   assert.match(css, /\.finance-chart__tooltip text[\s\S]*font-weight:\s*400/);
   assert.match(css, /\.finance-chart__tooltip \.finance-chart__tooltip-value[\s\S]*font-size:\s*12px[\s\S]*font-weight:\s*600/);
   assert.match(css, /\.finance-table th[\s\S]*font-size:\s*var\(--finance-font-secondary\)/);
   assert.match(css, /\.finance-table td[\s\S]*font-size:\s*var\(--finance-font-body\)/);
   assert.match(readme, /可读性与无障碍/);
-  assert.match(readme, /主要正文、表格数据和表单控件文字不小于/);
+  assert.match(readme, /主要正文、表格数据和表单控件文字使用 `12px` 及以上/);
 });
 
 test('finance neutral text uses contrast-ready dark gray tokens', () => {
