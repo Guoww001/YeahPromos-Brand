@@ -38,16 +38,20 @@ import {
   selectOverviewMetric,
 } from './overview.mjs';
 import {
+  affiliateProgramRecords,
   createOperationsState,
   getOperationsPage,
   getOperationsStateKey,
+  influencerCampaignRecords,
   operationsPageIds,
+  resetOperationsFilters,
   selectOperationsRecord,
   selectOperationsTab,
+  toggleOperationsFilters,
   updateOperationsFilter,
   updateOperationsSearch,
-} from './operations.mjs?v=merchant-reference-18';
-import { renderOperationsPage } from './operations-renderers.mjs?v=merchant-reference-18';
+} from './operations.mjs?v=merchant-reference-26';
+import { renderOperationsPage } from './operations-renderers.mjs?v=merchant-reference-26';
 
 let state = createDashboardState(dashboardData);
 let recruitmentState = createRecruitmentState();
@@ -56,6 +60,8 @@ let operationsState = createOperationsState();
 let toastTimer;
 let lastDrawerTrigger = null;
 let recruitmentDrawerRecordId = null;
+let campaignSupportDrawerPageId = null;
+let campaignSupportDrawerRecordId = null;
 
 
 const navigation = document.querySelector('[data-navigation]');
@@ -3674,6 +3680,8 @@ const openPartnerDrawer = (partnerId, trigger) => {
 
   lastDrawerTrigger = trigger ?? document.activeElement;
   recruitmentDrawerRecordId = null;
+  campaignSupportDrawerPageId = null;
+  campaignSupportDrawerRecordId = null;
   state = { ...state, activePartnerId: partnerId };
   drawerContent.innerHTML = `
     <div class="drawer-header">
@@ -3722,11 +3730,78 @@ const openPartnerDrawer = (partnerId, trigger) => {
   });
 };
 
+const getCampaignSupportRecord = (pageId, recordId) => {
+  const records = pageId === 'affiliate-programs' ? affiliateProgramRecords : pageId === 'influencer-campaigns' ? influencerCampaignRecords : [];
+  return records.find((record) => record.id === recordId) ?? null;
+};
+
+const openCampaignSupportDrawer = (pageId, recordId, trigger) => {
+  const record = getCampaignSupportRecord(pageId, recordId);
+  if (!record) return;
+
+  const isProgram = pageId === 'affiliate-programs';
+  lastDrawerTrigger = trigger ?? document.activeElement;
+  recruitmentDrawerRecordId = null;
+  campaignSupportDrawerPageId = pageId;
+  campaignSupportDrawerRecordId = record.id;
+  state = { ...state, activePartnerId: null };
+
+  const title = escapeHtml(record.name);
+  const subtitle = isProgram
+    ? `${escapeHtml(record.status)} · ${escapeHtml(record.dateRange)}`
+    : `${escapeHtml(record.category)} · ${escapeHtml(record.platforms.join(' · '))}`;
+  const avatar = isProgram
+    ? `<span class="campaign-drawer-avatar campaign-drawer-avatar--${escapeHtml(record.markTone)}">${escapeHtml(record.initials)}</span>`
+    : `<span class="campaign-drawer-avatar campaign-drawer-avatar--${escapeHtml(record.avatar.tone)}">${escapeHtml(record.avatar.initials)}</span>`;
+  const facts = isProgram
+    ? [['Status', record.status], ['Commission', record.commission], ['Attribution', record.attribution], ['Partners', record.partners]]
+    : [['Status', record.status], ['Creators', record.creators], ['Deliverables', record.deliverables], ['Budget', record.budget]];
+  const media = isProgram
+    ? '<div class="campaign-drawer-signal"><span>Program rhythm</span><strong>Healthy partner activity</strong><i><b></b></i></div>'
+    : `<div class="campaign-drawer-media">${record.videos.map((video) => `<div class="campaign-drawer-video campaign-drawer-video--${escapeHtml(video.tone)}"><span>${escapeHtml(video.mark)}</span><strong>${escapeHtml(video.title)}</strong><small>${escapeHtml(video.views)} views · ${escapeHtml(video.date)}</small></div>`).join('')}</div>`;
+
+  drawerContent.innerHTML = `
+    <div class="drawer-header drawer-header--campaign">
+      <div class="drawer-header__merchant">
+        ${avatar}
+        <div><span class="campaign-drawer-eyebrow">${isProgram ? 'Affiliate program' : 'Influencer campaign'}</span><h2 id="merchant-drawer-title">${title}</h2><p>${subtitle}</p></div>
+      </div>
+      <button class="icon-button" type="button" data-drawer-close aria-label="Close campaign details">${icon('x')}</button>
+    </div>
+    <section class="drawer-section">
+      <p class="drawer-section__label">${isProgram ? 'Program pulse' : 'Campaign pulse'}</p>
+      <div class="drawer-commission"><span>${isProgram ? 'Commission rate' : 'Budget used'}</span><strong>${isProgram ? escapeHtml(record.commission) : `${escapeHtml(record.budgetPercent)}%`}</strong></div>
+    </section>
+    <section class="drawer-section">
+      <p class="drawer-section__label">${isProgram ? 'Program details' : 'Delivery snapshot'}</p>
+      <div class="drawer-facts">${facts.map(([label, value]) => `<div class="drawer-fact"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value ?? '—')}</strong></div>`).join('')}</div>
+    </section>
+    <section class="drawer-section drawer-section--campaign-media">
+      <p class="drawer-section__label">${isProgram ? 'Activity signal' : 'Related content'}</p>
+      ${media}
+    </section>
+    <div class="drawer-actions drawer-actions--campaign">
+      <button class="button button--secondary" type="button" data-drawer-close>Keep browsing</button>
+      <button class="button button--primary" type="button" data-campaign-support-drawer-action="primary">${isProgram ? 'Manage program' : 'Open campaign'} ${icon('arrow')}</button>
+    </div>
+  `;
+  drawer.hidden = false;
+  drawer.dataset.drawerType = 'campaign-support';
+  document.body.classList.add('is-overlay-open');
+  requestAnimationFrame(() => {
+    drawer.classList.add('is-open');
+    drawerBackdrop.classList.add('is-open');
+    drawer.querySelector('[data-drawer-close]')?.focus();
+  });
+};
+
 const openRecruitmentDrawer = (record, trigger, variant = 'profile') => {
   if (!record) return;
 
   lastDrawerTrigger = trigger ?? document.activeElement;
   recruitmentDrawerRecordId = record.id;
+  campaignSupportDrawerPageId = null;
+  campaignSupportDrawerRecordId = null;
   state = { ...state, activePartnerId: null };
 
   const isMessage = variant === 'message';
@@ -3798,17 +3873,24 @@ const openRecruitmentDrawer = (record, trigger, variant = 'profile') => {
 const closePartnerDrawer = () => {
   const activePartnerId = state.activePartnerId;
   const activeRecruitmentRecordId = recruitmentDrawerRecordId;
+  const activeCampaignSupportPageId = campaignSupportDrawerPageId;
+  const activeCampaignSupportRecordId = campaignSupportDrawerRecordId;
   drawer.classList.remove('is-open');
   drawerBackdrop.classList.remove('is-open');
   window.setTimeout(() => {
     const fallbackTrigger = activeRecruitmentRecordId
       ? document.querySelector(`[data-recruitment-action="view"][data-record-id="${activeRecruitmentRecordId}"]`)
-      : document.querySelector(`[data-partner-view="${activePartnerId}"]`);
+      : activeCampaignSupportPageId && activeCampaignSupportRecordId
+        ? document.querySelector(`[data-campaign-support-action][data-campaign-support-record-id="${activeCampaignSupportRecordId}"]`)
+        : document.querySelector(`[data-partner-view="${activePartnerId}"]`);
     const focusTarget = lastDrawerTrigger?.isConnected ? lastDrawerTrigger : fallbackTrigger;
 
     drawer.hidden = true;
     state = { ...state, activePartnerId: null };
     recruitmentDrawerRecordId = null;
+    campaignSupportDrawerPageId = null;
+    campaignSupportDrawerRecordId = null;
+    delete drawer.dataset.drawerType;
     document.body.classList.remove('is-overlay-open');
     focusTarget?.focus();
     lastDrawerTrigger = null;
@@ -4007,6 +4089,17 @@ const handleRecruitmentAction = (action, trigger) => {
 };
 
 modulePage.addEventListener('submit', (event) => {
+  const campaignSupportForm = event.target.closest('[data-campaign-support-search-form]');
+  if (campaignSupportForm) {
+    event.preventDefault();
+    const pageId = campaignSupportForm.dataset.campaignSupportPageId ?? getActiveOperationsPageId();
+    const search = campaignSupportForm.querySelector('[data-campaign-support-search]')?.value ?? '';
+    operationsState = updateOperationsSearch(operationsState, pageId, search);
+    renderWorkspacePage(pageId);
+    showToast(search ? `Search updated to “${search}”` : 'Search cleared');
+    return;
+  }
+
   const workspaceForm = event.target.closest('[data-workspace-search-form]');
   if (workspaceForm) {
     event.preventDefault();
@@ -4028,6 +4121,15 @@ modulePage.addEventListener('submit', (event) => {
 });
 
 modulePage.addEventListener('change', (event) => {
+  const campaignSupportFilter = event.target.closest('[data-campaign-support-filter]');
+  if (campaignSupportFilter) {
+    const pageId = campaignSupportFilter.dataset.campaignSupportPageId ?? getActiveOperationsPageId();
+    operationsState = updateOperationsFilter(operationsState, pageId, campaignSupportFilter.dataset.filterKey, campaignSupportFilter.value);
+    renderWorkspacePage(pageId);
+    showToast(`${campaignSupportFilter.getAttribute('aria-label') ?? 'Filter'} updated`);
+    return;
+  }
+
   const workspaceFilter = event.target.closest('[data-workspace-filter]');
   if (workspaceFilter) {
     const pageId = workspaceFilter.dataset.workspacePageId ?? getActiveOperationsPageId();
@@ -4072,6 +4174,57 @@ modulePage.addEventListener('change', (event) => {
 });
 
 modulePage.addEventListener('click', (event) => {
+  const campaignSupportTab = event.target.closest('[data-campaign-support-tab]');
+  if (campaignSupportTab) {
+    const pageId = campaignSupportTab.dataset.campaignSupportPageId ?? getActiveOperationsPageId();
+    operationsState = selectOperationsTab(operationsState, pageId, campaignSupportTab.dataset.campaignSupportTabValue);
+    renderWorkspacePage(pageId);
+    showToast(`${campaignSupportTab.textContent.trim()} selected`);
+    return;
+  }
+
+  const campaignSupportQuickFilter = event.target.closest('[data-campaign-support-quick-filter]');
+  if (campaignSupportQuickFilter) {
+    const pageId = campaignSupportQuickFilter.dataset.campaignSupportPageId ?? getActiveOperationsPageId();
+    operationsState = updateOperationsFilter(operationsState, pageId, campaignSupportQuickFilter.dataset.filterKey, campaignSupportQuickFilter.dataset.filterValue);
+    renderWorkspacePage(pageId);
+    showToast(`${campaignSupportQuickFilter.textContent.trim()} filter applied`);
+    return;
+  }
+
+  const campaignSupportAction = event.target.closest('[data-campaign-support-action]');
+  if (campaignSupportAction) {
+    const actionId = campaignSupportAction.dataset.campaignSupportAction;
+    const pageId = campaignSupportAction.dataset.campaignSupportPageId ?? getActiveOperationsPageId();
+
+    if (actionId === 'filter-programs' || actionId === 'filter-influencer') {
+      operationsState = toggleOperationsFilters(operationsState, pageId);
+      renderWorkspacePage(pageId);
+      return;
+    }
+
+    if (actionId === 'reset-campaign-filters') {
+      operationsState = resetOperationsFilters(operationsState, pageId);
+      renderWorkspacePage(pageId);
+      showToast('Filters cleared');
+      return;
+    }
+
+    if ((actionId === 'view-program' || actionId === 'view-campaign') && campaignSupportAction.dataset.campaignSupportRecordId && (pageId === 'affiliate-programs' || pageId === 'influencer-campaigns')) {
+      operationsState = selectOperationsRecord(operationsState, pageId, campaignSupportAction.dataset.campaignSupportRecordId);
+      renderWorkspacePage(pageId);
+      openCampaignSupportDrawer(pageId, campaignSupportAction.dataset.campaignSupportRecordId, campaignSupportAction);
+      return;
+    }
+
+    const messages = {
+      'create-campaign': 'Campaign creation flow is ready',
+      'create-program': 'Affiliate program creation flow is ready',
+    };
+    showToast(messages[actionId] ?? 'Campaign action is ready for product integration');
+    return;
+  }
+
   const workspaceTab = event.target.closest('[data-workspace-tab]');
   if (workspaceTab) {
     const pageId = workspaceTab.dataset.workspacePageId ?? getActiveOperationsPageId();
@@ -5278,6 +5431,12 @@ drawerContent.addEventListener('click', (event) => {
 
   const recruitmentDrawerAction = event.target.closest('[data-recruitment-drawer-action]');
   if (recruitmentDrawerAction) handleRecruitmentAction(recruitmentDrawerAction, recruitmentDrawerAction);
+
+  const campaignSupportDrawerAction = event.target.closest('[data-campaign-support-drawer-action]');
+  if (campaignSupportDrawerAction) {
+    closePartnerDrawer();
+    showToast(campaignSupportDrawerPageId === 'affiliate-programs' ? 'Affiliate program management is ready' : 'Campaign workspace is ready');
+  }
 });
 
 drawerContent.addEventListener('submit', (event) => {
