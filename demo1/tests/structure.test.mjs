@@ -92,6 +92,36 @@ test('finance page reuses the README red navigation tokens', () => {
   assert.match(css, /nav-child\[data-nav-child="balance-payments"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--finance-selected-red\)/i);
 });
 
+test('commission rules invoices has its own routed, filterable table shell', () => {
+  assert.match(html, /data-invoices-page/);
+  assert.match(html, /Invoices \(73\)/);
+  assert.match(html, /data-invoices-date-range/);
+  assert.match(html, /data-invoices-filter="paymentMethod"/);
+  assert.match(html, /data-invoices-filter="paymentType"/);
+  assert.match(html, /data-invoices-filter="status"/);
+  assert.match(html, /data-invoices-filter="brand"/);
+  assert.match(html, /data-invoices-search/);
+  assert.match(html, /data-invoices-rows/);
+  assert.match(html, /Payment ID/);
+  assert.match(appJs, /Download invoice/);
+  assert.match(appJs, /isInvoicesPage/);
+  assert.match(appJs, /renderInvoicesPage/);
+  assert.match(appJs, /getFilteredInvoices/);
+  assert.match(data, /commission-invoices/);
+  assert.match(data, /commissionInvoicesPageData/);
+});
+
+test('invoices page uses readable dark-gray tokens and explicit status semantics', () => {
+  assert.match(css, /body\.is-invoices-page[\s\S]*--invoices-text-strong:\s*#1f2937/);
+  assert.match(css, /body\.is-invoices-page[\s\S]*--invoices-text:\s*#374151/);
+  assert.match(css, /body\.is-invoices-page[\s\S]*--invoices-text-muted:\s*#4b5563/);
+  assert.match(css, /\.invoices-table th[\s\S]*font-size:\s*11px/);
+  assert.match(css, /\.invoices-table td[\s\S]*font-size:\s*12px/);
+  assert.match(css, /\.invoices-status[\s\S]*font-size:\s*11px/);
+  assert.match(css, /\.invoices-status--paid[\s\S]*color:\s*#1f7a4d/);
+  assert.match(readme, /Invoices 页面中的日期控件、筛选器、发票表格/);
+});
+
 test('public demo data does not include credential or personal-data patterns', () => {
   assert.doesNotMatch(html, /Guowv|Taylor Morgan|Alex Rivera|Jamie Lee|Brand Admin\s*·\s*US Store/);
   assert.doesNotMatch(data, /(api[_-]?key|client[_-]?secret|password|cvc|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY)/i);
@@ -121,7 +151,7 @@ test('finance neutral text uses contrast-ready dark gray tokens', () => {
 });
 
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
-  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-3"><\/script>/);
+  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-4"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);
   assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
 });
@@ -148,8 +178,8 @@ test('overview follows the reference dashboard hierarchy', () => {
 });
 
 test('preview busts the entry cache for the reference dashboard skin', () => {
-  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-3"/);
-  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-3"/);
+  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-4"/);
+  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-4"/);
 });
 
 test('reference dashboard keeps flat cards and red action controls', () => {
