@@ -100,12 +100,12 @@ test('public demo data does not include credential or personal-data patterns', (
 });
 
 test('finance typography preserves readability and lightweight chart annotations', () => {
-  assert.match(css, /body\.is-finance-page[\\s\\S]*--finance-font-body:\s*11px/);
-  assert.match(css, /body\.is-finance-page[\\s\\S]*--finance-font-secondary:\s*10px/);
-  assert.match(css, /\.finance-chart__tooltip text[\\s\\S]*font-weight:\s*400/);
-  assert.match(css, /\.finance-chart__tooltip \.finance-chart__tooltip-value[\\s\\S]*font-size:\s*12px[\\s\\S]*font-weight:\s*600/);
-  assert.match(css, /\.finance-table th[\\s\\S]*font-size:\s*var\(--finance-font-secondary\)/);
-  assert.match(css, /\.finance-table td[\\s\\S]*font-size:\s*var\(--finance-font-body\)/);
+  assert.match(css, /body\.is-finance-page[\s\S]*--finance-font-body:\s*11px/);
+  assert.match(css, /body\.is-finance-page[\s\S]*--finance-font-secondary:\s*10px/);
+  assert.match(css, /\.finance-chart__tooltip text[\s\S]*font-weight:\s*400/);
+  assert.match(css, /\.finance-chart__tooltip \.finance-chart__tooltip-value[\s\S]*font-size:\s*12px[\s\S]*font-weight:\s*600/);
+  assert.match(css, /\.finance-table th[\s\S]*font-size:\s*var\(--finance-font-secondary\)/);
+  assert.match(css, /\.finance-table td[\s\S]*font-size:\s*var\(--finance-font-body\)/);
   assert.match(readme, /可读性与无障碍/);
   assert.match(readme, /主要正文、表格数据和表单控件文字不小于/);
 });
