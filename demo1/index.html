@@ -130,17 +130,18 @@
             </div>
 
             <div class="page-header__actions">
-              <div class="page-header__utility" aria-label="Workspace utilities">
-                <button class="icon-button utility-action" type="button" data-demo-action="Messages" aria-label="Messages">
+              <div class="page-header__utility" aria-label="Workspace utilities" data-page-header-utility>
+                <button class="icon-button utility-action" type="button" data-header-action="messages" aria-label="Messages">
                   <svg><use href="#icon-message"></use></svg>
                 </button>
-                <button class="icon-button utility-action has-indicator" type="button" data-demo-action="Notifications" aria-label="Notifications">
+                <button class="icon-button utility-action has-indicator" type="button" data-header-action="notifications" aria-label="Notifications" data-count="3">
                   <svg><use href="#icon-bell"></use></svg>
                 </button>
-                <button class="icon-button utility-action" type="button" data-demo-action="Download center" aria-label="Download center">
+                <button class="icon-button utility-action" type="button" data-header-action="download" aria-label="Download center">
                   <svg><use href="#icon-download"></use></svg>
                 </button>
                 <button class="language-switch" type="button" data-language-toggle aria-label="Switch to Chinese" aria-pressed="false" title="Switch to Chinese">EN</button>
+                <div class="header-popover" id="header-action-popover" data-header-popover hidden></div>
               </div>
               <div class="page-header__filters">
                 <label class="demo-state-picker">

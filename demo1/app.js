@@ -60,16 +60,40 @@ import {
   translateNavigationLabel,
   translatePageTitle,
 } from './localization.mjs';
+import {
+  closeHeaderActionPanel,
+  createHeaderActionState,
+  markHeaderNotificationsRead,
+  toggleHeaderActionPanel,
+} from './header-actions.mjs?v=merchant-reference-26';
+import {
+  createTargetState,
+  getTargetPage,
+  getTargetStateKey,
+  resetTargetFilters,
+  selectTargetRecord,
+  selectTargetTab,
+  targetPages,
+  toggleTargetFilters,
+  toggleTargetPreference,
+  updateTargetFilter,
+  updateTargetSearch,
+  influencerCampaignRecords as targetInfluencerCampaignRecords,
+} from './settings-influencer.mjs?v=merchant-reference-26';
+import { renderTargetPage } from './settings-influencer-renderers.mjs?v=merchant-reference-26';
 
 let state = createDashboardState(dashboardData);
 let recruitmentState = createRecruitmentState();
 let overviewState = createOverviewState();
 let operationsState = createOperationsState();
+let targetState = createTargetState();
+let headerActionState = createHeaderActionState();
 let toastTimer;
 let lastDrawerTrigger = null;
 let recruitmentDrawerRecordId = null;
 let campaignSupportDrawerPageId = null;
 let campaignSupportDrawerRecordId = null;
+let targetDrawerRecordId = null;
 
 
 const navigation = document.querySelector('[data-navigation]');
@@ -238,6 +262,8 @@ const productsAssetsResultCount = document.querySelector('[data-products-assets-
 const productsAssetsPageLabel = document.querySelector('[data-products-assets-page-label]');
 const productsAssetsSort = document.querySelector('[data-products-assets-sort]');
 const productsAssetsPageSize = document.querySelector('[data-products-assets-page-size]');
+const pageHeaderUtility = document.querySelector('[data-page-header-utility]');
+const headerPopover = document.querySelector('[data-header-popover]');
 
 const campaignState = {
   activeTab: 'all',
@@ -446,9 +472,16 @@ const t = (key, fallback) => translate(locale, key, fallback ?? {
   'page.overview.description': 'Monitor your affiliate program performance and partner activity.',
 }[key] ?? key);
 const localizedPageTitle = (pageId, fallback) => translatePageTitle(locale, pageId, fallback);
+const targetPageSet = new Set(targetPages.map(({ id }) => id));
 
 
 const findNavigationContext = (navigationId) => {
+  const targetPage = getTargetPage(navigationId);
+  if (targetPage) {
+    const parent = { id: targetPage.parent.toLowerCase().replaceAll(' ', '-'), label: targetPage.parent, children: [] };
+    return { parent, current: targetPage };
+  }
+
   if (navigationId === 'help-center') {
     const helpCenter = { id: 'help-center', label: 'Help center', icon: 'help' };
     return { parent: helpCenter, current: helpCenter };
@@ -1322,6 +1355,70 @@ const renderRecruitmentPage = (pageId) => {
 const renderWorkspacePage = (pageId) => {
   const pageState = operationsState[getOperationsStateKey(pageId)];
   modulePage.innerHTML = renderOperationsPage(pageId, { pageState, icon, escapeHtml });
+};
+
+const renderTargetWorkspace = (pageId) => {
+  const pageState = targetState[getTargetStateKey(pageId)];
+  modulePage.innerHTML = renderTargetPage(pageId, { pageState, icon, escapeHtml });
+};
+
+const renderHeaderUtility = () => {
+  if (!pageHeaderUtility || !headerPopover) return;
+
+  const openPanel = headerActionState.openPanel;
+  const messagesButton = pageHeaderUtility.querySelector('[data-header-action="messages"]');
+  const notificationsButton = pageHeaderUtility.querySelector('[data-header-action="notifications"]');
+  const downloadButton = pageHeaderUtility.querySelector('[data-header-action="download"]');
+
+  if (notificationsButton) {
+    notificationsButton.classList.toggle('has-indicator', !headerActionState.notificationsRead);
+    if (headerActionState.notificationsRead) notificationsButton.removeAttribute('data-count');
+    else notificationsButton.dataset.count = '3';
+  }
+
+  [messagesButton, notificationsButton].forEach((button) => {
+    if (!button) return;
+    button.setAttribute('aria-expanded', String(openPanel === button.dataset.headerAction));
+    button.setAttribute('aria-controls', 'header-action-popover');
+  });
+  downloadButton?.removeAttribute('aria-expanded');
+
+  if (!openPanel) {
+    headerPopover.hidden = true;
+    headerPopover.innerHTML = '';
+    return;
+  }
+
+  const isMessages = openPanel === 'messages';
+  const title = isMessages ? 'Messages' : 'Notifications';
+  const rows = isMessages
+    ? `
+      <button class="header-popover__item" type="button" data-header-panel-action="view-inbox">
+        <span class="header-popover__item-icon">${icon('message')}</span>
+        <span><strong>New partner message</strong><small>Northstar Media · 8 min ago</small></span>${icon('arrow')}
+      </button>
+      <button class="header-popover__item" type="button" data-header-panel-action="view-inbox">
+        <span class="header-popover__item-icon">${icon('users')}</span>
+        <span><strong>New partner application</strong><small>2 hours ago</small></span>${icon('arrow')}
+      </button>`
+    : headerActionState.notificationsRead
+      ? `<div class="header-popover__empty">${icon('check')}<span>You're all caught up.</span></div>`
+      : `
+        <button class="header-popover__item" type="button" data-header-panel-action="view-notifications">
+          <span class="header-popover__item-icon header-popover__item-icon--brand">${icon('trend')}</span>
+          <span><strong>Commission report is ready</strong><small>May 12, 2025 · 09:32</small></span>${icon('arrow')}
+        </button>
+        <button class="header-popover__item" type="button" data-header-panel-action="view-notifications">
+          <span class="header-popover__item-icon">${icon('users')}</span>
+          <span><strong>3 applications need review</strong><small>Yesterday</small></span>${icon('arrow')}
+        </button>`;
+
+  headerPopover.innerHTML = `
+    <div class="header-popover__header"><strong>${title}</strong><button type="button" data-header-panel-action="close" aria-label="Close">${icon('x')}</button></div>
+    <div class="header-popover__body">${rows}</div>
+    <div class="header-popover__footer">${isMessages ? '<button type="button" data-header-panel-action="view-inbox">View inbox ' + icon('arrow') + '</button>' : '<button type="button" data-header-panel-action="mark-read">Mark all as read</button>'}</div>
+  `;
+  headerPopover.hidden = false;
 };
 
 const renderUtilityNavigationState = () => {
@@ -3478,7 +3575,8 @@ const renderPage = () => {
   const isOverview = state.activeNavigationId === 'overview' && !state.activeNavigationChild;
   const activePageId = state.activeNavigationChild ?? state.activeNavigationId;
   const recruitmentPage = recruitmentPageSet.has(activePageId) ? getRecruitmentPage(activePageId) : null;
-  const operationsPage = operationsPageSet.has(activePageId) ? getOperationsPage(activePageId) : null;
+  const targetPage = targetPageSet.has(activePageId) ? getTargetPage(activePageId) : null;
+  const operationsPage = operationsPageSet.has(activePageId) && !targetPage ? getOperationsPage(activePageId) : null;
   const isCampaignPage = state.activeNavigationChild === 'all-campaigns';
   const isAttributionPage = state.activeNavigationChild === 'attribution-rules';
   const isCouponAttributionPage = state.activeNavigationChild === 'coupon-attribution';
@@ -3496,7 +3594,7 @@ const renderPage = () => {
   const isMessagesPage = ['all-messages', 'partner-messages', 'system-alerts', 'archived-messages'].includes(state.activeNavigationChild);
   const isCouponsPage = state.activeNavigationChild === 'coupons';
   const isProductsAssetsPage = state.activeNavigationChild === 'banners-images';
-  const isMainPage = isCampaignPage || isAttributionPage || isCouponAttributionPage || isCommissionRulesPage || isRestrictionRulesPage || isPpcPage || isFinancePage || isTransactionHistoryPage || isInvoicesPage || isHelpCenterPage || isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage;
+  const isMainPage = isCampaignPage || isAttributionPage || isCouponAttributionPage || isCommissionRulesPage || isRestrictionRulesPage || isPpcPage || isFinancePage || isTransactionHistoryPage || isInvoicesPage || isHelpCenterPage || isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage || Boolean(targetPage);
 
   document.body.classList.toggle('is-campaign-page', isCampaignPage);
   document.body.classList.toggle('is-attribution-page', isAttributionPage);
@@ -3521,7 +3619,7 @@ const renderPage = () => {
     if (isHelpCenterPage) helpCenterUtility.setAttribute('aria-current', 'page');
     else helpCenterUtility.removeAttribute('aria-current');
   }
-  const currentPageTitle = recruitmentPage?.title ?? operationsPage?.title ?? context.current.label;
+  const currentPageTitle = recruitmentPage?.title ?? targetPage?.title ?? operationsPage?.title ?? context.current.label;
   if (isMessagesPage) {
     pageTitle.innerHTML = `Messages &amp; Notifications <span class="messages-page-title-badge" aria-label="${messagesPageData.unreadCount} unread messages">${messagesPageData.unreadCount}</span>`;
   } else {
@@ -3567,7 +3665,7 @@ const renderPage = () => {
               ? 'Create, manage, and track promotional coupons for your partners and campaigns.'
             : isProductsAssetsPage
               ? 'Manage your creative assets and organize them into folders for easy access and use across campaigns.'
-            : recruitmentPage?.description ?? operationsPage?.description ?? context.current.label + ' workspace preview for the current brand scope.';
+            : targetPage?.description ?? recruitmentPage?.description ?? operationsPage?.description ?? context.current.label + ' workspace preview for the current brand scope.';
   breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCouponAttributionPage || isCommissionRulesPage || isRestrictionRulesPage || isPpcPage || isFinancePage || isTransactionHistoryPage || isInvoicesPage || isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage
     ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCouponAttributionPage || isCommissionRulesPage || isRestrictionRulesPage || isPpcPage || isInvoicesPage ? 'Commission & Rules' : isTeamAccountsPage || isRecruitmentSettingsPage || isBrandIntegrationPage || isApiCredentialsPage ? 'Integrations & Settings' : isMessagesPage ? 'Messages & Notifications' : isCouponsPage || isProductsAssetsPage ? 'Products & Assets' : 'Finance')
     : isHelpCenterPage ? 'Help center'
@@ -3575,7 +3673,7 @@ const renderPage = () => {
   breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCouponAttributionPage ? 'Coupon attribution' : isCommissionRulesPage ? 'Commission rules' : isRestrictionRulesPage ? 'Restriction rules' : isPpcPage ? 'PPC' : isFinancePage ? 'Balance & payments' : isTransactionHistoryPage ? 'Transaction history' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isTeamAccountsPage ? 'Team accounts' : isRecruitmentSettingsPage ? 'Recruitment page' : isBrandIntegrationPage ? 'Brand integration' : isApiCredentialsPage ? 'API credentials' : isMessagesPage ? context.current.label : isCouponsPage ? 'Coupons' : isProductsAssetsPage ? 'Banners & images' : isOverview ? 'Overview' : context.current.label;
   breadcrumbCurrent.setAttribute('aria-current', 'page');
   overviewPage.hidden = !isOverview;
-  modulePage.hidden = isOverview || (!recruitmentPage && !operationsPage);
+  modulePage.hidden = isOverview || (!recruitmentPage && !operationsPage && !targetPage);
   campaignPage.hidden = !isCampaignPage;
   attributionPage.hidden = !isAttributionPage;
   couponAttributionPage.hidden = !isCouponAttributionPage;
@@ -3593,7 +3691,7 @@ const renderPage = () => {
   messagesPage.hidden = !isMessagesPage;
   couponsPage.hidden = !isCouponsPage;
   productsAssetsPage.hidden = !isProductsAssetsPage;
-  modulePlaceholder.hidden = isOverview || isMainPage || Boolean(recruitmentPage || operationsPage);
+  modulePlaceholder.hidden = isOverview || isMainPage || Boolean(recruitmentPage || operationsPage || targetPage);
   if (pageActions) pageActions.hidden = !isAttributionPage;
   if (couponAttributionActions) couponAttributionActions.hidden = !isCouponAttributionPage;
   if (commissionRulesActions) commissionRulesActions.hidden = !isCommissionRulesPage;
@@ -3608,6 +3706,8 @@ const renderPage = () => {
 
   if (recruitmentPage) {
     renderRecruitmentPage(recruitmentPage.id);
+  } else if (targetPage) {
+    renderTargetWorkspace(targetPage.id);
   } else if (operationsPage) {
     renderWorkspacePage(operationsPage.id);
   } else if (!isOverview && !isMainPage) {
@@ -3647,6 +3747,7 @@ const renderAll = () => {
   renderDemoStateBanner();
   renderPage();
   renderUtilityNavigationState();
+  renderHeaderUtility();
   applyLocale();
 };
 
@@ -3663,6 +3764,47 @@ const showToast = (message) => {
     }, 220);
   }, 3200);
 };
+
+const downloadReport = () => {
+  const report = ['Metric,Value', 'Clicks,182940', 'Orders,4982', 'Gross sales,724680.10', 'Commission,96420.80'].join('\n');
+  const reportUrl = URL.createObjectURL(new Blob([report], { type: 'text/csv;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = reportUrl;
+  link.download = 'yeahpromos-performance-report.csv';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(reportUrl), 0);
+  showToast('Performance report download prepared');
+};
+
+pageHeaderUtility?.addEventListener('click', (event) => {
+  const action = event.target.closest('[data-header-action]');
+  if (!action) return;
+
+  const actionId = action.dataset.headerAction;
+  if (actionId === 'download') {
+    headerActionState = closeHeaderActionPanel(headerActionState);
+    renderHeaderUtility();
+    downloadReport();
+    return;
+  }
+
+  headerActionState = toggleHeaderActionPanel(headerActionState, actionId);
+  renderHeaderUtility();
+});
+
+headerPopover?.addEventListener('click', (event) => {
+  const panelAction = event.target.closest('[data-header-panel-action]');
+  if (!panelAction) return;
+
+  const action = panelAction.dataset.headerPanelAction;
+  if (action === 'mark-read') headerActionState = markHeaderNotificationsRead(headerActionState);
+  if (action === 'view-inbox') showToast('Inbox is ready for review');
+  if (action === 'view-notifications') showToast('Notification details are ready for review');
+  headerActionState = closeHeaderActionPanel(headerActionState);
+  renderHeaderUtility();
+});
 
 const closePeriodMenu = () => {
   periodMenu.hidden = true;
@@ -3697,6 +3839,7 @@ const openPartnerDrawer = (partnerId, trigger) => {
   recruitmentDrawerRecordId = null;
   campaignSupportDrawerPageId = null;
   campaignSupportDrawerRecordId = null;
+  targetDrawerRecordId = null;
   state = { ...state, activePartnerId: partnerId };
   drawerContent.innerHTML = `
     <div class="drawer-header">
@@ -3817,6 +3960,7 @@ const openRecruitmentDrawer = (record, trigger, variant = 'profile') => {
   recruitmentDrawerRecordId = record.id;
   campaignSupportDrawerPageId = null;
   campaignSupportDrawerRecordId = null;
+  targetDrawerRecordId = null;
   state = { ...state, activePartnerId: null };
 
   const isMessage = variant === 'message';
@@ -3885,11 +4029,56 @@ const openRecruitmentDrawer = (record, trigger, variant = 'profile') => {
   });
 };
 
+const openTargetInfluencerDrawer = (record, trigger) => {
+  if (!record) return;
+
+  lastDrawerTrigger = trigger ?? document.activeElement;
+  recruitmentDrawerRecordId = null;
+  targetDrawerRecordId = record.id;
+  const videoList = record.videos.map((video) => `<li><span class="target-drawer-video target-drawer-video--${video.tone}">${escapeHtml(video.mark)}</span><span><strong>${escapeHtml(video.title)}</strong><small>${escapeHtml(video.views)} views · ${escapeHtml(video.date)}</small></span></li>`).join('');
+
+  drawerContent.innerHTML = `
+    <div class="drawer-header">
+      <div class="drawer-header__merchant">
+        <span class="target-drawer-avatar target-drawer-avatar--${record.avatar.tone}">${escapeHtml(record.avatar.initials)}</span>
+        <div><h2 id="merchant-drawer-title">${escapeHtml(record.name)}</h2><p>Influencer campaign · ${escapeHtml(record.category)}</p></div>
+      </div>
+      <button class="icon-button" type="button" data-drawer-close aria-label="Close campaign details">${icon('x')}</button>
+    </div>
+    <section class="drawer-section">
+      <p class="drawer-section__label">Campaign snapshot</p>
+      <div class="drawer-commission"><span>Budget allocated</span><strong>${escapeHtml(record.budget)}</strong></div>
+    </section>
+    <section class="drawer-section">
+      <p class="drawer-section__label">Delivery plan</p>
+      <div class="drawer-facts">
+        <div class="drawer-fact"><span>Status</span><strong>${escapeHtml(record.status)}</strong></div>
+        <div class="drawer-fact"><span>Creators</span><strong>${escapeHtml(record.creators)}</strong></div>
+        <div class="drawer-fact"><span>Deliverables</span><strong>${escapeHtml(record.deliverables)}</strong></div>
+        <div class="drawer-fact"><span>Flight</span><strong>${escapeHtml(record.date)}</strong></div>
+      </div>
+    </section>
+    <section class="drawer-section target-drawer-videos">
+      <p class="drawer-section__label">Related videos</p>
+      <ul>${videoList}</ul>
+    </section>
+    <div class="drawer-actions"><button class="button button--primary" type="button" data-target-drawer-action="open-workspace">Open campaign workspace ${icon('arrow')}</button></div>
+  `;
+  drawer.hidden = false;
+  document.body.classList.add('is-overlay-open');
+  requestAnimationFrame(() => {
+    drawer.classList.add('is-open');
+    drawerBackdrop.classList.add('is-open');
+    drawer.querySelector('[data-drawer-close]')?.focus();
+  });
+};
+
 const closePartnerDrawer = () => {
   const activePartnerId = state.activePartnerId;
   const activeRecruitmentRecordId = recruitmentDrawerRecordId;
   const activeCampaignSupportPageId = campaignSupportDrawerPageId;
   const activeCampaignSupportRecordId = campaignSupportDrawerRecordId;
+  const activeTargetRecordId = targetDrawerRecordId;
   drawer.classList.remove('is-open');
   drawerBackdrop.classList.remove('is-open');
   window.setTimeout(() => {
@@ -3897,6 +4086,8 @@ const closePartnerDrawer = () => {
       ? document.querySelector(`[data-recruitment-action="view"][data-record-id="${activeRecruitmentRecordId}"]`)
       : activeCampaignSupportPageId && activeCampaignSupportRecordId
         ? document.querySelector(`[data-campaign-support-action][data-campaign-support-record-id="${activeCampaignSupportRecordId}"]`)
+        : activeTargetRecordId
+        ? document.querySelector(`[data-target-action="view-influencer-campaign"][data-target-record-id="${activeTargetRecordId}"]`)
         : document.querySelector(`[data-partner-view="${activePartnerId}"]`);
     const focusTarget = lastDrawerTrigger?.isConnected ? lastDrawerTrigger : fallbackTrigger;
 
@@ -3906,6 +4097,7 @@ const closePartnerDrawer = () => {
     campaignSupportDrawerPageId = null;
     campaignSupportDrawerRecordId = null;
     delete drawer.dataset.drawerType;
+    targetDrawerRecordId = null;
     document.body.classList.remove('is-overlay-open');
     focusTarget?.focus();
     lastDrawerTrigger = null;
@@ -3993,6 +4185,14 @@ overviewPage.addEventListener('change', (event) => {
 
 const getActiveRecruitmentPageId = () => state.activeNavigationChild ?? state.activeNavigationId;
 const getActiveOperationsPageId = () => state.activeNavigationChild ?? state.activeNavigationId;
+const getActiveTargetPageId = () => state.activeNavigationChild ?? state.activeNavigationId;
+const isActiveTargetPage = (pageId = getActiveTargetPageId()) => targetPageSet.has(pageId);
+
+const renderActiveTargetPage = (pageId = getActiveTargetPageId()) => {
+  if (isActiveTargetPage(pageId)) renderTargetWorkspace(pageId);
+};
+
+const getTargetRecordById = (recordId) => targetInfluencerCampaignRecords.find((record) => record.id === recordId);
 
 const getRecruitmentRecordById = (recordId) => [
   ...recruitmentData.influencers,
@@ -4104,6 +4304,17 @@ const handleRecruitmentAction = (action, trigger) => {
 };
 
 modulePage.addEventListener('submit', (event) => {
+  const targetForm = event.target.closest('[data-target-search-form]');
+  if (targetForm) {
+    event.preventDefault();
+    const pageId = targetForm.dataset.targetPageId ?? getActiveTargetPageId();
+    const search = targetForm.querySelector('[data-target-search]')?.value ?? '';
+    targetState = updateTargetSearch(targetState, pageId, search);
+    renderActiveTargetPage(pageId);
+    showToast(search ? `Search updated to “${search}”` : 'Search cleared');
+    return;
+  }
+
   const campaignSupportForm = event.target.closest('[data-campaign-support-search-form]');
   if (campaignSupportForm) {
     event.preventDefault();
@@ -4136,6 +4347,15 @@ modulePage.addEventListener('submit', (event) => {
 });
 
 modulePage.addEventListener('change', (event) => {
+  const targetFilter = event.target.closest('[data-target-filter]');
+  if (targetFilter) {
+    const pageId = targetFilter.dataset.targetPageId ?? getActiveTargetPageId();
+    targetState = updateTargetFilter(targetState, pageId, targetFilter.dataset.targetFilterKey, targetFilter.value);
+    renderActiveTargetPage(pageId);
+    showToast(`${targetFilter.previousElementSibling?.textContent ?? 'Filter'} updated`);
+    return;
+  }
+
   const campaignSupportFilter = event.target.closest('[data-campaign-support-filter]');
   if (campaignSupportFilter) {
     const pageId = campaignSupportFilter.dataset.campaignSupportPageId ?? getActiveOperationsPageId();
@@ -4189,6 +4409,80 @@ modulePage.addEventListener('change', (event) => {
 });
 
 modulePage.addEventListener('click', (event) => {
+  const targetTab = event.target.closest('[data-target-tab]');
+  if (targetTab) {
+    const pageId = targetTab.dataset.targetPageId ?? getActiveTargetPageId();
+    targetState = selectTargetTab(targetState, pageId, targetTab.dataset.targetTabValue);
+    renderActiveTargetPage(pageId);
+    showToast(`${targetTab.textContent.trim()} selected`);
+    return;
+  }
+
+  const targetSettingsTab = event.target.closest('[data-target-settings-tab]');
+  if (targetSettingsTab) {
+    const pageId = getActiveTargetPageId();
+    targetState = selectTargetTab(targetState, pageId, targetSettingsTab.dataset.targetSettingsTab);
+    renderActiveTargetPage(pageId);
+    showToast(`${targetSettingsTab.textContent.trim()} selected`);
+    return;
+  }
+
+  const targetPreference = event.target.closest('[data-target-preference]');
+  if (targetPreference) {
+    const pageId = getActiveTargetPageId();
+    targetState = toggleTargetPreference(targetState, pageId, targetPreference.dataset.targetPreference);
+    renderActiveTargetPage(pageId);
+    showToast('Notification preference updated');
+    return;
+  }
+
+  const targetAction = event.target.closest('[data-target-action]');
+  if (targetAction) {
+    const actionId = targetAction.dataset.targetAction;
+    const pageId = targetAction.dataset.targetPageId ?? getActiveTargetPageId();
+    if (actionId === 'toggle-influencer-filters') {
+      targetState = toggleTargetFilters(targetState, pageId);
+      renderActiveTargetPage(pageId);
+      return;
+    }
+    if (actionId === 'reset-influencer-filters') {
+      targetState = resetTargetFilters(targetState, pageId);
+      renderActiveTargetPage(pageId);
+      showToast('Influencer campaign filters reset');
+      return;
+    }
+    if (actionId === 'view-influencer-campaign') {
+      const record = getTargetRecordById(targetAction.dataset.targetRecordId);
+      targetState = selectTargetRecord(targetState, pageId, targetAction.dataset.targetRecordId);
+      renderActiveTargetPage(pageId);
+      const trigger = modulePage.querySelector(`[data-target-action="view-influencer-campaign"][data-target-record-id="${targetAction.dataset.targetRecordId}"]`);
+      openTargetInfluencerDrawer(record, trigger);
+      return;
+    }
+    if (actionId === 'create-influencer-campaign') {
+      showToast('Campaign creation flow is ready for product integration');
+      return;
+    }
+    if (actionId === 'save-settings') {
+      showToast('Workspace settings saved in this demo');
+      return;
+    }
+    if (actionId === 'cancel-settings') {
+      targetState = { ...targetState, workspaceSettings: createTargetState().workspaceSettings };
+      renderActiveTargetPage(pageId);
+      showToast('Workspace settings changes discarded');
+      return;
+    }
+  }
+
+  const targetRecord = event.target.closest('[data-target-record-id]');
+  if (targetRecord && isActiveTargetPage(targetRecord.closest('[data-target-page]')?.dataset.targetPage)) {
+    const pageId = getActiveTargetPageId();
+    targetState = selectTargetRecord(targetState, pageId, targetRecord.dataset.targetRecordId);
+    renderActiveTargetPage(pageId);
+    return;
+  }
+
   const campaignSupportTab = event.target.closest('[data-campaign-support-tab]');
   if (campaignSupportTab) {
     const pageId = campaignSupportTab.dataset.campaignSupportPageId ?? getActiveOperationsPageId();
@@ -5347,6 +5641,10 @@ if (couponAttributionPage) {
 
 document.addEventListener('click', (event) => {
   if (!event.target.closest('.period-picker')) closePeriodMenu();
+  if (!pageHeaderUtility?.contains(event.target) && headerActionState.openPanel) {
+    headerActionState = closeHeaderActionPanel(headerActionState);
+    renderHeaderUtility();
+  }
   if (!event.target.closest('.team-accounts-filter-wrap')) {
     if (teamAccountsFilterMenu) teamAccountsFilterMenu.hidden = true;
     teamAccountsFilterButton?.setAttribute('aria-expanded', 'false');
@@ -5444,6 +5742,13 @@ document.addEventListener('click', (event) => {
 drawerContent.addEventListener('click', (event) => {
   if (event.target.closest('[data-drawer-close]')) closePartnerDrawer();
 
+  const targetDrawerAction = event.target.closest('[data-target-drawer-action]');
+  if (targetDrawerAction) {
+    closePartnerDrawer();
+    showToast('Campaign workspace is ready for product integration');
+    return;
+  }
+
   const recruitmentDrawerAction = event.target.closest('[data-recruitment-drawer-action]');
   if (recruitmentDrawerAction) handleRecruitmentAction(recruitmentDrawerAction, recruitmentDrawerAction);
 
@@ -5494,6 +5799,12 @@ document.addEventListener('keydown', (event) => {
   }
 
   if (event.key !== 'Escape') return;
+
+  if (headerActionState.openPanel) {
+    headerActionState = closeHeaderActionPanel(headerActionState);
+    renderHeaderUtility();
+    return;
+  }
 
   if (drawer.classList.contains('is-open')) {
     closePartnerDrawer();
