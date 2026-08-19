@@ -166,6 +166,12 @@
                   Create rule
                 </button>
               </div>
+              <div class="page-header__page-actions restriction-rules-page-actions" data-restriction-rules-actions hidden>
+                <button class="button button--primary" type="button" data-restriction-rules-action="create">
+                  <svg><use href="#icon-plus"></use></svg>
+                  Create rule
+                </button>
+              </div>
               <div class="page-header__page-actions finance-page-actions" data-finance-actions hidden>
                 <button class="button button--primary" type="button" data-finance-action="deposit">
                   <svg><use href="#icon-plus"></use></svg>
@@ -723,6 +729,142 @@
               </section>
 
               <aside class="commission-rules-card commission-rules-detail-card" data-commission-rules-detail aria-labelledby="commission-rules-detail-title"></aside>
+            </div>
+          </section>
+
+          <section class="restriction-rules-page" data-restriction-rules-page hidden aria-labelledby="restriction-rules-page-title">
+            <h2 id="restriction-rules-page-title" class="sr-only">Restriction rules</h2>
+
+            <div class="restriction-rules-summary-grid" data-restriction-rules-summary></div>
+
+            <div class="restriction-rules-layout">
+              <section class="restriction-rules-card restriction-rules-list-card" aria-labelledby="restriction-rules-list-title">
+                <div class="restriction-rules-card__header">
+                  <div>
+                    <span class="eyebrow">PPC policy management</span>
+                    <h2 id="restriction-rules-list-title">Restriction rules</h2>
+                    <p>Define paid-search terms, channels, regions, and partner eligibility.</p>
+                  </div>
+                  <button class="icon-button restriction-rules-settings" type="button" data-restriction-rules-action="settings" aria-label="Configure restriction rules table">
+                    <svg><use href="#icon-settings"></use></svg>
+                  </button>
+                </div>
+
+                <div class="restriction-rules-toolbar" aria-label="Restriction rule filters">
+                  <label class="restriction-rules-filter">
+                    <span>Status</span>
+                    <select data-restriction-rules-filter="status" aria-label="Filter by status">
+                      <option value="all">All statuses</option>
+                      <option value="Active">Active</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Inactive">Inactive</option>
+                      <option value="Expired">Expired</option>
+                    </select>
+                  </label>
+                  <label class="restriction-rules-filter">
+                    <span>Policy</span>
+                    <select data-restriction-rules-filter="policy" aria-label="Filter by policy">
+                      <option value="all">All policies</option>
+                      <option value="Block">Block</option>
+                      <option value="Allow">Allow</option>
+                      <option value="Review">Review</option>
+                    </select>
+                  </label>
+                  <label class="restriction-rules-filter">
+                    <span>Channel</span>
+                    <select data-restriction-rules-filter="channel" aria-label="Filter by channel">
+                      <option value="all">All channels</option>
+                      <option value="Paid search">Paid search</option>
+                      <option value="Google Ads">Google Ads</option>
+                      <option value="Meta / TikTok">Meta / TikTok</option>
+                    </select>
+                  </label>
+                  <label class="restriction-rules-filter">
+                    <span>Region</span>
+                    <select data-restriction-rules-filter="region" aria-label="Filter by region">
+                      <option value="all">All regions</option>
+                      <option value="North America">North America</option>
+                      <option value="US, CA, UK">US, CA, UK</option>
+                      <option value="US, UK">US, UK</option>
+                    </select>
+                  </label>
+                  <label class="restriction-rules-filter">
+                    <span>Effective date</span>
+                    <select data-restriction-rules-filter="effectiveDate" aria-label="Filter by effective date">
+                      <option value="all">All dates</option>
+                      <option value="30d">Last 30 days</option>
+                      <option value="90d">Last 90 days</option>
+                      <option value="2025">Year 2025</option>
+                    </select>
+                  </label>
+                  <button class="button button--secondary restriction-rules-more-filters" type="button" data-restriction-rules-action="more-filters">
+                    <svg><use href="#icon-filter"></use></svg>
+                    More filters
+                  </button>
+                  <label class="restriction-rules-search">
+                    <span class="sr-only">Search restriction rules</span>
+                    <svg><use href="#icon-search"></use></svg>
+                    <input type="search" data-restriction-rules-search placeholder="Search rules..." autocomplete="off" />
+                  </label>
+                </div>
+
+                <div class="restriction-rules-table-scroll">
+                  <table class="restriction-rules-table">
+                    <caption class="sr-only">Restriction rules</caption>
+                    <colgroup>
+                      <col class="restriction-rules-col--check" />
+                      <col class="restriction-rules-col--name" />
+                      <col class="restriction-rules-col--policy" />
+                      <col class="restriction-rules-col--terms" />
+                      <col class="restriction-rules-col--channel" />
+                      <col class="restriction-rules-col--region" />
+                      <col class="restriction-rules-col--scope" />
+                      <col class="restriction-rules-col--effective" />
+                      <col class="restriction-rules-col--status" />
+                      <col class="restriction-rules-col--actions" />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th scope="col">
+                          <label class="restriction-rules-checkbox restriction-rules-checkbox--header">
+                            <input type="checkbox" data-restriction-rules-select-all aria-label="Select all visible restriction rules" />
+                            <span aria-hidden="true"></span>
+                          </label>
+                        </th>
+                        <th scope="col">Rule name</th>
+                        <th scope="col">Policy</th>
+                        <th scope="col">Keywords / terms</th>
+                        <th scope="col">Channel</th>
+                        <th scope="col">Region</th>
+                        <th scope="col">Partner scope</th>
+                        <th scope="col">Effective date</th>
+                        <th scope="col">Status</th>
+                        <th scope="col"><span class="sr-only">Actions</span></th>
+                      </tr>
+                    </thead>
+                    <tbody data-restriction-rules-rows></tbody>
+                  </table>
+                </div>
+
+                <div class="restriction-rules-list-footer">
+                  <span data-restriction-rules-result-count>Showing 1 to 7 of 7 rules</span>
+                  <div class="restriction-rules-pagination" aria-label="Restriction rules pagination">
+                    <button type="button" aria-label="Previous page" disabled>‹</button>
+                    <button type="button" class="is-current" aria-current="page" data-restriction-rules-page-number="1">1</button>
+                    <button type="button" data-restriction-rules-page-number="2">2</button>
+                    <button type="button" aria-label="Next page" data-restriction-rules-action="next-page">›</button>
+                    <label>
+                      <span class="sr-only">Rows per page</span>
+                      <select aria-label="Rows per page">
+                        <option>10 / page</option>
+                        <option>25 / page</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+              </section>
+
+              <aside class="restriction-rules-card restriction-rules-detail-card" data-restriction-rules-detail aria-labelledby="restriction-rules-detail-title"></aside>
             </div>
           </section>
 

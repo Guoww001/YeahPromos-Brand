@@ -32,6 +32,7 @@ http://127.0.0.1:8766/demo1/
 - `Campaigns > All campaigns`：活动指标、Type / Channel 分列、状态筛选、进度和批量操作；
 - `Commission & Rules > Attribution rules`：归因模型、渠道信用分配、归因规则表和审计历史；
 - `Commission & Rules > Commission rules`：佣金规则列表、状态/伙伴类型/渠道筛选、规则详情、阶梯佣金和表现数据；
+- `Commission & Rules > Restriction rules`：PPC 限制规则列表、关键词/品牌词、搜索渠道、地区、伙伴范围、违规处理和规则详情；页面数据为依据 RUL-04 功能合同整理的演示数据；
 - `Finance > Balance & payments`：余额摘要、余额趋势、付款计划、掩码支付方式和近期 payout activity；
 - `Help center > Help center`：帮助分类、热门文章搜索、联系客服、工单入口和系统状态摘要；
 - `Integrations & Settings > API credentials`：Live/Test 环境切换、掩码 API 凭证表、状态筛选、Webhook endpoint 管理和安全提示；
@@ -117,6 +118,7 @@ Demo 1 使用白、黑、红三色构成品牌视觉；旧蓝色不得继续作�
 - Messages & Notifications 的消息列表、未读标记、状态标签、会话正文、附件和回复编辑器遵循以上字号与行高约束；未读状态同时提供文字、圆点和语义属性，不只依靠颜色。
 - Banners & images 的资产卡片、筛选器、搜索框、状态标签、分页和右侧详情面板遵循以上字号与行高约束；选中、Active、In use 和 Draft 状态同时提供文字、边框、圆点或语义属性，不只依靠颜色。
 - Coupons 的日期范围、筛选器、关键词搜索、优惠码表格、使用量、状态标签和操作按钮遵循以上字号与行高约束；Active、Scheduled、Expired 同时提供文字、圆点、边框或语义属性，不只依靠颜色。
+- Restriction rules 的关键词/品牌词、Policy、渠道、地区、伙伴范围、有效期、状态标签和详情面板遵循以上字号与行高约束；Block、Allow、Review、Active、Pending 等状态同时提供文字、圆点、浅色背景或语义属性，不只依靠颜色。
 
 ### 对比度与灰阶 / Contrast & grayscale
 
@@ -132,6 +134,7 @@ Demo 1 使用白、黑、红三色构成品牌视觉；旧蓝色不得继续作�
 - Recruitment page 使用 `#1F2937` 承载设置标题、公开页标题和字段名，`#374151` 承载表单正文与说明，`#4B5563` 承载 URL、辅助说明和队列提示；Published / Disabled 通过深色文字、状态点和浅色背景共同表达。
 - Banners & images 使用 `#1F2937` 承载资产名称和详情字段，`#374151` 承载文件信息，`#4B5563` 承载筛选器、文件夹和说明文字；Active、In use、Draft 使用深色文字配浅色背景，并保留文字标签和圆点语义。
 - Coupons 使用 `#1F2937` 承载优惠码和主要 Offer，`#374151` 承载分类、有效日期和使用量，`#4B5563` 承载筛选器、最低消费和辅助说明；Active、Scheduled、Expired 使用深色文字配浅色背景，并保留文字标签和圆点语义。
+- Restriction rules 使用 `#1F2937` 承载规则名称、ID 和详情字段，`#374151` 承载关键词、渠道、地区和伙伴范围，`#4B5563` 承载筛选器、辅助说明和更新时间；Block、Allow、Review 与 Active、Pending、Inactive、Expired 使用深色文字配浅色背景，并保留文字、圆点和状态语义。
 
 ### 演示数据与支付安全
 
@@ -159,11 +162,11 @@ Demo 1 使用白、黑、红三色构成品牌视觉；旧蓝色不得继续作�
 
 | 文件 | 职责 |
 | --- | --- |
-| `index.html` | Merchant 页面语义骨架、SVG 图标库、抽屉、状态选择器、活动页、归因规则页、佣金规则页、发票页、财务页、Help center、Team accounts、Recruitment page、Brand integration、API credentials、Messages & Notifications、Coupons 和 Products & Assets 页面 |
+| `index.html` | Merchant 页面语义骨架、SVG 图标库、抽屉、状态选择器、活动页、归因规则页、佣金规则页、Restriction rules 页、发票页、财务页、Help center、Team accounts、Recruitment page、Brand integration、API credentials、Messages & Notifications、Coupons 和 Products & Assets 页面 |
 | `styles.css` | 视觉 Token、布局、组件、状态、动效和响应式样式 |
-| `data.mjs` | 工作区、任务导航、时间范围快照、指标、伙伴、活动、归因规则、佣金规则、发票、财务、Help center、Team accounts、Recruitment page、Brand integration、API credentials、Messages & Notifications、Coupons 和 Banners & images 模拟数据 |
+| `data.mjs` | 工作区、任务导航、时间范围快照、指标、伙伴、活动、归因规则、佣金规则、Restriction rules、发票、财务、Help center、Team accounts、Recruitment page、Brand integration、API credentials、Messages & Notifications、Coupons 和 Banners & images 模拟数据 |
 | `app-core.mjs` | 不依赖 DOM 的状态函数 |
-| `app.js` | 数据渲染、模块导航、活动筛选、归因模型交互、佣金规则筛选/详情交互、发票筛选/下载交互、财务趋势/付款交互、Help center 搜索/文章交互、Team accounts 搜索/筛选/邀请/编辑/停用/分页交互、Recruitment page 启停/品牌/队列/文案/申请字段/预览交互、Brand integration 集成管理/重连/活动交互、API credentials 环境/筛选/复制/轮换交互、Messages & Notifications 标签/搜索/回复/伙伴交互、Coupons 日期/筛选/搜索/选择交互、Banners & images 分类/筛选/搜索/详情交互、状态切换、抽屉和浏览器交互 |
+| `app.js` | 数据渲染、模块导航、活动筛选、归因模型交互、佣金规则筛选/详情交互、Restriction rules 筛选/选择/详情交互、发票筛选/下载交互、财务趋势/付款交互、Help center 搜索/文章交互、Team accounts 搜索/筛选/邀请/编辑/停用/分页交互、Recruitment page 启停/品牌/队列/文案/申请字段/预览交互、Brand integration 集成管理/重连/活动交互、API credentials 环境/筛选/复制/轮换交互、Messages & Notifications 标签/搜索/回复/伙伴交互、Coupons 日期/筛选/搜索/选择交互、Banners & images 分类/筛选/搜索/详情交互、状态切换、抽屉和浏览器交互 |
 | `tests/app-core.test.mjs` | 时间范围、导航展开和 Demo 状态行为测试 |
 | `tests/structure.test.mjs` | Merchant 结构、字体、响应式和无障碍规则测试 |
 
