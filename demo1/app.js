@@ -1,4 +1,4 @@
-import { apiCredentialsPageData, attributionPageData, bannersImagesPageData, brandIntegrationPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, couponsPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData } from './data.mjs?v=merchant-reference-20';
+import { apiCredentialsPageData, attributionPageData, bannersImagesPageData, brandIntegrationPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, couponsPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData, teamAccountsPageData } from './data.mjs?v=merchant-reference-21';
 import {
   createDashboardState,
   isNavigationItemActive,
@@ -140,6 +140,17 @@ const brandIntegrationActions = document.querySelector('[data-brand-integration-
 const brandIntegrationHealth = document.querySelector('[data-brand-integration-health]');
 const brandIntegrationList = document.querySelector('[data-brand-integration-list]');
 const brandIntegrationActivity = document.querySelector('[data-brand-integration-activity]');
+const teamAccountsPage = document.querySelector('[data-team-accounts-page]');
+const teamAccountsActions = document.querySelector('[data-team-accounts-actions]');
+const teamAccountsSearch = document.querySelector('[data-team-accounts-search]');
+const teamAccountsSearchForm = document.querySelector('[data-team-accounts-search-form]');
+const teamAccountsFilterButton = document.querySelector('[data-team-accounts-action="toggle-filter"]');
+const teamAccountsFilterMenu = document.querySelector('[data-team-accounts-filter-menu]');
+const teamAccountsRows = document.querySelector('[data-team-accounts-rows]');
+const teamAccountsResultCount = document.querySelector('[data-team-accounts-result-count]');
+const teamAccountsBrandFilter = document.querySelector('[data-team-accounts-brand-filter]');
+const teamAccountsPageSize = document.querySelector('[data-team-accounts-page-size]');
+const teamAccountsPagination = document.querySelector('[data-team-accounts-pagination]');
 const couponsPage = document.querySelector('[data-coupons-page]');
 const couponsTabs = document.querySelector('[data-coupons-tabs]');
 const couponsSearch = document.querySelector('[data-coupons-search]');
@@ -281,6 +292,17 @@ const productsAssetsState = {
     status: 'all',
   },
   selectedId: bannersImagesPageData.assets[0]?.id ?? null,
+};
+
+const teamAccountsState = {
+  search: '',
+  page: 1,
+  pageSize: teamAccountsPageData.pageSize,
+  filters: {
+    brand: 'all',
+    role: 'all',
+    status: 'all',
+  },
 };
 
 const icon = (name, className = '') => `
@@ -1828,6 +1850,99 @@ const renderBrandIntegrationPage = () => {
   }
 };
 
+const getFilteredTeamAccounts = () => {
+  const query = teamAccountsState.search.trim().toLowerCase();
+
+  return teamAccountsPageData.accounts.filter((account) => {
+    const matchesBrand = teamAccountsState.filters.brand === 'all'
+      || account.scope.includes('All Brands')
+      || account.scope.includes(teamAccountsState.filters.brand);
+    const matchesRole = teamAccountsState.filters.role === 'all' || account.role === teamAccountsState.filters.role;
+    const matchesStatus = teamAccountsState.filters.status === 'all' || account.status === teamAccountsState.filters.status;
+    const matchesSearch = !query || [account.name, account.username, account.role, account.status, ...account.scope]
+      .some((value) => value.toLowerCase().includes(query));
+
+    return matchesBrand && matchesRole && matchesStatus && matchesSearch;
+  });
+};
+
+const renderTeamAccountsPagination = (totalPages) => {
+  if (!teamAccountsPagination) return;
+
+  const pages = Array.from({ length: totalPages }, (_, index) => index + 1)
+    .slice(0, 4)
+    .map((page) => `
+      <button type="button" class="${page === teamAccountsState.page ? 'is-current' : ''}" ${page === teamAccountsState.page ? 'aria-current="page"' : ''} data-team-accounts-page-number="${page}">${page}</button>
+    `)
+    .join('');
+
+  teamAccountsPagination.innerHTML = `
+    <button type="button" aria-label="Previous page" data-team-accounts-page-number="${Math.max(1, teamAccountsState.page - 1)}" ${teamAccountsState.page === 1 ? 'disabled' : ''}>‹</button>
+    ${pages}
+    <button type="button" aria-label="Next page" data-team-accounts-page-number="${Math.min(totalPages, teamAccountsState.page + 1)}" ${teamAccountsState.page >= totalPages ? 'disabled' : ''}>›</button>
+  `;
+};
+
+const renderTeamAccountsRows = (accounts) => {
+  if (!teamAccountsRows) return;
+
+  teamAccountsRows.innerHTML = accounts.length
+    ? accounts.map((account) => `
+        <tr data-team-account-row="${account.id}">
+          <td class="team-accounts-cell--account">
+            <div class="team-account-identity">
+              <span class="team-account-avatar team-account-avatar--${account.avatarTone}">${escapeHtml(account.initials)}</span>
+              <strong>${escapeHtml(account.name)}</strong>
+              <span class="sr-only">MFA ${escapeHtml(account.mfa)}</span>
+            </div>
+          </td>
+          <td class="team-accounts-cell--username"><span>${escapeHtml(account.username)}</span></td>
+          <td class="team-accounts-cell--scope">
+            <div class="team-account-role-scope">
+              <strong>${escapeHtml(account.role)}</strong>
+              <span class="team-account-scope-list">${account.scope.map((scope) => `<span class="team-account-scope-chip">${escapeHtml(scope)}</span>`).join('')}</span>
+            </div>
+          </td>
+          <td class="team-accounts-cell--last-active"><time datetime="${account.datetime}">${escapeHtml(account.lastActive)}</time></td>
+          <td class="team-accounts-cell--status"><span class="team-account-status team-account-status--${account.statusTone}"><i aria-hidden="true"></i>${escapeHtml(account.status)}</span></td>
+          <td class="team-accounts-cell--actions">
+            <div class="team-account-actions">
+              <button type="button" class="team-account-edit-button" data-team-accounts-action="edit" data-team-accounts-id="${account.id}" aria-label="Edit ${escapeHtml(account.name)}; MFA ${escapeHtml(account.mfa)}">${icon('edit')}<span>Edit</span></button>
+              <button type="button" class="team-account-deactivate-button" data-team-accounts-action="deactivate" data-team-accounts-id="${account.id}" aria-label="Deactivate ${escapeHtml(account.name)}">${icon('trash')}<span>Deactivate</span></button>
+            </div>
+          </td>
+        </tr>
+      `).join('')
+    : '<tr><td class="team-accounts-empty" colspan="6"><strong>No team accounts found</strong><span>Try another name, username, brand, role, or status.</span></td></tr>';
+};
+
+const renderTeamAccountsPage = () => {
+  if (!teamAccountsPage) return;
+
+  const filteredAccounts = getFilteredTeamAccounts();
+  const totalPages = Math.max(1, Math.ceil(filteredAccounts.length / teamAccountsState.pageSize));
+  teamAccountsState.page = Math.min(teamAccountsState.page, totalPages);
+  const startIndex = (teamAccountsState.page - 1) * teamAccountsState.pageSize;
+  const visibleAccounts = filteredAccounts.slice(startIndex, startIndex + teamAccountsState.pageSize);
+
+  const roleFilter = teamAccountsPage.querySelector('[data-team-accounts-filter="role"]');
+  const statusFilter = teamAccountsPage.querySelector('[data-team-accounts-filter="status"]');
+  if (roleFilter) roleFilter.value = teamAccountsState.filters.role;
+  if (statusFilter) statusFilter.value = teamAccountsState.filters.status;
+  if (teamAccountsBrandFilter) teamAccountsBrandFilter.value = teamAccountsState.filters.brand;
+  if (teamAccountsSearch) teamAccountsSearch.value = teamAccountsState.search;
+  if (teamAccountsPageSize) teamAccountsPageSize.value = String(teamAccountsState.pageSize);
+
+  renderTeamAccountsRows(visibleAccounts);
+  renderTeamAccountsPagination(totalPages);
+
+  if (teamAccountsResultCount) {
+    teamAccountsResultCount.textContent = filteredAccounts.length
+      ? `Showing ${startIndex + 1} to ${Math.min(startIndex + visibleAccounts.length, filteredAccounts.length)} of ${filteredAccounts.length} results`
+      : 'Showing 0 of 0 results';
+  }
+};
+
 const getFilteredApiCredentials = () => {
   const query = apiCredentialsState.search.trim().toLowerCase();
 
@@ -2485,12 +2600,13 @@ const renderPage = () => {
   const isFinancePage = state.activeNavigationChild === 'balance-payments';
   const isInvoicesPage = state.activeNavigationChild === 'commission-invoices' || state.activeNavigationChild === 'invoices';
   const isHelpCenterPage = state.activeNavigationId === 'help-center';
+  const isTeamAccountsPage = state.activeNavigationChild === 'team-accounts';
   const isBrandIntegrationPage = state.activeNavigationChild === 'brand-integration';
   const isApiCredentialsPage = state.activeNavigationChild === 'api-credentials';
   const isMessagesPage = ['all-messages', 'partner-messages', 'system-alerts', 'archived-messages'].includes(state.activeNavigationChild);
   const isCouponsPage = state.activeNavigationChild === 'coupons';
   const isProductsAssetsPage = state.activeNavigationChild === 'banners-images';
-  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage;
+  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage || isTeamAccountsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage;
 
   document.body.classList.toggle('is-campaign-page', isCampaignPage);
   document.body.classList.toggle('is-attribution-page', isAttributionPage);
@@ -2500,6 +2616,7 @@ const renderPage = () => {
   document.body.classList.toggle('is-commission-invoices-page', state.activeNavigationChild === 'commission-invoices');
   document.body.classList.toggle('is-finance-invoices-page', state.activeNavigationChild === 'invoices');
   document.body.classList.toggle('is-help-center-page', isHelpCenterPage);
+  document.body.classList.toggle('is-team-accounts-page', isTeamAccountsPage);
   document.body.classList.toggle('is-brand-integration-page', isBrandIntegrationPage);
   document.body.classList.toggle('is-api-credentials-page', isApiCredentialsPage);
   document.body.classList.toggle('is-messages-page', isMessagesPage);
@@ -2534,6 +2651,8 @@ const renderPage = () => {
               ? 'Review, filter, and download demo invoice records for the selected workspace.'
             : isHelpCenterPage
               ? 'Find answers, learn best practices, and get the support you need.'
+            : isTeamAccountsPage
+              ? 'Manage teammate access and permissions for your brands and programs.'
             : isBrandIntegrationPage
               ? 'Connect your stores, marketplaces, and analytics tools to sync data and power your affiliate programs.'
             : isApiCredentialsPage
@@ -2545,11 +2664,11 @@ const renderPage = () => {
             : isProductsAssetsPage
               ? 'Manage your creative assets and organize them into folders for easy access and use across campaigns.'
             : recruitmentPage?.description ?? operationsPage?.description ?? context.current.label + ' workspace preview for the current brand scope.';
-  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage
-    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isInvoicesPage ? 'Commission & Rules' : isBrandIntegrationPage || isApiCredentialsPage ? 'Integrations & Settings' : isMessagesPage ? 'Messages & Notifications' : isCouponsPage || isProductsAssetsPage ? 'Products & Assets' : 'Finance')
+  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isTeamAccountsPage || isBrandIntegrationPage || isApiCredentialsPage || isMessagesPage || isCouponsPage || isProductsAssetsPage
+    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isInvoicesPage ? 'Commission & Rules' : isTeamAccountsPage || isBrandIntegrationPage || isApiCredentialsPage ? 'Integrations & Settings' : isMessagesPage ? 'Messages & Notifications' : isCouponsPage || isProductsAssetsPage ? 'Products & Assets' : 'Finance')
     : isHelpCenterPage ? 'Help center'
     : isOverview ? t('shell.merchantWorkspace', 'Merchant workspace') : context.parent.label;
-  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isBrandIntegrationPage ? 'Brand integration' : isApiCredentialsPage ? 'API credentials' : isMessagesPage ? context.current.label : isCouponsPage ? 'Coupons' : isProductsAssetsPage ? 'Banners & images' : isOverview ? 'Overview' : context.current.label;
+  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isTeamAccountsPage ? 'Team accounts' : isBrandIntegrationPage ? 'Brand integration' : isApiCredentialsPage ? 'API credentials' : isMessagesPage ? context.current.label : isCouponsPage ? 'Coupons' : isProductsAssetsPage ? 'Banners & images' : isOverview ? 'Overview' : context.current.label;
   breadcrumbCurrent.setAttribute('aria-current', 'page');
   overviewPage.hidden = !isOverview;
   modulePage.hidden = isOverview || (!recruitmentPage && !operationsPage);
@@ -2559,6 +2678,7 @@ const renderPage = () => {
   financePage.hidden = !isFinancePage;
   invoicesPage.hidden = !isInvoicesPage;
   helpCenterPage.hidden = !isHelpCenterPage;
+  teamAccountsPage.hidden = !isTeamAccountsPage;
   brandIntegrationPage.hidden = !isBrandIntegrationPage;
   apiCredentialsPage.hidden = !isApiCredentialsPage;
   messagesPage.hidden = !isMessagesPage;
@@ -2568,6 +2688,7 @@ const renderPage = () => {
   if (pageActions) pageActions.hidden = !isAttributionPage;
   if (commissionRulesActions) commissionRulesActions.hidden = !isCommissionRulesPage;
   if (financeActions) financeActions.hidden = !isFinancePage;
+  if (teamAccountsActions) teamAccountsActions.hidden = !isTeamAccountsPage;
   if (brandIntegrationActions) brandIntegrationActions.hidden = !isBrandIntegrationPage;
   if (apiCredentialsActions) apiCredentialsActions.hidden = !isApiCredentialsPage;
   if (messagesPageActions) messagesPageActions.hidden = !isMessagesPage;
@@ -2587,6 +2708,7 @@ const renderPage = () => {
   if (isFinancePage) renderFinancePage();
   if (isInvoicesPage) renderInvoicesPage();
   if (isHelpCenterPage) renderHelpCenterPage();
+  if (isTeamAccountsPage) renderTeamAccountsPage();
   if (isBrandIntegrationPage) renderBrandIntegrationPage();
   if (isApiCredentialsPage) renderApiCredentialsPage();
   if (isMessagesPage) renderMessagesPage();
@@ -3171,6 +3293,100 @@ if (helpCenterPage) {
   });
 }
 
+if (teamAccountsActions) {
+  teamAccountsActions.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-team-accounts-action]');
+    if (!action) return;
+    if (action.dataset.teamAccountsAction === 'create-account') {
+      showToast('Create new account flow is ready for product integration');
+    }
+  });
+}
+
+if (teamAccountsPage) {
+  teamAccountsPage.addEventListener('input', (event) => {
+    if (!event.target.matches('[data-team-accounts-search]')) return;
+    teamAccountsState.search = event.target.value;
+    teamAccountsState.page = 1;
+    renderTeamAccountsPage();
+  });
+
+  teamAccountsPage.addEventListener('change', (event) => {
+    const filter = event.target.closest('[data-team-accounts-filter]');
+    if (filter) {
+      teamAccountsState.filters[filter.dataset.teamAccountsFilter] = filter.value;
+      teamAccountsState.page = 1;
+      renderTeamAccountsPage();
+      return;
+    }
+
+    if (event.target.matches('[data-team-accounts-brand-filter]')) {
+      teamAccountsState.filters.brand = event.target.value;
+      teamAccountsState.page = 1;
+      renderTeamAccountsPage();
+      return;
+    }
+
+    if (event.target.matches('[data-team-accounts-page-size]')) {
+      teamAccountsState.pageSize = Number(event.target.value);
+      teamAccountsState.page = 1;
+      renderTeamAccountsPage();
+      showToast(`${event.target.options[event.target.selectedIndex].text} selected`);
+    }
+  });
+
+  teamAccountsPage.addEventListener('submit', (event) => {
+    if (event.target.matches('[data-team-accounts-search-form]')) {
+      event.preventDefault();
+      showToast(teamAccountsState.search ? `Searching team accounts for “${teamAccountsState.search}”` : 'Team account search cleared');
+      teamAccountsSearch?.focus();
+      return;
+    }
+
+    if (event.target.matches('[data-team-accounts-invite-form]')) {
+      event.preventDefault();
+      showToast('Invitation flow is ready for product integration');
+    }
+  });
+
+  teamAccountsPage.addEventListener('click', (event) => {
+    const filterToggle = event.target.closest('[data-team-accounts-action="toggle-filter"]');
+    if (filterToggle) {
+      const isHidden = teamAccountsFilterMenu?.hidden ?? true;
+      if (teamAccountsFilterMenu) teamAccountsFilterMenu.hidden = !isHidden;
+      filterToggle.setAttribute('aria-expanded', String(isHidden));
+      return;
+    }
+
+    const reset = event.target.closest('[data-team-accounts-action="reset-filter"]');
+    if (reset) {
+      teamAccountsState.filters = { brand: 'all', role: 'all', status: 'all' };
+      teamAccountsState.page = 1;
+      renderTeamAccountsPage();
+      if (teamAccountsFilterMenu) teamAccountsFilterMenu.hidden = true;
+      teamAccountsFilterButton?.setAttribute('aria-expanded', 'false');
+      showToast('Team account filters reset');
+      return;
+    }
+
+    const pageNumber = event.target.closest('[data-team-accounts-page-number]');
+    if (pageNumber && !pageNumber.disabled) {
+      teamAccountsState.page = Number(pageNumber.dataset.teamAccountsPageNumber);
+      renderTeamAccountsPage();
+      return;
+    }
+
+    const action = event.target.closest('[data-team-accounts-action]');
+    if (!action) return;
+    const account = teamAccountsPageData.accounts.find((item) => item.id === action.dataset.teamAccountsId);
+    if (action.dataset.teamAccountsAction === 'edit') {
+      showToast(`${account?.name ?? 'Team account'} edit flow is ready for product integration`);
+    } else if (action.dataset.teamAccountsAction === 'deactivate') {
+      showToast(`${account?.name ?? 'Team account'} deactivation requires confirmation`);
+    }
+  });
+}
+
 if (brandIntegrationActions) {
   brandIntegrationActions.addEventListener('click', (event) => {
     const action = event.target.closest('[data-brand-integration-action]');
@@ -3519,6 +3735,10 @@ if (attributionPage) {
 
 document.addEventListener('click', (event) => {
   if (!event.target.closest('.period-picker')) closePeriodMenu();
+  if (!event.target.closest('.team-accounts-filter-wrap')) {
+    if (teamAccountsFilterMenu) teamAccountsFilterMenu.hidden = true;
+    teamAccountsFilterButton?.setAttribute('aria-expanded', 'false');
+  }
   const messagesAction = event.target.closest('[data-messages-action]');
   if (messagesAction && !messagesPage?.contains(messagesAction)) {
     if (messagesAction.dataset.messagesAction === 'compose') {
