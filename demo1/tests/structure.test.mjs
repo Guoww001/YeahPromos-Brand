@@ -185,6 +185,34 @@ test('API credentials reuses the README red navigation tokens and safe copy rule
   assert.match(readme, /不可访问的 Webhook 占位 URL/);
 });
 
+test('Brand integration has its own Integrations & Settings page shell', () => {
+  assert.match(html, /data-brand-integration-page/);
+  assert.match(html, /Brand integration/);
+  assert.match(html, /Connected brand/);
+  assert.match(html, /Sync health summary/);
+  assert.match(html, /data-brand-integration-health/);
+  assert.match(html, /data-brand-integration-list/);
+  assert.match(html, /data-brand-integration-activity/);
+  assert.match(html, /Add integration/);
+  assert.match(appJs, /isBrandIntegrationPage/);
+  assert.match(appJs, /renderBrandIntegrationPage/);
+  assert.match(appJs, /Integrations & Settings/);
+  assert.match(appJs, /data-brand-integration-action/);
+  assert.match(data, /brandIntegrationPageData/);
+  assert.match(data, /shopify-storefront/);
+  assert.match(data, /amazon-marketplace/);
+});
+
+test('Brand integration reuses the README red navigation tokens and safe demo copy', () => {
+  assert.match(css, /body\.is-brand-integration-page[\s\S]*--brand-integration-red:\s*#e60000/i);
+  assert.match(css, /--brand-integration-soft-red:\s*#fde8e8/i);
+  assert.match(css, /--brand-integration-selected-red:\s*#ff312e/i);
+  assert.match(css, /nav-child\[data-nav-child="brand-integration"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--brand-integration-selected-red\)/i);
+  assert.match(readme, /Integrations & Settings > Brand integration/);
+  assert.match(readme, /demo-store\.com/);
+  assert.match(data, /demoOnly:\s*true/);
+});
+
 test('messages and notifications has its own routed conversation workspace', () => {
   assert.match(html, /data-messages-page/);
   assert.match(html, /Messages &amp; Notifications/);
@@ -313,7 +341,7 @@ test('finance neutral text uses contrast-ready dark gray tokens', () => {
 });
 
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
-  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-19"><\/script>/);
+  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-20"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);
   assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
 });
@@ -339,8 +367,8 @@ test('overview follows the reference dashboard hierarchy', () => {
 });
 
 test('preview busts the entry cache for the reference dashboard skin', () => {
-  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-19"/);
-  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-19"/);
+  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-20"/);
+  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-20"/);
 });
 
 test('reference dashboard keeps flat cards and red action controls', () => {
