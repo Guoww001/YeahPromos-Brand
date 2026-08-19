@@ -1,12 +1,16 @@
 import { buildSmoothChartPath } from './overview.mjs';
 import {
   amazonCampaignRecords,
+  affiliateProgramRecords,
   brandPerformanceRecords,
+  filterInfluencerCampaignRecords,
   filterOperationsRecords,
+  influencerCampaignRecords,
   performanceMetricOptions,
   performanceSeries,
+  sortAffiliateProgramRecords,
   transactionRecords,
-} from './operations.mjs';
+} from './operations.mjs?v=merchant-reference-26';
 
 const toneForStatus = (status) => {
   const normalized = String(status ?? '').toLowerCase();
@@ -50,6 +54,65 @@ const searchControl = ({ pageId, query = '', placeholder = 'Search' }) => `
     </label>
   </form>
 `;
+
+const campaignSupportButton = (label, action, { primary = false, iconName = '', pageId = '' } = {}) => `
+  <button class="campaign-support-button${primary ? ' campaign-support-button--primary' : ''}" type="button" data-campaign-support-action="${action}" data-campaign-support-page-id="${pageId}">
+    ${iconName ? icon(iconName) : ''}<span>${label}</span>
+  </button>
+`;
+
+const campaignSupportSelect = ({ pageId, key, label, value, options }) => `
+  <label class="campaign-support-select">
+    <span>${label}</span>
+    <select data-campaign-support-filter data-campaign-support-page-id="${pageId}" data-filter-key="${key}" aria-label="${label}">
+      ${options.map((option) => `<option value="${option}"${option === value ? ' selected' : ''}>${option}</option>`).join('')}
+    </select>
+    ${icon('chevron')}
+  </label>
+`;
+
+const campaignSupportSearch = ({ pageId, query = '', placeholder = 'Search' }) => `
+  <form class="campaign-support-search-form" data-campaign-support-search-form data-campaign-support-page-id="${pageId}">
+    <label class="campaign-support-search">
+      ${icon('search')}
+      <span class="sr-only">${placeholder}</span>
+      <input type="search" data-campaign-support-search value="${query}" placeholder="${placeholder}" />
+      <button type="submit" aria-label="Search">${icon('arrow')}</button>
+    </label>
+  </form>
+`;
+
+const campaignSupportToolbar = ({ eyebrow, title, meta = '', actions = '' }) => `
+  <div class="campaign-support-toolbar">
+    <div>
+      <span class="campaign-support-eyebrow">${eyebrow}</span>
+      <h2>${title}</h2>
+      <p>${meta}</p>
+    </div>
+    <div class="campaign-support-toolbar__actions">${actions}</div>
+  </div>
+`;
+
+const campaignSupportTabs = ({ pageId, active, items }) => `
+  <div class="campaign-support-tabs" role="tablist" aria-label="Campaign views">
+    ${items.map(([value, label]) => `<button class="campaign-support-tab${active === value ? ' is-active' : ''}" type="button" role="tab" aria-selected="${active === value}" data-campaign-support-tab data-campaign-support-page-id="${pageId}" data-campaign-support-tab-value="${value}">${label}</button>`).join('')}
+  </div>
+`;
+
+const campaignSupportStatus = (status, tone = '') => `<span class="campaign-support-status" data-tone="${tone || toneForStatus(status)}">${status}</span>`;
+
+const campaignSupportMark = (mark, tone = 'red') => `<span class="campaign-support-mark campaign-support-mark--${tone}">${mark}</span>`;
+
+const campaignSupportQuickFilter = ({ pageId, key, value, label, selected }) => `<button class="campaign-support-filter-chip${selected ? ' is-selected' : ''}" type="button" data-campaign-support-quick-filter data-campaign-support-page-id="${pageId}" data-filter-key="${key}" data-filter-value="${value}" aria-pressed="${selected}">${label}</button>`;
+
+const campaignSupportFilterPanel = ({ pageId, pageState, mode, resultCount }) => {
+  if (!pageState.filtersOpen) return '';
+  const isPrograms = mode === 'programs';
+  const quickFilters = isPrograms
+    ? `<div><span class="campaign-support-filter-panel__label">Status</span><div class="campaign-support-filter-chips">${['All statuses', 'Active', 'Paused', 'Draft'].map((value) => campaignSupportQuickFilter({ pageId, key: 'status', value, label: value.replace('All statuses', 'All'), selected: pageState.filters.status === value })).join('')}</div></div><div><span class="campaign-support-filter-panel__label">Sort emphasis</span><div class="campaign-support-filter-chips">${['Recently updated', 'Most partners', 'Highest commission'].map((value) => campaignSupportQuickFilter({ pageId, key: 'sort', value, label: value.replace('Recently updated', 'Recent'), selected: pageState.filters.sort === value })).join('')}</div></div>`
+    : `<div><span class="campaign-support-filter-panel__label">Platform</span><div class="campaign-support-filter-chips">${['All platforms', 'Instagram', 'TikTok', 'YouTube'].map((value) => campaignSupportQuickFilter({ pageId, key: 'platform', value, label: value.replace('All platforms', 'All'), selected: pageState.filters.platform === value })).join('')}</div></div><div><span class="campaign-support-filter-panel__label">Budget focus</span><div class="campaign-support-filter-chips">${['Any budget', 'Under $5,000', '$5,000 – $10,000', 'Over $10,000'].map((value) => campaignSupportQuickFilter({ pageId, key: 'budget', value, label: value.replace('Any budget', 'Any'), selected: pageState.filters.budget === value })).join('')}</div></div>`;
+  return `<div class="campaign-support-filter-panel" data-campaign-support-filter-panel><div class="campaign-support-filter-panel__intro"><span class="campaign-support-eyebrow">Filter focus</span><strong>Shape the view without leaving the workspace</strong><span>${resultCount} ${isPrograms ? 'programs' : 'campaigns'} currently visible</span></div><div class="campaign-support-filter-panel__controls">${quickFilters}</div><button class="campaign-support-filter-panel__reset" type="button" data-campaign-support-action="reset-campaign-filters" data-campaign-support-page-id="${pageId}">Clear all</button></div>`;
+};
 
 const toolbar = ({ eyebrow, title, meta = '', actions = '' }) => `
   <div class="workspace-toolbar">
@@ -134,6 +197,72 @@ const renderLineChart = ({ chart, comparison = null, ariaLabel = 'Performance ch
 
 const renderMetricTabs = ({ pageId, active, options }) => `<div class="workspace-tabs" role="tablist" aria-label="Metric tabs">${options.map(([value, label]) => `<button type="button" role="tab" aria-selected="${active === value}" class="workspace-tab${active === value ? ' is-active' : ''}" data-workspace-tab data-workspace-page-id="${pageId}" data-workspace-tab-value="${value}">${label}</button>`).join('')}</div>`;
 
+const renderAffiliateProgramsPage = ({ pageId, pageState }) => {
+  const filtered = sortAffiliateProgramRecords(
+    filterOperationsRecords(affiliateProgramRecords, { query: pageState.query, filters: { status: pageState.filters.status } })
+      .filter((record) => pageState.tab === 'all' || record.status.toLowerCase() === pageState.tab),
+    pageState.filters.sort,
+  );
+  return `
+    <div class="campaigns-support-module campaigns-support-module--programs" data-campaign-support-page="${pageId}">
+      ${campaignSupportToolbar({ eyebrow: 'Partner programs', title: 'Affiliate programs', meta: 'Create, organize, and optimize the programs your partners promote.', actions: campaignSupportButton('Create affiliate program', 'create-program', { primary: true, iconName: 'users', pageId }) })}
+      ${statGrid([['Active programs', '8', 'Across all partner groups', 'success'], ['Total partners', '1,248', '+14 this month', 'neutral'], ['Clicks this month', '128,450', '+12.6% vs previous period', 'success'], ['Commission paid', '$8,281.57', '30-day attribution window', 'neutral'], ['Conversion rate', '1.98%', '+5.6% vs previous period', 'success']], 'campaign-support-stat-grid campaign-support-stat-grid--five')}
+      <div class="campaign-support-filter-bar">
+        ${campaignSupportSearch({ pageId, query: pageState.query, placeholder: 'Search programs' })}
+        ${campaignSupportSelect({ pageId, key: 'status', label: 'Status', value: pageState.filters.status, options: ['All statuses', 'Active', 'Paused', 'Draft'] })}
+        ${campaignSupportSelect({ pageId, key: 'sort', label: 'Sort by', value: pageState.filters.sort, options: ['Recently updated', 'Most partners', 'Highest commission'] })}
+        ${campaignSupportButton(pageState.filtersOpen ? 'Close filters' : 'Filters', 'filter-programs', { pageId })}
+      </div>
+      ${campaignSupportFilterPanel({ pageId, pageState, mode: 'programs', resultCount: filtered.length })}
+      <div class="program-grid">${filtered.length ? filtered.map((record, index) => `
+        <article class="program-card${pageState.selectedId === record.id ? ' is-selected' : ''}" style="--card-index:${index}" data-campaign-support-card data-campaign-support-record-id="${record.id}">
+          <div class="program-card__top"><div>${campaignSupportMark(record.initials, record.markTone)}<div><h3>${record.name}</h3><span>Updated May 08, 2025</span></div></div>${campaignSupportStatus(record.status, record.tone)}</div>
+          <div class="program-card__metrics"><div><span>Commission</span><strong>${record.commission}</strong></div><div><span>Attribution</span><strong>${record.attribution}</strong></div><div><span>Partners</span><strong>${record.partners}</strong></div></div>
+          <div class="program-card__tags">${record.tags.map((tag) => `<span>${tag}</span>`).join('')}</div>
+          <div class="program-card__footer"><span>${record.dateRange}</span><button type="button" data-campaign-support-action="view-program" data-campaign-support-page-id="${pageId}" data-campaign-support-record-id="${record.id}">Manage ${icon('arrow')}</button></div>
+        </article>`).join('') : `<div class="campaign-support-empty"><strong>No programs match these filters</strong><span>Try clearing a filter or using a broader search.</span></div>`}</div>
+    </div>
+  `;
+};
+
+const renderInfluencerCampaignsPage = ({ pageId, pageState }) => {
+  const filtered = filterInfluencerCampaignRecords(influencerCampaignRecords, { query: pageState.query, filters: pageState.filters, tab: pageState.tab });
+  return `
+    <div class="campaigns-support-module campaigns-support-module--influencer" data-campaign-support-page="${pageId}">
+      ${campaignSupportToolbar({ eyebrow: 'Creator campaigns', title: 'Influencer campaigns', meta: 'Plan creator partnerships, track deliverables, and keep campaign spend visible.', actions: campaignSupportButton('Create campaign', 'create-campaign', { primary: true, iconName: 'users', pageId }) })}
+      ${campaignSupportTabs({ pageId, active: pageState.tab, items: [['live', 'Live'], ['upcoming', 'Upcoming'], ['draft', 'Draft'], ['completed', 'Completed']] })}
+      <div class="campaign-support-filter-bar campaign-support-filter-bar--wide">
+        ${campaignSupportSelect({ pageId, key: 'category', label: 'Category', value: pageState.filters.category, options: ['All categories', 'Beauty & Personal Care', 'Health & Fitness', 'Fashion', 'Tech & Electronics', 'Travel', 'Food & Beverage', 'Photography', 'Home & Living'] })}
+        ${campaignSupportSelect({ pageId, key: 'platform', label: 'Platform', value: pageState.filters.platform, options: ['All platforms', 'Instagram', 'TikTok', 'YouTube'] })}
+        ${campaignSupportSelect({ pageId, key: 'budget', label: 'Budget', value: pageState.filters.budget, options: ['Any budget', 'Under $5,000', '$5,000 – $10,000', 'Over $10,000'] })}
+        ${campaignSupportSelect({ pageId, key: 'date', label: 'Date range', value: pageState.filters.date, options: ['May 05 – May 12, 2025', 'Apr 28 – May 04, 2025', 'Apr 21 – Apr 27, 2025'] })}
+        ${campaignSupportButton('Reset', 'reset-campaign-filters', { pageId })}
+        ${campaignSupportButton(pageState.filtersOpen ? 'Close filters' : 'Filter focus', 'filter-influencer', { pageId })}
+        ${campaignSupportSearch({ pageId, query: pageState.query, placeholder: 'Search campaigns' })}
+      </div>
+      ${campaignSupportFilterPanel({ pageId, pageState, mode: 'influencer', resultCount: filtered.length })}
+      <div class="influencer-grid">${filtered.length ? filtered.map((record, index) => `
+        <article class="influencer-card${pageState.selectedId === record.id ? ' is-selected' : ''}" style="--card-index:${index}" data-campaign-support-card data-campaign-support-record-id="${record.id}">
+          <div class="influencer-card__profile">
+            <div class="influencer-card__avatar influencer-card__avatar--${record.avatar.tone}" role="img" aria-label="${record.name} creator avatar"><span>${record.avatar.initials}</span></div>
+            <span class="influencer-card__favorite" aria-hidden="true">♡</span>
+          </div>
+          <div class="influencer-card__body">
+            <div class="influencer-card__heading"><div><h3>${record.name}</h3><span>${record.date}</span></div>${campaignSupportStatus(record.status, record.tone)}</div>
+            <div class="influencer-card__tags"><span>${record.category}</span>${record.platforms.map((platform) => `<span>${platform}</span>`).join('')}</div>
+            <div class="influencer-card__meta"><span>${icon('users')}<strong>${record.creators}</strong><small>creators</small></span><span>${icon('tag')}<strong>${record.deliverables}</strong><small>deliverables</small></span><span>${icon('wallet')}<strong>${record.budget}</strong><small>budget</small></span></div>
+            <div class="influencer-card__footer"><div class="campaign-progress"><div><span>Budget used</span><strong>${record.budgetPercent}%</strong></div><span><i style="width:${record.budgetPercent}%"></i></span></div><button type="button" class="influencer-card__action" data-campaign-support-action="view-campaign" data-campaign-support-page-id="${pageId}" data-campaign-support-record-id="${record.id}">View campaign ${icon('arrow')}</button></div>
+          </div>
+          <div class="influencer-card__videos" aria-label="Related videos">${record.videos.map((video) => `
+            <figure class="influencer-card__video">
+              <div class="influencer-card__video-cover influencer-card__video-cover--${video.tone}" role="img" aria-label="${record.name}: ${video.title}"><span>${video.mark}</span><i class="influencer-card__video-play" aria-hidden="true"></i><strong>${video.title}</strong></div>
+              <figcaption><span><i class="influencer-card__video-dot" aria-hidden="true"></i>${video.views}</span><time>${video.date}</time></figcaption>
+            </figure>`).join('')}</div>
+        </article>`).join('') : `<div class="campaign-support-empty"><strong>No influencer campaigns match these filters</strong><span>Try clearing a filter or using a broader search.</span></div>`}</div>
+    </div>
+  `;
+};
+
 const renderPerformancePage = ({ pageId, pageState }) => {
   const chart = performanceSeries[pageState.tab] ?? performanceSeries.clicks;
   return `
@@ -202,6 +331,8 @@ export function renderOperationsPage(pageId, { pageState } = {}) {
     'performance-brand': renderBrandPerformancePage,
     transactions: renderTransactionsPage,
     'amazon-brb': renderAmazonPage,
+    'affiliate-programs': renderAffiliateProgramsPage,
+    'influencer-campaigns': renderInfluencerCampaignsPage,
   };
   return renderers[pageId]?.({ pageId, pageState }) ?? '<div class="workspace-module"><div class="workspace-empty"><strong>Module unavailable</strong><span>This workspace is not configured yet.</span></div></div>';
 }

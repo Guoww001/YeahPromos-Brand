@@ -10,6 +10,7 @@ const demoDirectory = resolve(currentDirectory, '..');
 const html = readFileSync(resolve(demoDirectory, 'index.html'), 'utf8');
 const css = readFileSync(resolve(demoDirectory, 'styles.css'), 'utf8');
 const appJs = readFileSync(resolve(demoDirectory, 'app.js'), 'utf8');
+const operationsRenderers = readFileSync(resolve(demoDirectory, 'operations-renderers.mjs'), 'utf8');
 const data = readFileSync(resolve(demoDirectory, 'data.mjs'), 'utf8');
 const readme = readFileSync(resolve(demoDirectory, 'README.md'), 'utf8');
 
@@ -75,7 +76,7 @@ test('app entry remains syntactically valid after conflict resolution', () => {
 });
 
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
-  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-25"><\/script>/);
+  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-26"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);
   assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
   assert.match(html, /data-module-page/);
@@ -137,7 +138,7 @@ test('coupon attribution keeps business rules readable and contrast-ready', () =
   assert.match(css, /body\.is-coupon-attribution-page[\s\S]*--coupon-attribution-red:\s*#e60000/i);
   assert.match(css, /--coupon-attribution-soft-red:\s*#fde8e8/i);
   assert.match(css, /--coupon-attribution-selected-red:\s*#ff312e/i);
-  assert.match(css, /\.coupon-attribution-table th[\s\S]*font-size:\s*10px/);
+  assert.match(css, /\.coupon-attribution-table th[\s\S]*font-size:\s*11px/);
   assert.match(css, /\.coupon-attribution-table td[\s\S]*font-size:\s*11px/);
   assert.match(appJs, /Coupon precedence: owned code/);
   assert.match(readme, /100% 的伙伴佣金归优惠码所有者/);
@@ -432,8 +433,8 @@ test('products and assets banners page has its own routed asset workspace', () =
 test('banners page keeps asset states readable and keyboard-addressable', () => {
   assert.match(css, /\.is-products-assets-page \.page-header__filters[\s\S]*display:\s*none/);
   assert.match(css, /\.products-assets-grid[\s\S]*grid-template-columns:\s*repeat\(3/);
-  assert.match(css, /\.products-asset-card__status[\s\S]*font-size:\s*10px/);
-  assert.match(css, /\.products-assets-detail__facts dt[\s\S]*font-size:\s*10px/);
+  assert.match(css, /\.products-asset-card__status[\s\S]*font-size:\s*11px/);
+  assert.match(css, /\.products-assets-detail__facts dt[\s\S]*font-size:\s*11px/);
   assert.match(css, /\.products-assets-detail__facts dd[\s\S]*color:\s*var\(--color-text-soft\)/);
   assert.match(appJs, /aria-pressed/);
   assert.match(readme, /Banners & images 的资产卡片、筛选器/);
@@ -504,8 +505,8 @@ test('transaction history reuses readable Finance tokens and safe demo actions',
   assert.match(css, /--transaction-history-soft-red:\s*#fde8e8/i);
   assert.match(css, /--transaction-history-selected-red:\s*#ff312e/i);
   assert.match(css, /nav-child\[data-nav-child="transaction-history"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--transaction-history-selected-red\)/i);
-  assert.match(css, /\.transaction-history-table th[\s\S]*font-size:\s*10px/);
-  assert.match(css, /\.transaction-history-table td[\s\S]*font-size:\s*10px/);
+  assert.match(css, /\.transaction-history-table th[\s\S]*font-size:\s*11px/);
+  assert.match(css, /\.transaction-history-table td[\s\S]*font-size:\s*11px/);
   assert.match(readme, /Approve \/ Void/);
   assert.match(readme, /Transaction history 使用 `#1F2937`/);
   assert.match(readme, /不提交真实交易、不导出业务数据/);
@@ -549,14 +550,14 @@ test('public demo data does not include credential or personal-data patterns', (
 });
 
 test('finance typography preserves readability and lightweight chart annotations', () => {
-  assert.match(css, /body\.is-finance-page[\s\S]*--finance-font-body:\s*11px/);
-  assert.match(css, /body\.is-finance-page[\s\S]*--finance-font-secondary:\s*10px/);
+  assert.match(css, /body\.is-finance-page[\s\S]*--finance-font-body:\s*12px/);
+  assert.match(css, /body\.is-finance-page[\s\S]*--finance-font-secondary:\s*11px/);
   assert.match(css, /\.finance-chart__tooltip text[\s\S]*font-weight:\s*400/);
   assert.match(css, /\.finance-chart__tooltip \.finance-chart__tooltip-value[\s\S]*font-size:\s*12px[\s\S]*font-weight:\s*600/);
   assert.match(css, /\.finance-table th[\s\S]*font-size:\s*var\(--finance-font-secondary\)/);
   assert.match(css, /\.finance-table td[\s\S]*font-size:\s*var\(--finance-font-body\)/);
   assert.match(readme, /可读性与无障碍/);
-  assert.match(readme, /主要正文、表格数据和表单控件文字不小于/);
+  assert.match(readme, /主要正文、表格数据和表单控件文字使用 `12px` 及以上/);
 });
 
 test('finance neutral text uses contrast-ready dark gray tokens', () => {
@@ -570,7 +571,7 @@ test('finance neutral text uses contrast-ready dark gray tokens', () => {
 });
 
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
-  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-25"><\/script>/);
+  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-26"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);
   assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
 });
@@ -609,8 +610,8 @@ test('overview follows the reference dashboard hierarchy', () => {
 });
 
 test('preview busts the entry cache for the reference dashboard skin', () => {
-  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-25"/);
-  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-25"/);
+  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-26"/);
+  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-26"/);
 });
 
 test('reference dashboard keeps flat cards and red action controls', () => {
@@ -656,4 +657,32 @@ test('target workspace keeps the overview shell and routed module regions', () =
   assert.match(appJs, /createOperationsState/);
   assert.match(appJs, /renderOperationsPage/);
   assert.match(data, /Data & Transactions/);
+});
+
+test('sidebar can collapse without hiding accessible navigation names', () => {
+  assert.match(html, /data-sidebar-collapse/);
+  assert.match(appJs, /setSidebarCollapsed/);
+  assert.match(appJs, /updateCollapsedNavigationA11y/);
+  assert.match(css, /body\.is-sidebar-collapsed/);
+  assert.match(css, /--sidebar-collapsed-width:\s*84px/);
+});
+test('readability refinement removes sub-11px readable text and strengthens focus feedback', () => {
+  assert.doesNotMatch(css, /font-size:\s*(?:[0-9]|10)px/);
+  assert.match(css, /--color-text-muted:\s*#4b5563/i);
+  assert.match(css, /content-frame table td[\s\S]*font-size:\s*12px/i);
+  assert.match(css, /interaction-border-beam/);
+});
+
+test('Campaigns 子页面保留筛选、选中态和详情抽屉交互契约', () => {
+  assert.match(operationsRenderers, /renderAffiliateProgramsPage/);
+  assert.match(operationsRenderers, /renderInfluencerCampaignsPage/);
+  assert.match(operationsRenderers, /influencer-card__videos/);
+  assert.match(appJs, /toggleOperationsFilters/);
+  assert.match(appJs, /resetOperationsFilters/);
+  assert.match(appJs, /openCampaignSupportDrawer/);
+  assert.match(appJs, /data-campaign-support-drawer-action/);
+  assert.match(css, /\.campaign-support-filter-panel\s*\{/);
+  assert.match(css, /\.program-card\.is-selected/);
+  assert.match(css, /\.influencer-card\.is-selected/);
+  assert.match(css, /@keyframes campaign-support-card-reveal/);
 });

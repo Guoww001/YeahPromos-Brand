@@ -9,7 +9,7 @@
       content="YeahPromos merchant business overview demo"
     />
     <title>Business Overview · YeahPromos</title>
-    <link rel="stylesheet" href="./styles.css?v=merchant-reference-25" />
+    <link rel="stylesheet" href="./styles.css?v=merchant-reference-26" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -73,6 +73,11 @@
           <a class="brand" href="#main-content" aria-label="YeahPromos home">
             <span class="brand__wordmark"><strong>YEAH</strong><b>P</b><strong>ROMOS</strong></span>
           </a>
+          <span class="sidebar__top-actions">
+            <button class="icon-button sidebar__collapse" type="button" data-sidebar-collapse aria-controls="app-sidebar" aria-pressed="false" aria-label="Collapse sidebar" title="Collapse sidebar">
+              <svg><use href="#icon-chevron"></use></svg>
+            </button>
+          </span>
           <button class="icon-button sidebar__close" type="button" data-sidebar-close aria-label="Close menu">
             <svg><use href="#icon-x"></use></svg>
           </button>
@@ -83,17 +88,17 @@
 
         <div class="sidebar__footer">
           <div class="sidebar__support">
-            <button class="sidebar__utility" type="button" data-utility-route="help-center" data-action-navigation="help-center" data-help-center-utility>
+            <button class="sidebar__utility" type="button" data-utility-route="help-center" data-action-navigation="help-center" data-help-center-utility aria-label="Open help center">
               <svg><use href="#icon-help"></use></svg>
               <span>Help center</span>
             </button>
-            <button class="sidebar__utility" type="button" data-utility-route="workspace-settings" data-action-navigation="workspace-settings">
+            <button class="sidebar__utility" type="button" data-utility-route="workspace-settings" data-action-navigation="workspace-settings" aria-label="Open workspace settings">
               <svg><use href="#icon-settings"></use></svg>
               <span>Settings</span>
             </button>
           </div>
 
-          <button class="account-card" type="button" data-demo-action="Account menu">
+          <button class="account-card" type="button" data-demo-action="Account menu" aria-label="Open account menu">
             <span class="account-card__avatar">D</span>
             <span class="account-card__copy">
               <strong>Demo Admin</strong>
@@ -2206,6 +2211,6 @@
       <button type="button" data-toast-close aria-label="Dismiss notification"><svg><use href="#icon-x"></use></svg></button>
     </div>
 
-    <script type="module" src="./app.js?v=merchant-reference-25"></script>
+    <script type="module" src="./app.js?v=merchant-reference-26"></script>
   </body>
 </html>
