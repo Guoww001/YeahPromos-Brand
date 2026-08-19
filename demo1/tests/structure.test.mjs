@@ -671,3 +671,17 @@ test('readability refinement removes sub-11px readable text and strengthens focu
   assert.match(css, /content-frame table td[\s\S]*font-size:\s*12px/i);
   assert.match(css, /interaction-border-beam/);
 });
+
+test('Campaigns 子页面保留筛选、选中态和详情抽屉交互契约', () => {
+  assert.match(operationsRenderers, /renderAffiliateProgramsPage/);
+  assert.match(operationsRenderers, /renderInfluencerCampaignsPage/);
+  assert.match(operationsRenderers, /influencer-card__videos/);
+  assert.match(appJs, /toggleOperationsFilters/);
+  assert.match(appJs, /resetOperationsFilters/);
+  assert.match(appJs, /openCampaignSupportDrawer/);
+  assert.match(appJs, /data-campaign-support-drawer-action/);
+  assert.match(css, /\.campaign-support-filter-panel\s*\{/);
+  assert.match(css, /\.program-card\.is-selected/);
+  assert.match(css, /\.influencer-card\.is-selected/);
+  assert.match(css, /@keyframes campaign-support-card-reveal/);
+});
