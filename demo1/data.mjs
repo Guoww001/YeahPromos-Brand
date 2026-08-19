@@ -147,6 +147,7 @@ export const dashboardData = {
       children: [
         { id: 'commission-rules-list', label: 'Commission rules' },
         { id: 'attribution-rules', label: 'Attribution rules' },
+        { id: 'commission-invoices', label: 'Invoices' },
       ],
     },
     {
@@ -895,5 +896,48 @@ export const helpCenterPageData = {
     { id: 'partner-dashboard', label: 'Partner Dashboard', status: 'Operational' },
     { id: 'email-delivery', label: 'Email Delivery', status: 'Operational' },
     { id: 'payment-processing', label: 'Payment Processing', status: 'Operational' },
+  ],
+};
+
+export const commissionInvoicesPageData = {
+  demoOnly: true,
+  totalCount: 73,
+  dateRanges: [
+    { id: 'last-7d', label: 'May 05 – May 12, 2025' },
+    { id: 'last-30d', label: 'Apr 13 – May 12, 2025' },
+    { id: 'last-90d', label: 'Feb 12 – May 12, 2025' },
+  ],
+  filters: {
+    paymentMethod: [
+      { value: 'all', label: 'All methods' },
+      { value: 'Account credits', label: 'Account credits' },
+      { value: 'Credit card', label: 'Credit card' },
+      { value: 'Bank transfer', label: 'Bank transfer' },
+    ],
+    paymentType: [
+      { value: 'all', label: 'All types' },
+      { value: 'Publisher payout', label: 'Publisher payout' },
+      { value: 'Price plan fee', label: 'Price plan fee' },
+      { value: 'Account deposit', label: 'Account deposit' },
+    ],
+    status: [
+      { value: 'all', label: 'All statuses' },
+      { value: 'Paid', label: 'Paid' },
+      { value: 'Pending', label: 'Pending' },
+      { value: 'Failed', label: 'Failed' },
+    ],
+    brand: [
+      { value: 'all', label: 'All brands' },
+      { value: 'PartnerBoost', label: 'PartnerBoost' },
+      { value: 'PartnerMatic', label: 'PartnerMatic' },
+      { value: 'Northstar Demo', label: 'Northstar Demo' },
+    ],
+  },
+  rows: [
+    { id: 'INV-250512-0712', date: 'May 12, 2025 14:32', brand: 'PartnerBoost', paymentMethod: 'Account credits', paymentType: 'Publisher payout', description: 'Auto charged commission balance', amount: '-$0.00', status: 'Paid', statusTone: 'paid' },
+    { id: 'INV-250511-0611', date: 'May 11, 2025 22:18', brand: 'PartnerMatic', paymentMethod: 'Account credits', paymentType: 'Price plan fee', description: 'Fees for Standard Plan', amount: '-$50.00', status: 'Paid', statusTone: 'paid' },
+    { id: 'INV-250510-0438', date: 'May 10, 2025 21:06', brand: 'PartnerMatic', paymentMethod: 'Account credits', paymentType: 'Price plan fee', description: 'Fees for Standard Plan', amount: '-$50.00', status: 'Paid', statusTone: 'paid' },
+    { id: 'INV-250510-0437', date: 'May 10, 2025 21:06', brand: 'PartnerBoost', paymentMethod: 'Credit card', paymentType: 'Account deposit', description: 'Account balance top-up', amount: '$500.00', status: 'Paid', statusTone: 'paid' },
+    { id: 'INV-250509-0315', date: 'May 09, 2025 18:42', brand: 'Northstar Demo', paymentMethod: 'Bank transfer', paymentType: 'Publisher payout', description: 'Bi-weekly partner payout', amount: '-$320.00', status: 'Pending', statusTone: 'pending' },
   ],
 };
