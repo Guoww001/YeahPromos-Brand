@@ -113,6 +113,39 @@ test('help center reuses the README red navigation tokens', () => {
   assert.match(readme, /Help center > Help center/);
 });
 
+test('messages and notifications has its own routed conversation workspace', () => {
+  assert.match(html, /data-messages-page/);
+  assert.match(html, /Messages &amp; Notifications/);
+  assert.match(html, /data-messages-tabs/);
+  assert.match(html, /data-messages-search/);
+  assert.match(html, /data-messages-filter/);
+  assert.match(html, /data-messages-list/);
+  assert.match(html, /data-messages-conversation/);
+  assert.match(html, /data-messages-partner-details/);
+  assert.match(html, /Compose Message/);
+  assert.match(appJs, /isMessagesPage/);
+  assert.match(appJs, /renderMessagesPage/);
+  assert.match(appJs, /getFilteredMessages/);
+  assert.match(appJs, /data-messages-reply/);
+  assert.match(data, /messagesPageData/);
+  assert.match(data, /all-messages/);
+  assert.match(data, /partner-messages/);
+  assert.match(data, /system-alerts/);
+  assert.match(readme, /Messages & Notifications > All Messages/);
+});
+
+test('messages and notifications uses readable contrast-ready tokens', () => {
+  assert.match(css, /body\.is-messages-page[\s\S]*--messages-red:\s*#e60000/i);
+  assert.match(css, /--messages-soft-red:\s*#fde8e8/i);
+  assert.match(css, /--messages-selected-red:\s*#ff312e/i);
+  assert.match(css, /nav-child\[data-nav-child="all-messages"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--messages-selected-red\)/i);
+  assert.match(css, /\.messages-list-row__copy small[\s\S]*font-size:\s*11px/);
+  assert.match(css, /\.messages-message-body[\s\S]*font-size:\s*13px/);
+  assert.match(css, /\.messages-reply-form textarea[\s\S]*font-size:\s*var\(--messages-font-body\)/);
+  assert.match(readme, /Messages & Notifications 的消息列表、未读标记/);
+  assert.match(readme, /Messages & Notifications 使用 `#1F2937`/);
+});
+
 test('finance page reuses the README red navigation tokens', () => {
   assert.match(css, /body\.is-finance-page[\s\S]*--finance-red:\s*#e60000/i);
   assert.match(css, /--finance-soft-red:\s*#fde8e8/i);
