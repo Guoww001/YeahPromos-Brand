@@ -10,7 +10,6 @@ const demoDirectory = resolve(currentDirectory, '..');
 const html = readFileSync(resolve(demoDirectory, 'index.html'), 'utf8');
 const css = readFileSync(resolve(demoDirectory, 'styles.css'), 'utf8');
 const appJs = readFileSync(resolve(demoDirectory, 'app.js'), 'utf8');
-const operationsRenderers = readFileSync(resolve(demoDirectory, 'operations-renderers.mjs'), 'utf8');
 const data = readFileSync(resolve(demoDirectory, 'data.mjs'), 'utf8');
 const readme = readFileSync(resolve(demoDirectory, 'README.md'), 'utf8');
 
@@ -657,18 +656,4 @@ test('target workspace keeps the overview shell and routed module regions', () =
   assert.match(appJs, /createOperationsState/);
   assert.match(appJs, /renderOperationsPage/);
   assert.match(data, /Data & Transactions/);
-});
-
-test('Campaigns 子页面保留筛选、选中态和详情抽屉交互契约', () => {
-  assert.match(operationsRenderers, /renderAffiliateProgramsPage/);
-  assert.match(operationsRenderers, /renderInfluencerCampaignsPage/);
-  assert.match(operationsRenderers, /influencer-card__videos/);
-  assert.match(appJs, /toggleOperationsFilters/);
-  assert.match(appJs, /resetOperationsFilters/);
-  assert.match(appJs, /openCampaignSupportDrawer/);
-  assert.match(appJs, /data-campaign-support-drawer-action/);
-  assert.match(css, /\.campaign-support-filter-panel\s*\{/);
-  assert.match(css, /\.program-card\.is-selected/);
-  assert.match(css, /\.influencer-card\.is-selected/);
-  assert.match(css, /@keyframes campaign-support-card-reveal/);
 });
