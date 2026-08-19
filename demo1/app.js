@@ -52,6 +52,14 @@ import {
   updateOperationsSearch,
 } from './operations.mjs?v=merchant-reference-26';
 import { renderOperationsPage } from './operations-renderers.mjs?v=merchant-reference-26';
+import {
+  applyLocale,
+  bindLanguageToggle,
+  getLocale,
+  translate,
+  translateNavigationLabel,
+  translatePageTitle,
+} from './localization.mjs';
 
 let state = createDashboardState(dashboardData);
 let recruitmentState = createRecruitmentState();
@@ -429,9 +437,15 @@ const icon = (name, className = '') => `
   </svg>
 `;
 
-const localizedNavigationLabel = (item) => item.label;
-const t = (_key, fallback = _key) => fallback;
-const localizedPageTitle = (_pageId, fallback) => fallback;
+const locale = getLocale();
+const localizedNavigationLabel = (item) => translateNavigationLabel(locale, item);
+const t = (key, fallback) => translate(locale, key, fallback ?? {
+  'shell.primaryNavigation': 'Primary navigation',
+  'shell.merchantWorkspace': 'Merchant workspace',
+  'page.overview.title': 'Business overview',
+  'page.overview.description': 'Monitor your affiliate program performance and partner activity.',
+}[key] ?? key);
+const localizedPageTitle = (pageId, fallback) => translatePageTitle(locale, pageId, fallback);
 
 
 const findNavigationContext = (navigationId) => {
@@ -3633,6 +3647,7 @@ const renderAll = () => {
   renderDemoStateBanner();
   renderPage();
   renderUtilityNavigationState();
+  applyLocale();
 };
 
 const showToast = (message) => {
@@ -5509,4 +5524,5 @@ document.querySelector('[data-toast-close]').addEventListener('click', () => {
   }, 220);
 });
 
+bindLanguageToggle();
 renderAll();
