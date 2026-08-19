@@ -1,4 +1,4 @@
-import { attributionPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData } from './data.mjs?v=merchant-reference-18';
+import { apiCredentialsPageData, attributionPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, dashboardData, financeBalancePageData, helpCenterPageData, messagesPageData } from './data.mjs?v=merchant-reference-19';
 import {
   createDashboardState,
   isNavigationItemActive,
@@ -125,6 +125,16 @@ const helpCenterSearch = document.querySelector('[data-help-center-search]');
 const helpCenterLoadMore = document.querySelector('[data-help-center-action="load-more-articles"]');
 const helpCenterStatus = document.querySelector('[data-help-center-status]');
 const helpCenterUtility = document.querySelector('[data-help-center-utility]');
+const apiCredentialsPage = document.querySelector('[data-api-credentials-page]');
+const apiCredentialsActions = document.querySelector('[data-api-credentials-actions]');
+const apiCredentialsEnvironmentButtons = document.querySelectorAll('[data-api-credentials-environment]');
+const apiCredentialsSearch = document.querySelector('[data-api-credentials-search]');
+const apiCredentialsStatus = document.querySelector('[data-api-credentials-status]');
+const apiCredentialsFilterButton = document.querySelector('[data-api-credentials-action="toggle-filter"]');
+const apiCredentialsFilterMenu = document.querySelector('[data-api-credentials-filter-menu]');
+const apiCredentialsRows = document.querySelector('[data-api-credentials-rows]');
+const apiCredentialsResultCount = document.querySelector('[data-api-credentials-result-count]');
+const apiCredentialsWebhooks = document.querySelector('[data-api-credentials-webhooks]');
 const messagesPage = document.querySelector('[data-messages-page]');
 const messagesPageActions = document.querySelector('[data-messages-page-actions]');
 const messagesTabs = document.querySelector('[data-messages-tabs]');
@@ -205,6 +215,12 @@ const invoicesState = {
 const helpCenterState = {
   search: '',
   visibleArticleCount: 5,
+};
+
+const apiCredentialsState = {
+  environment: 'live',
+  search: '',
+  status: 'all',
 };
 
 const messagesState = {
@@ -1696,6 +1712,96 @@ const renderHelpCenterPage = () => {
   `).join('');
 };
 
+const getFilteredApiCredentials = () => {
+  const query = apiCredentialsState.search.trim().toLowerCase();
+
+  return apiCredentialsPageData.credentials.filter((credential) => {
+    const matchesEnvironment = credential.environment === apiCredentialsState.environment;
+    const matchesStatus = apiCredentialsState.status === 'all' || credential.statusTone === apiCredentialsState.status;
+    const matchesSearch = !query || [credential.name, credential.createdBy.name, credential.createdBy.detail, ...credential.scopes]
+      .some((value) => value.toLowerCase().includes(query));
+
+    return matchesEnvironment && matchesStatus && matchesSearch;
+  });
+};
+
+const renderApiCredentialsRows = () => {
+  if (!apiCredentialsRows) return;
+
+  const credentials = getFilteredApiCredentials();
+  apiCredentialsRows.innerHTML = credentials.length
+    ? credentials.map((credential) => `
+        <tr>
+          <td class="api-credentials-cell--key">
+            <div class="api-credentials-key-copy">
+              <span class="api-credentials-key-icon">${icon('key')}</span>
+              <div>
+                <strong>${credential.name}</strong>
+                <small>${credential.masked} <button type="button" data-api-credentials-action="copy-key" data-api-credentials-name="${credential.name}" aria-label="Copy masked key for ${credential.name}">${icon('copy')}</button></small>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="api-credentials-created-by">
+              <span class="api-credentials-avatar">${credential.createdBy.initials}</span>
+              <span><strong>${credential.createdBy.name}</strong><small>${credential.createdBy.detail}</small></span>
+            </div>
+          </td>
+          <td><strong>${credential.createdOn}</strong><small>${credential.createdTime}</small></td>
+          <td><strong>${credential.lastUsed}</strong>${credential.lastUsedTime ? `<small>${credential.lastUsedTime}</small>` : ''}</td>
+          <td>
+            <div class="api-credentials-scopes">
+              ${credential.scopes.map((scope) => `<span>${scope}</span>`).join('')}
+              ${credential.extraScopes ? `<span class="api-credentials-scope-extra">+${credential.extraScopes}</span>` : ''}
+            </div>
+          </td>
+          <td><span class="api-credentials-status api-credentials-status--${credential.statusTone}"><i></i>${credential.status}</span></td>
+          <td class="api-credentials-cell--actions"><button type="button" data-api-credentials-action="row-menu" data-api-credentials-name="${credential.name}" aria-label="More actions for ${credential.name}">${icon('more')}</button></td>
+        </tr>
+      `).join('')
+    : '<tr><td class="api-credentials-empty" colspan="7"><strong>No API credentials found</strong><span>Try changing your search or filters.</span></td></tr>';
+
+  if (apiCredentialsResultCount) {
+    const total = apiCredentialsPageData.credentials.filter((credential) => credential.environment === apiCredentialsState.environment).length;
+    apiCredentialsResultCount.textContent = credentials.length
+      ? `Showing 1 to ${credentials.length} of ${total} results`
+      : `Showing 0 of ${total} results`;
+  }
+};
+
+const renderApiCredentialsWebhooks = () => {
+  if (!apiCredentialsWebhooks) return;
+
+  apiCredentialsWebhooks.innerHTML = apiCredentialsPageData.webhooks.map((webhook) => `
+    <article class="api-credentials-webhook">
+      <div class="api-credentials-webhook__title">
+        <strong>${webhook.label}</strong>
+        <span class="api-credentials-status api-credentials-status--${webhook.statusTone}"><i></i>${webhook.status}</span>
+      </div>
+      <div class="api-credentials-webhook__url">
+        <span>${webhook.url}</span>
+        <button type="button" data-api-credentials-action="copy-webhook" data-api-credentials-name="${webhook.label}" aria-label="Copy ${webhook.label} endpoint">${icon('copy')}</button>
+      </div>
+      <div class="api-credentials-webhook__actions">
+        <button type="button" data-api-credentials-action="rotate-webhook" data-api-credentials-name="${webhook.label}">${icon('refresh')}Rotate</button>
+        <button type="button" class="is-danger" data-api-credentials-action="revoke-webhook" data-api-credentials-name="${webhook.label}">${icon('trash')}Revoke</button>
+      </div>
+    </article>
+  `).join('');
+};
+
+const renderApiCredentialsPage = () => {
+  if (!apiCredentialsPage) return;
+
+  apiCredentialsEnvironmentButtons.forEach((button) => {
+    const isActive = button.dataset.apiCredentialsEnvironment === apiCredentialsState.environment;
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-pressed', String(isActive));
+  });
+  renderApiCredentialsRows();
+  renderApiCredentialsWebhooks();
+};
+
 const messageIsUnread = (message) => message.unread && !messagesState.readIds.has(message.id);
 
 const getFilteredMessages = () => {
@@ -1998,8 +2104,9 @@ const renderPage = () => {
   const isFinancePage = state.activeNavigationChild === 'balance-payments';
   const isInvoicesPage = state.activeNavigationChild === 'commission-invoices' || state.activeNavigationChild === 'invoices';
   const isHelpCenterPage = state.activeNavigationId === 'help-center';
+  const isApiCredentialsPage = state.activeNavigationChild === 'api-credentials';
   const isMessagesPage = ['all-messages', 'partner-messages', 'system-alerts', 'archived-messages'].includes(state.activeNavigationChild);
-  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage || isMessagesPage;
+  const isMainPage = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage || isApiCredentialsPage || isMessagesPage;
 
   document.body.classList.toggle('is-campaign-page', isCampaignPage);
   document.body.classList.toggle('is-attribution-page', isAttributionPage);
@@ -2009,6 +2116,7 @@ const renderPage = () => {
   document.body.classList.toggle('is-commission-invoices-page', state.activeNavigationChild === 'commission-invoices');
   document.body.classList.toggle('is-finance-invoices-page', state.activeNavigationChild === 'invoices');
   document.body.classList.toggle('is-help-center-page', isHelpCenterPage);
+  document.body.classList.toggle('is-api-credentials-page', isApiCredentialsPage);
   document.body.classList.toggle('is-messages-page', isMessagesPage);
   if (helpCenterUtility) {
     helpCenterUtility.classList.toggle('is-active', isHelpCenterPage);
@@ -2039,14 +2147,16 @@ const renderPage = () => {
               ? 'Review, filter, and download demo invoice records for the selected workspace.'
             : isHelpCenterPage
               ? 'Find answers, learn best practices, and get the support you need.'
+            : isApiCredentialsPage
+              ? 'Create and manage API keys to authenticate and authorize access to the YeahPromos Merchant API. Keep your credentials secure and never share them publicly.'
             : isMessagesPage
               ? 'Stay connected with your partners and never miss an important update.'
             : recruitmentPage?.description ?? operationsPage?.description ?? context.current.label + ' workspace preview for the current brand scope.';
-  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isMessagesPage
-    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isInvoicesPage ? 'Commission & Rules' : isMessagesPage ? 'Messages & Notifications' : 'Finance')
+  breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isApiCredentialsPage || isMessagesPage
+    ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || isInvoicesPage ? 'Commission & Rules' : isApiCredentialsPage ? 'Settings' : isMessagesPage ? 'Messages & Notifications' : 'Finance')
     : isHelpCenterPage ? 'Help center'
     : isOverview ? t('shell.merchantWorkspace', 'Merchant workspace') : context.parent.label;
-  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isMessagesPage ? context.current.label : isOverview ? 'Overview' : context.current.label;
+  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isApiCredentialsPage ? 'API credentials' : isMessagesPage ? context.current.label : isOverview ? 'Overview' : context.current.label;
   breadcrumbCurrent.setAttribute('aria-current', 'page');
   overviewPage.hidden = !isOverview;
   modulePage.hidden = isOverview || (!recruitmentPage && !operationsPage);
@@ -2056,11 +2166,13 @@ const renderPage = () => {
   financePage.hidden = !isFinancePage;
   invoicesPage.hidden = !isInvoicesPage;
   helpCenterPage.hidden = !isHelpCenterPage;
+  apiCredentialsPage.hidden = !isApiCredentialsPage;
   messagesPage.hidden = !isMessagesPage;
   modulePlaceholder.hidden = isOverview || isMainPage || Boolean(recruitmentPage || operationsPage);
   if (pageActions) pageActions.hidden = !isAttributionPage;
   if (commissionRulesActions) commissionRulesActions.hidden = !isCommissionRulesPage;
   if (financeActions) financeActions.hidden = !isFinancePage;
+  if (apiCredentialsActions) apiCredentialsActions.hidden = !isApiCredentialsPage;
   if (messagesPageActions) messagesPageActions.hidden = !isMessagesPage;
 
   if (recruitmentPage) {
@@ -2078,6 +2190,7 @@ const renderPage = () => {
   if (isFinancePage) renderFinancePage();
   if (isInvoicesPage) renderInvoicesPage();
   if (isHelpCenterPage) renderHelpCenterPage();
+  if (isApiCredentialsPage) renderApiCredentialsPage();
   if (isMessagesPage) renderMessagesPage();
 };
 
@@ -2657,6 +2770,68 @@ if (helpCenterPage) {
     }
   });
 }
+
+if (apiCredentialsPage) {
+  apiCredentialsPage.addEventListener('input', (event) => {
+    if (!event.target.matches('[data-api-credentials-search]')) return;
+    apiCredentialsState.search = event.target.value;
+    renderApiCredentialsRows();
+  });
+
+  apiCredentialsPage.addEventListener('change', (event) => {
+    if (!event.target.matches('[data-api-credentials-status]')) return;
+    apiCredentialsState.status = event.target.value;
+    renderApiCredentialsRows();
+  });
+
+  apiCredentialsPage.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-api-credentials-action]');
+    if (!action) return;
+
+    const actionName = action.dataset.apiCredentialsAction;
+    const itemName = action.dataset.apiCredentialsName;
+    if (actionName === 'toggle-filter') {
+      const nextOpenState = apiCredentialsFilterMenu.hidden;
+      apiCredentialsFilterMenu.hidden = !nextOpenState;
+      apiCredentialsFilterButton.setAttribute('aria-expanded', String(nextOpenState));
+      return;
+    }
+
+    if (actionName === 'copy-key') {
+      showToast(`Masked key for ${itemName} is ready to copy`);
+    } else if (actionName === 'row-menu') {
+      showToast(`Actions for ${itemName} are ready for product integration`);
+    } else if (actionName === 'next-page') {
+      showToast('API keys page 2 is ready for product integration');
+    } else if (actionName === 'security-help') {
+      showToast('API key security guidance is ready for product integration');
+    } else if (actionName === 'create-key') {
+      showToast('Create API key flow is ready for product integration');
+    } else if (actionName === 'add-endpoint') {
+      showToast('Webhook endpoint setup is ready for product integration');
+    } else if (actionName === 'copy-webhook') {
+      showToast(`${itemName} endpoint is ready to copy`);
+    } else if (actionName === 'rotate-webhook') {
+      showToast(`${itemName} rotation is ready for product integration`);
+    } else if (actionName === 'revoke-webhook') {
+      showToast(`${itemName} revoke flow is ready for product integration`);
+    } else if (actionName === 'webhook-help') {
+      showToast('Webhook documentation is ready for product integration');
+    }
+  });
+}
+
+apiCredentialsEnvironmentButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    apiCredentialsState.environment = button.dataset.apiCredentialsEnvironment;
+    apiCredentialsState.search = '';
+    apiCredentialsState.status = 'all';
+    if (apiCredentialsSearch) apiCredentialsSearch.value = '';
+    if (apiCredentialsStatus) apiCredentialsStatus.value = 'all';
+    renderApiCredentialsPage();
+    showToast(`${button.textContent.trim()} environment selected`);
+  });
+});
 
 if (messagesPage) {
   messagesPage.addEventListener('input', (event) => {

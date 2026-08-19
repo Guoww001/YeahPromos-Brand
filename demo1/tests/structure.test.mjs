@@ -160,6 +160,31 @@ test('help center reuses the README red navigation tokens', () => {
   assert.match(readme, /Help center > Help center/);
 });
 
+test('API credentials has its own Integrations & Settings page shell', () => {
+  assert.match(html, /data-api-credentials-page/);
+  assert.match(html, /API credentials/);
+  assert.match(html, /data-api-credentials-environment="live"/);
+  assert.match(html, /data-api-credentials-search/);
+  assert.match(html, /data-api-credentials-status/);
+  assert.match(html, /data-api-credentials-rows/);
+  assert.match(html, /data-api-credentials-webhooks/);
+  assert.match(appJs, /isApiCredentialsPage/);
+  assert.match(appJs, /renderApiCredentialsPage/);
+  assert.match(appJs, /getFilteredApiCredentials/);
+  assert.match(data, /apiCredentialsPageData/);
+  assert.match(data, /reporting-service/);
+  assert.match(data, /demoOnly:\s*true/);
+});
+
+test('API credentials reuses the README red navigation tokens and safe copy rules', () => {
+  assert.match(css, /body\.is-api-credentials-page[\s\S]*--api-credentials-red:\s*#e60000/i);
+  assert.match(css, /--api-credentials-soft-red:\s*#fde8e8/i);
+  assert.match(css, /--api-credentials-selected-red:\s*#ff312e/i);
+  assert.match(css, /nav-child\[data-nav-child="api-credentials"\][\s\S]*box-shadow:\s*inset 3px 0 0 var\(--api-credentials-selected-red\)/i);
+  assert.match(readme, /Integrations & Settings > API credentials/);
+  assert.match(readme, /不可访问的 Webhook 占位 URL/);
+});
+
 test('messages and notifications has its own routed conversation workspace', () => {
   assert.match(html, /data-messages-page/);
   assert.match(html, /Messages &amp; Notifications/);
@@ -259,7 +284,7 @@ test('finance neutral text uses contrast-ready dark gray tokens', () => {
 });
 
 test('page loads one module entry and keeps the global navigation in the sidebar', () => {
-  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-18"><\/script>/);
+  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-19"><\/script>/);
   assert.match(html, /<aside[^>]+data-sidebar/);
   assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
 });
@@ -285,8 +310,8 @@ test('overview follows the reference dashboard hierarchy', () => {
 });
 
 test('preview busts the entry cache for the reference dashboard skin', () => {
-  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-18"/);
-  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-18"/);
+  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-19"/);
+  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-19"/);
 });
 
 test('reference dashboard keeps flat cards and red action controls', () => {

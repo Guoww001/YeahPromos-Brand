@@ -14496,6 +14496,968 @@ body.is-help-center-page {
     justify-self: start;
   }
 }
+
+/* Integrations & Settings / API credentials */
+body.is-api-credentials-page {
+  --api-credentials-red: #e60000;
+  --api-credentials-red-dark: #cd0200;
+  --api-credentials-soft-red: #fde8e8;
+  --api-credentials-selected-red: #ff312e;
+  --api-credentials-border: #e5e7eb;
+  --api-credentials-line: #edf0f3;
+  --api-credentials-text: #111111;
+  --api-credentials-text-secondary: #374151;
+  --api-credentials-text-muted: #4b5563;
+  background: #ffffff;
+}
+
+.is-api-credentials-page .page-header {
+  min-height: 104px;
+  margin-bottom: 18px;
+}
+
+.is-api-credentials-page .scope-line,
+.is-api-credentials-page .page-header__filters {
+  display: none;
+}
+
+.is-api-credentials-page .page-header__actions {
+  width: auto;
+  flex: 0 0 auto;
+  gap: 20px;
+  padding-top: 0;
+}
+
+.is-api-credentials-page .page-header__utility {
+  padding-top: 0;
+}
+
+.is-api-credentials-page .page-header__page-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+}
+
+.is-api-credentials-page .breadcrumb [data-breadcrumb-parent] {
+  color: var(--api-credentials-red);
+  font-weight: 600;
+}
+
+.is-api-credentials-page .breadcrumb strong,
+.is-api-credentials-page .page-header h1 {
+  color: var(--api-credentials-text);
+}
+
+.is-api-credentials-page .page-header h1 {
+  font-size: 30px;
+  letter-spacing: -0.9px;
+}
+
+.is-api-credentials-page .page-header p {
+  max-width: 650px;
+  color: var(--api-credentials-text-secondary);
+  font-size: 13px;
+}
+
+.is-api-credentials-page .nav-item[data-nav-item="settings"] {
+  background: var(--api-credentials-red);
+  color: #ffffff;
+}
+
+.is-api-credentials-page .nav-item[data-nav-item="settings"]:hover {
+  background: var(--api-credentials-red-dark);
+  color: #ffffff;
+}
+
+.is-api-credentials-page .nav-item[data-nav-item="settings"] .nav-item__chevron {
+  color: #ffffff;
+}
+
+.is-api-credentials-page .nav-child[data-nav-child="api-credentials"] {
+  background: var(--api-credentials-soft-red);
+  box-shadow: inset 3px 0 0 var(--api-credentials-selected-red);
+  color: var(--api-credentials-selected-red);
+  font-weight: 600;
+}
+
+.api-credentials-page[hidden] {
+  display: none;
+}
+
+.api-credentials-page {
+  display: grid;
+  gap: 18px;
+  color: var(--api-credentials-text);
+}
+
+.api-credentials-environment {
+  display: grid;
+  gap: 6px;
+  min-width: 214px;
+}
+
+.api-credentials-environment > span {
+  color: var(--api-credentials-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.api-credentials-environment__toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 36px;
+  overflow: hidden;
+  border: 1px solid var(--api-credentials-border);
+  border-radius: 7px;
+  background: #ffffff;
+}
+
+.api-credentials-environment__toggle button {
+  min-width: 0;
+  padding: 0 13px;
+  background: #ffffff;
+  color: var(--api-credentials-text);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.api-credentials-environment__toggle button:hover,
+.api-credentials-environment__toggle button.is-active {
+  background: #fff3f3;
+  color: var(--api-credentials-red);
+}
+
+.is-api-credentials-page .api-credentials-page-actions > .button {
+  min-width: 146px;
+  height: 36px;
+  border-radius: 6px;
+  background: var(--api-credentials-red);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.is-api-credentials-page .api-credentials-page-actions > .button:hover {
+  background: var(--api-credentials-red-dark);
+}
+
+.api-credentials-page-actions > .button svg {
+  width: 15px;
+  height: 15px;
+}
+
+.api-credentials-security {
+  display: flex;
+  min-height: 76px;
+  align-items: center;
+  gap: 15px;
+  padding: 13px 17px;
+  border-radius: 7px;
+  background: #fff2f2;
+}
+
+.api-credentials-security__icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--api-credentials-red);
+}
+
+.api-credentials-security__icon svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.8;
+}
+
+.api-credentials-security > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.api-credentials-security strong {
+  display: block;
+  color: var(--api-credentials-text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.api-credentials-security p {
+  margin: 2px 0 0;
+  color: var(--api-credentials-text-secondary);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.api-credentials-text-link,
+.api-credentials-webhook-help {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--api-credentials-text);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.api-credentials-text-link:hover,
+.api-credentials-webhook-help:hover {
+  color: var(--api-credentials-red);
+}
+
+.api-credentials-text-link svg,
+.api-credentials-webhook-help svg {
+  width: 14px;
+  height: 14px;
+}
+
+.api-credentials-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 345px;
+  gap: 24px;
+  align-items: start;
+}
+
+.api-credentials-card {
+  min-width: 0;
+  border: 1px solid var(--api-credentials-border);
+  border-radius: 7px;
+  background: #ffffff;
+}
+
+.api-credentials-card__header {
+  display: flex;
+  min-height: 69px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 17px;
+}
+
+.api-credentials-card__header h2 {
+  margin: 0;
+  color: var(--api-credentials-text);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+.api-credentials-card__header p {
+  max-width: 220px;
+  margin: 8px 0 0;
+  color: var(--api-credentials-text-secondary);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.api-credentials-table-tools {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.api-credentials-search {
+  display: flex;
+  width: 258px;
+  height: 36px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 11px;
+  border: 1px solid var(--api-credentials-border);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--api-credentials-text-muted);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.api-credentials-search:focus-within {
+  border-color: var(--api-credentials-red);
+  box-shadow: 0 0 0 3px var(--api-credentials-soft-red);
+}
+
+.api-credentials-search > svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  stroke-width: 2;
+}
+
+.api-credentials-search input {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--api-credentials-text);
+  font-size: 11px;
+}
+
+.api-credentials-search input::placeholder {
+  color: var(--api-credentials-text-muted);
+  opacity: 1;
+}
+
+.api-credentials-filter-wrap {
+  position: relative;
+}
+
+.api-credentials-outline-button {
+  display: inline-flex;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 13px;
+  border: 1px solid var(--api-credentials-border);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--api-credentials-text);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+
+.api-credentials-outline-button:hover,
+.api-credentials-outline-button[aria-expanded="true"] {
+  border-color: #f0bfc0;
+  background: #fffafa;
+  color: var(--api-credentials-red);
+}
+
+.api-credentials-outline-button svg {
+  width: 15px;
+  height: 15px;
+}
+
+.api-credentials-filter-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  width: 180px;
+  padding: 12px;
+  border: 1px solid var(--api-credentials-border);
+  border-radius: 7px;
+  background: #ffffff;
+  box-shadow: 0 14px 30px rgba(17, 17, 17, 0.12);
+}
+
+.api-credentials-filter-menu label {
+  display: grid;
+  gap: 6px;
+}
+
+.api-credentials-filter-menu label > span {
+  color: var(--api-credentials-text-muted);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.api-credentials-filter-menu select {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--api-credentials-border);
+  border-radius: 5px;
+  outline: 0;
+  background: #ffffff;
+  color: var(--api-credentials-text-secondary);
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.api-credentials-filter-menu select:focus-visible,
+.api-credentials-table button:focus-visible,
+.api-credentials-webhook button:focus-visible,
+.api-credentials-outline-button:focus-visible,
+.api-credentials-text-link:focus-visible,
+.api-credentials-webhook-help:focus-visible,
+.api-credentials-environment__toggle button:focus-visible {
+  outline: 2px solid var(--api-credentials-red);
+  outline-offset: 2px;
+}
+
+.api-credentials-table-scroll {
+  overflow-x: auto;
+}
+
+.api-credentials-table {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.api-credentials-table th,
+.api-credentials-table td {
+  border-top: 1px solid var(--api-credentials-line);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.api-credentials-table th {
+  height: 41px;
+  padding: 0 10px;
+  background: #fafbfc;
+  color: var(--api-credentials-text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.api-credentials-table td {
+  height: 65px;
+  padding: 8px 10px;
+  color: var(--api-credentials-text-secondary);
+  font-size: 11px;
+}
+
+.api-credentials-table th:first-child,
+.api-credentials-table td:first-child {
+  padding-left: 17px;
+}
+
+.api-credentials-table th:nth-child(1),
+.api-credentials-table td:nth-child(1) { width: 23%; }
+
+.api-credentials-table th:nth-child(2),
+.api-credentials-table td:nth-child(2) { width: 21%; }
+
+.api-credentials-table th:nth-child(3),
+.api-credentials-table td:nth-child(3),
+.api-credentials-table th:nth-child(4),
+.api-credentials-table td:nth-child(4) { width: 13%; }
+
+.api-credentials-table th:nth-child(5),
+.api-credentials-table td:nth-child(5) { width: 14%; }
+
+.api-credentials-table th:nth-child(6),
+.api-credentials-table td:nth-child(6) { width: 10%; }
+
+.api-credentials-table th:nth-child(7),
+.api-credentials-table td:nth-child(7) { width: 6%; }
+
+.api-credentials-table td > strong,
+.api-credentials-table td > small {
+  display: block;
+}
+
+.api-credentials-table td > strong {
+  color: var(--api-credentials-text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.api-credentials-table td > small {
+  margin-top: 3px;
+  color: var(--api-credentials-text-muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.api-credentials-key-copy,
+.api-credentials-created-by {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+}
+
+.api-credentials-key-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  place-items: center;
+  border-radius: 50%;
+  background: #f2f4f7;
+  color: #687386;
+}
+
+.api-credentials-key-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.8;
+}
+
+.api-credentials-key-copy > div,
+.api-credentials-created-by > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.api-credentials-key-copy strong,
+.api-credentials-created-by strong {
+  overflow: hidden;
+  color: var(--api-credentials-text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.api-credentials-key-copy small,
+.api-credentials-created-by small {
+  overflow: hidden;
+  color: var(--api-credentials-text-muted);
+  font-size: 10px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.api-credentials-key-copy small {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.api-credentials-key-copy small button {
+  display: inline-grid;
+  width: 15px;
+  height: 15px;
+  place-items: center;
+  padding: 0;
+  background: transparent;
+  color: var(--api-credentials-text-muted);
+  cursor: pointer;
+}
+
+.api-credentials-key-copy small button:hover {
+  color: var(--api-credentials-red);
+}
+
+.api-credentials-key-copy small button svg {
+  width: 13px;
+  height: 13px;
+}
+
+.api-credentials-avatar {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  border-radius: 50%;
+  background: #eef0f3;
+  color: #586272;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.api-credentials-scopes {
+  display: grid;
+  gap: 2px;
+  color: var(--api-credentials-text-secondary);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.api-credentials-scope-extra {
+  color: var(--api-credentials-text-muted);
+}
+
+.api-credentials-status {
+  display: inline-flex;
+  min-height: 22px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.api-credentials-status i {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.api-credentials-status--active {
+  background: #e7f8ed;
+  color: #1d995e;
+}
+
+.api-credentials-status--inactive {
+  background: #f0f2f5;
+  color: #5f6876;
+}
+
+.api-credentials-cell--actions {
+  text-align: right !important;
+}
+
+.api-credentials-cell--actions button {
+  display: inline-grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid var(--api-credentials-border);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--api-credentials-text-secondary);
+  cursor: pointer;
+}
+
+.api-credentials-cell--actions button:hover {
+  border-color: #f0bfc0;
+  color: var(--api-credentials-red);
+}
+
+.api-credentials-cell--actions button svg {
+  width: 15px;
+  height: 15px;
+}
+
+.api-credentials-empty {
+  height: 180px !important;
+  text-align: center !important;
+}
+
+.api-credentials-empty strong,
+.api-credentials-empty span {
+  display: block;
+}
+
+.api-credentials-empty strong {
+  color: var(--api-credentials-text);
+  font-size: 12px;
+}
+
+.api-credentials-empty span {
+  margin-top: 5px;
+  color: var(--api-credentials-text-muted);
+  font-size: 11px;
+}
+
+.api-credentials-table-footer {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 0 17px;
+  border-top: 1px solid var(--api-credentials-line);
+  color: var(--api-credentials-text-muted);
+  font-size: 10px;
+}
+
+.api-credentials-pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.api-credentials-pagination button {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--api-credentials-text-secondary);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.api-credentials-pagination button:hover:not(:disabled),
+.api-credentials-pagination button.is-current {
+  border-color: #f2c6c6;
+  background: var(--api-credentials-soft-red);
+  color: var(--api-credentials-red);
+}
+
+.api-credentials-pagination button:disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.api-credentials-webhooks-card {
+  min-height: 575px;
+  padding-bottom: 16px;
+}
+
+.api-credentials-card__header--webhooks {
+  align-items: flex-start;
+  padding-bottom: 15px;
+}
+
+.api-credentials-add-button {
+  height: 34px;
+  padding-inline: 10px;
+  font-size: 10px;
+}
+
+.api-credentials-add-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.api-credentials-webhook-list {
+  display: grid;
+}
+
+.api-credentials-webhook {
+  display: grid;
+  gap: 10px;
+  padding: 16px 17px 14px;
+  border-top: 1px solid var(--api-credentials-line);
+}
+
+.api-credentials-webhook__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.api-credentials-webhook__title > strong {
+  color: var(--api-credentials-text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.api-credentials-webhook__url {
+  display: flex;
+  min-width: 0;
+  min-height: 30px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 8px;
+  border: 1px solid #e3e7ed;
+  border-radius: 6px;
+  background: #fafbfc;
+}
+
+.api-credentials-webhook__url > span {
+  min-width: 0;
+  overflow: hidden;
+  flex: 1;
+  color: var(--api-credentials-text-secondary);
+  font-size: 10px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.api-credentials-webhook__url button {
+  display: inline-grid;
+  width: 20px;
+  height: 24px;
+  flex: 0 0 20px;
+  place-items: center;
+  padding: 0;
+  background: transparent;
+  color: var(--api-credentials-text-muted);
+  cursor: pointer;
+}
+
+.api-credentials-webhook__url button:hover {
+  color: var(--api-credentials-red);
+}
+
+.api-credentials-webhook__url button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.api-credentials-webhook__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.api-credentials-webhook__actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background: transparent;
+  color: var(--api-credentials-text-secondary);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.api-credentials-webhook__actions button:hover {
+  color: var(--api-credentials-red);
+}
+
+.api-credentials-webhook__actions button.is-danger {
+  color: var(--api-credentials-red);
+}
+
+.api-credentials-webhook__actions button.is-danger:hover {
+  color: var(--api-credentials-red-dark);
+}
+
+.api-credentials-webhook__actions button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.api-credentials-webhook-help {
+  margin: 16px 17px 0;
+  font-size: 10px;
+}
+
+@media (max-width: 1199px) {
+  .api-credentials-layout {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 16px;
+  }
+
+  .api-credentials-search {
+    width: 210px;
+  }
+}
+
+@media (max-width: 980px) {
+  .api-credentials-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .api-credentials-webhooks-card {
+    min-height: 0;
+  }
+
+  .api-credentials-webhook-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .api-credentials-webhook {
+    border-right: 1px solid var(--api-credentials-line);
+  }
+
+  .api-credentials-webhook:nth-child(-n + 2) {
+    border-top: 1px solid var(--api-credentials-line);
+  }
+}
+
+@media (max-width: 767px) {
+  .is-api-credentials-page .page-header {
+    min-height: 0;
+  }
+
+  .is-api-credentials-page .page-header__actions {
+    display: grid;
+    gap: 14px;
+    padding-top: 16px;
+  }
+
+  .is-api-credentials-page .page-header__page-actions {
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .api-credentials-environment {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .is-api-credentials-page .api-credentials-page-actions > .button {
+    align-self: end;
+    min-width: 134px;
+  }
+
+  .api-credentials-security {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .api-credentials-security .api-credentials-text-link {
+    margin-left: 53px;
+  }
+
+  .api-credentials-card__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .api-credentials-table-tools {
+    width: 100%;
+  }
+
+  .api-credentials-search {
+    width: auto;
+    flex: 1;
+  }
+
+  .api-credentials-webhook-list {
+    grid-template-columns: 1fr;
+  }
+
+  .api-credentials-webhook,
+  .api-credentials-webhook:nth-child(-n + 2) {
+    border-right: 0;
+    border-top: 1px solid var(--api-credentials-line);
+  }
+}
+
+@media (max-width: 479px) {
+  .is-api-credentials-page .page-header__page-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .is-api-credentials-page .api-credentials-page-actions > .button {
+    width: 100%;
+  }
+
+  .api-credentials-security {
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .api-credentials-security .api-credentials-text-link {
+    grid-column: 2;
+    margin-left: 0;
+    justify-self: start;
+  }
+
+  .api-credentials-table-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    padding-block: 11px;
+  }
+
+  .api-credentials-pagination {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .api-credentials-card__header--webhooks {
+    align-items: flex-start;
+  }
+
+  .api-credentials-add-button {
+    align-self: flex-start;
+  }
+}
+
 /* Commission & Rules / Invoices */
 body.is-invoices-page {
   --invoices-red: #e60000;
