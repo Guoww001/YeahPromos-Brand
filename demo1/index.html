@@ -9,7 +9,7 @@
       content="YeahPromos merchant business overview demo"
     />
     <title>Business Overview · YeahPromos</title>
-    <link rel="stylesheet" href="./styles.css?v=merchant-reference-3" />
+    <link rel="stylesheet" href="./styles.css?v=merchant-reference-4" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -746,6 +746,127 @@
             </section>
           </section>
 
+          <section class="invoices-page" data-invoices-page hidden aria-labelledby="invoices-page-title">
+            <h2 id="invoices-page-title" class="sr-only">Invoices</h2>
+
+            <section class="invoices-card" aria-label="Invoice filters and records">
+              <div class="invoices-page__topbar">
+                <label class="invoices-date-range">
+                  <span class="sr-only">Invoice date range</span>
+                  <svg aria-hidden="true"><use href="#icon-calendar"></use></svg>
+                  <select data-invoices-date-range aria-label="Invoice date range">
+                    <option value="last-7d">May 05 – May 12, 2025</option>
+                    <option value="last-30d">Apr 13 – May 12, 2025</option>
+                    <option value="last-90d">Feb 12 – May 12, 2025</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="invoices-page__heading">
+                <div>
+                  <span class="eyebrow">Billing records</span>
+                  <h2>Invoices (73)</h2>
+                  <p>Review payment records and download invoice details for this workspace.</p>
+                </div>
+              </div>
+
+              <div class="invoices-toolbar" aria-label="Invoice filters">
+                <label class="invoices-filter">
+                  <span>Payment method</span>
+                  <select data-invoices-filter="paymentMethod" aria-label="Filter by payment method">
+                    <option value="all">All methods</option>
+                    <option value="Account credits">Account credits</option>
+                    <option value="Credit card">Credit card</option>
+                    <option value="Bank transfer">Bank transfer</option>
+                  </select>
+                </label>
+                <label class="invoices-filter">
+                  <span>Payment type</span>
+                  <select data-invoices-filter="paymentType" aria-label="Filter by payment type">
+                    <option value="all">All types</option>
+                    <option value="Publisher payout">Publisher payout</option>
+                    <option value="Price plan fee">Price plan fee</option>
+                    <option value="Account deposit">Account deposit</option>
+                  </select>
+                </label>
+                <label class="invoices-filter">
+                  <span>Status</span>
+                  <select data-invoices-filter="status" aria-label="Filter by invoice status">
+                    <option value="all">All statuses</option>
+                    <option value="Paid">Paid</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Failed">Failed</option>
+                  </select>
+                </label>
+                <label class="invoices-filter">
+                  <span>Brand</span>
+                  <select data-invoices-filter="brand" aria-label="Filter by brand">
+                    <option value="all">All brands</option>
+                    <option value="PartnerBoost">PartnerBoost</option>
+                    <option value="PartnerMatic">PartnerMatic</option>
+                    <option value="Northstar Demo">Northstar Demo</option>
+                  </select>
+                </label>
+                <label class="invoices-search">
+                  <span class="sr-only">Search invoices</span>
+                  <svg aria-hidden="true"><use href="#icon-search"></use></svg>
+                  <input type="search" data-invoices-search placeholder="Search invoices..." autocomplete="off" />
+                </label>
+              </div>
+
+              <div class="invoices-table-scroll">
+                <table class="invoices-table">
+                  <caption class="sr-only">Invoices</caption>
+                  <colgroup>
+                    <col class="invoices-col--check" />
+                    <col class="invoices-col--date" />
+                    <col class="invoices-col--id" />
+                    <col class="invoices-col--brand" />
+                    <col class="invoices-col--method" />
+                    <col class="invoices-col--type" />
+                    <col class="invoices-col--description" />
+                    <col class="invoices-col--amount" />
+                    <col class="invoices-col--status" />
+                    <col class="invoices-col--actions" />
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th scope="col">
+                        <label class="invoices-checkbox invoices-checkbox--header">
+                          <input type="checkbox" data-invoices-select-all aria-label="Select all visible invoices" />
+                          <span aria-hidden="true"></span>
+                        </label>
+                      </th>
+                      <th scope="col">Date / Time</th>
+                      <th scope="col">Payment ID</th>
+                      <th scope="col">Brand</th>
+                      <th scope="col">Payment Method</th>
+                      <th scope="col">Payment Type</th>
+                      <th scope="col">Description</th>
+                      <th scope="col">Amount</th>
+                      <th scope="col">Status</th>
+                      <th scope="col"><span class="sr-only">Actions</span></th>
+                    </tr>
+                  </thead>
+                  <tbody data-invoices-rows></tbody>
+                </table>
+              </div>
+
+              <div class="invoices-table-footer">
+                <span data-invoices-result-count>Showing 1 to 5 of 73 invoices</span>
+                <div class="invoices-pagination" aria-label="Invoice pagination">
+                  <button type="button" aria-label="Previous page" disabled>‹</button>
+                  <button type="button" class="is-current" aria-current="page" data-invoices-action="page" data-invoices-page-number="1">1</button>
+                  <button type="button" data-invoices-action="page" data-invoices-page-number="2">2</button>
+                  <button type="button" data-invoices-action="page" data-invoices-page-number="3">3</button>
+                  <span aria-hidden="true">…</span>
+                  <button type="button" data-invoices-action="page" data-invoices-page-number="15">15</button>
+                  <button type="button" aria-label="Next page" data-invoices-action="page" data-invoices-page-number="2">›</button>
+                </div>
+              </div>
+            </section>
+          </section>
+
           <section class="module-placeholder card" data-module-placeholder hidden aria-live="polite">
             <div class="module-placeholder__mark">◎</div>
             <span class="eyebrow" data-module-parent>Workspace</span>
@@ -783,6 +904,6 @@
       <button type="button" data-toast-close aria-label="Dismiss notification"><svg><use href="#icon-x"></use></svg></button>
     </div>
 
-    <script type="module" src="./app.js?v=merchant-reference-3"></script>
+    <script type="module" src="./app.js?v=merchant-reference-4"></script>
   </body>
 </html>
