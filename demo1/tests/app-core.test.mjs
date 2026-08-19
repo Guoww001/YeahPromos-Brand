@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   createDashboardState,
+  isNavigationItemActive,
   selectDemoState,
   selectPeriod,
   toggleNavigationGroup,
@@ -78,4 +79,14 @@ test('toggleNavigationGroup expands and collapses the same group immutably', () 
   assert.deepEqual(source.expandedGroups, []);
   assert.deepEqual(expanded.expandedGroups, ['reports']);
   assert.deepEqual(collapsed.expandedGroups, []);
+});
+
+test('a selected child keeps its parent group marked as the current module', () => {
+  const state = {
+    activeNavigationId: 'campaigns',
+    activeNavigationChild: 'affiliate-programs',
+  };
+
+  assert.equal(isNavigationItemActive(state, 'campaigns'), true);
+  assert.equal(isNavigationItemActive({ ...state, activeNavigationChild: null }, 'campaigns'), true);
 });

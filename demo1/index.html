@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f4f7fb" />
+    <meta name="theme-color" content="#ffffff" />
     <meta
       name="description"
       content="YeahPromos merchant business overview demo"
     />
     <title>Business Overview · YeahPromos</title>
-    <link rel="stylesheet" href="./styles.css?v=merchant-reference-1" />
+    <link rel="stylesheet" href="./styles.css?v=merchant-reference-18" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -58,11 +58,11 @@
 
         <div class="sidebar__footer">
           <div class="sidebar__support">
-            <button class="sidebar__utility" type="button" data-demo-action="Help center">
+            <button class="sidebar__utility" type="button" data-utility-route="help-center" data-action-navigation="help-center">
               <svg><use href="#icon-help"></use></svg>
               <span>Help center</span>
             </button>
-            <button class="sidebar__utility" type="button" data-demo-action="Settings">
+            <button class="sidebar__utility" type="button" data-utility-route="workspace-settings" data-action-navigation="workspace-settings">
               <svg><use href="#icon-settings"></use></svg>
               <span>Settings</span>
             </button>
@@ -88,9 +88,13 @@
                 <svg><use href="#icon-menu"></use></svg>
               </button>
               <div>
-                <div class="breadcrumb"><span>Merchant workspace</span><i>/</i><strong data-breadcrumb-current>Overview</strong></div>
+                <nav class="breadcrumb" aria-label="Breadcrumb">
+                  <span data-breadcrumb-parent>Merchant workspace</span>
+                  <span class="breadcrumb__separator" aria-hidden="true">&gt;</span>
+                  <strong data-breadcrumb-current aria-current="page">Overview</strong>
+                </nav>
                 <h1 data-page-title>Business overview</h1>
-                <p data-page-description>Monitor your affiliate program performance and partner activity.</p>
+                <p data-page-description>Track performance, partner growth, and revenue across your affiliate programs.</p>
                 <div class="scope-line"><span>Scope: All partners and campaigns</span><i aria-hidden="true">⌄</i></div>
               </div>
             </div>
@@ -121,7 +125,7 @@
                 <div class="period-picker">
                   <button class="period-picker__trigger" type="button" data-period-toggle aria-expanded="false">
                     <svg><use href="#icon-calendar"></use></svg>
-                    <span data-period-label>Aug 05 – Aug 12, 2026</span>
+                    <span data-period-label>May 05 – May 12, 2025</span>
                     <svg class="period-picker__chevron"><use href="#icon-chevron"></use></svg>
                   </button>
                   <div class="period-picker__menu" data-period-menu hidden></div>
@@ -133,60 +137,74 @@
           <div class="demo-state-banner" data-demo-state-banner role="status" aria-live="polite" hidden></div>
 
           <div data-overview-page>
-            <section class="metrics-section" aria-labelledby="performance-heading">
-              <div class="section-heading section-heading--compact">
-                <div>
-                  <h2 id="performance-heading">Performance overview</h2>
-                </div>
-                <span class="live-status"><i></i> Live</span>
-              </div>
-              <div class="metrics-grid" data-metrics-grid></div>
+            <section class="metrics-section overview-metrics-section" aria-label="Key performance metrics">
+              <div class="metrics-grid overview-metrics-grid" data-metrics-grid></div>
             </section>
 
-            <section class="analytics-grid" aria-label="Performance details">
-              <article class="card ranking-card">
-                <div class="card__header">
+            <section class="analytics-grid overview-layout" aria-label="Performance and partner insights">
+              <article class="card overview-panel overview-chart-panel">
+                <div class="overview-panel__header">
+                  <div>
+                    <span class="eyebrow">Performance tracking</span>
+                    <h2>Performance overview</h2>
+                  </div>
+                  <span class="overview-chart__range" data-overview-chart-range>May 05 – May 12, 2025</span>
+                </div>
+                <div class="overview-chart-toolbar">
+                  <div class="overview-chart-tabs" data-overview-chart-tabs role="tablist" aria-label="Performance metric"></div>
+                  <div class="overview-chart-controls">
+                    <span data-overview-chart-period>May 05 – May 12, 2025</span>
+                    <select data-overview-chart-cadence aria-label="Chart interval">
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="overview-chart" data-overview-chart role="img" aria-label="Performance trend chart"></div>
+              </article>
+
+              <article class="card ranking-card overview-panel overview-ranking-panel">
+                <div class="card__header overview-panel__header">
                   <div>
                     <span class="eyebrow">Partner performance</span>
                     <h2>Top performing partners</h2>
-                    <p>Commission contribution · Selected period</p>
                   </div>
                   <button class="text-link" type="button" data-partner-view="northstar">
-                    View partner detail
+                    <span>View all</span>
                     <svg><use href="#icon-arrow"></use></svg>
                   </button>
                 </div>
                 <div class="ranking-table-head" aria-hidden="true">
                   <span>Rank</span>
                   <span>Partner</span>
-                  <span>Orders</span>
+                  <span>Clicks</span>
+                  <span>Conversions</span>
                   <span>Commission</span>
-                  <span>Trend</span>
                 </div>
                 <div class="ranking-list" data-ranking-list></div>
-                <button class="text-link ranking-card__footer-link" type="button" data-partner-view="northstar">
-                  View all partners
-                  <svg><use href="#icon-arrow"></use></svg>
-                </button>
               </article>
-
-              <div class="summary-grid">
-                <article class="card summary-card" data-commission-summary></article>
-                <article class="card summary-card" data-partner-status></article>
-              </div>
             </section>
 
-            <section class="action-center-section" aria-labelledby="action-center-heading">
-              <div class="section-heading">
-                <div>
-                  <h2 id="action-center-heading">Action Center</h2>
+            <section class="overview-secondary-grid" aria-label="Commission, partner status and action center">
+              <div class="summary-grid overview-summary-grid">
+                <article class="card summary-card overview-panel" data-commission-summary></article>
+                <article class="card summary-card overview-panel" data-partner-status></article>
+              </div>
+
+              <section class="action-center-section overview-action-panel" aria-labelledby="action-center-heading">
+                <div class="section-heading">
+                  <div>
+                    <h2 id="action-center-heading">Action center</h2>
+                  </div>
+                  <span class="section-heading__meta" data-section-count>2 tasks</span>
+                  <button class="text-link" type="button" data-action-navigation="applications"><span>View all</span></button>
                 </div>
-                <span class="section-count" data-section-count>4 tasks</span>
-              </div>
-              <div class="action-center-grid" data-action-center></div>
+                <div class="action-center-grid" data-action-center></div>
+              </section>
             </section>
 
-            <section class="quick-actions-section" aria-labelledby="quick-actions-heading">
+            <section class="quick-actions-section overview-shortcuts-panel" aria-labelledby="quick-actions-heading">
               <div class="section-heading">
                 <div>
                   <h2 id="quick-actions-heading">Shortcuts</h2>
@@ -196,7 +214,9 @@
             </section>
           </div>
 
-          <section class="module-placeholder card" data-module-placeholder hidden aria-live="polite">
+        <section class="module-page" data-module-page hidden aria-live="polite"></section>
+
+        <section class="module-placeholder card" data-module-placeholder hidden aria-live="polite">
             <div class="module-placeholder__mark">◎</div>
             <span class="eyebrow" data-module-parent>Workspace</span>
             <h2 data-module-title>Module preview</h2>
@@ -233,6 +253,6 @@
       <button type="button" data-toast-close aria-label="Dismiss notification"><svg><use href="#icon-x"></use></svg></button>
     </div>
 
-    <script type="module" src="./app.js?v=merchant-reference-1"></script>
+    <script type="module" src="./app.js?v=merchant-reference-18"></script>
   </body>
 </html>

@@ -101,9 +101,9 @@ export const dashboardData = {
     timezone: 'America/Los_Angeles',
   },
   periods: [
-    { id: '7d', label: 'Aug 05 – Aug 12, 2026', shortLabel: 'Last 7 days', snapshot: sevenDaySnapshot },
-    { id: '30d', label: 'Jul 14 – Aug 12, 2026', shortLabel: 'Last 30 days', snapshot: thirtyDaySnapshot },
-    { id: '90d', label: 'May 15 – Aug 12, 2026', shortLabel: 'Last 90 days', snapshot: ninetyDaySnapshot },
+    { id: '7d', label: 'May 05 – May 12, 2025', shortLabel: 'Last 7 days', snapshot: sevenDaySnapshot },
+    { id: '30d', label: 'Apr 13 – May 12, 2025', shortLabel: 'Last 30 days', snapshot: thirtyDaySnapshot },
+    { id: '90d', label: 'Feb 12 – May 12, 2025', shortLabel: 'Last 90 days', snapshot: ninetyDaySnapshot },
   ],
   navigation: [
     { id: 'overview', label: 'Overview', icon: 'grid' },
@@ -136,8 +136,8 @@ export const dashboardData = {
       children: [
         { id: 'product-feed', label: 'Product feed' },
         { id: 'coupons', label: 'Coupons' },
-        { id: 'texts-emails', label: 'Texts & emails' },
         { id: 'banners-images', label: 'Banners & images' },
+        { id: 'texts-emails', label: 'Texts & emails' },
       ],
     },
     {
@@ -232,13 +232,13 @@ export const dashboardData = {
   partners: [
     {
       id: 'northstar',
-      name: 'Northstar Media',
+      name: 'Alpha Media',
       type: 'Publisher',
-      channel: 'Website / Content',
+      channel: 'Content/Blog',
       status: 'Active',
       group: 'Premium publishers',
       audience: '1.2M monthly visits',
-      commission: '$6,845.20',
+      commission: '$2,812.45',
     },
   ],
 };

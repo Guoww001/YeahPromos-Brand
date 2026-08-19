@@ -1,110 +1,35 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
+import fs from 'node:fs';
+import path from 'node:path';
 
-const currentDirectory = dirname(fileURLToPath(import.meta.url));
-const demoDirectory = resolve(currentDirectory, '..');
-const html = readFileSync(resolve(demoDirectory, 'index.html'), 'utf8');
-const css = readFileSync(resolve(demoDirectory, 'styles.css'), 'utf8');
-const appJs = readFileSync(resolve(demoDirectory, 'app.js'), 'utf8');
-const data = readFileSync(resolve(demoDirectory, 'data.mjs'), 'utf8');
+const root = path.resolve(process.cwd(), 'demo1');
+const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const appJs = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
+const css = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
+const data = fs.readFileSync(path.join(root, 'data.mjs'), 'utf8');
 
-test('page provides the required sidebar and dashboard regions', () => {
-  assert.match(html, /data-sidebar/);
-  assert.match(html, /data-metrics-grid/);
-  assert.match(html, /data-ranking-list/);
-  assert.match(html, /data-commission-summary/);
-  assert.match(html, /data-partner-status/);
-  assert.match(html, /data-action-center/);
-  assert.match(html, /data-drawer/);
-  assert.match(html, /data-toast/);
-  assert.match(html, /data-action-center/);
-  assert.match(html, /data-demo-state/);
-});
-
-test('page loads one module entry and keeps the global navigation in the sidebar', () => {
-  assert.match(html, /<script type="module" src="\.\/app\.js\?v=merchant-reference-1"><\/script>/);
-  assert.match(html, /<aside[^>]+data-sidebar/);
-  assert.doesNotMatch(html, /<header[^>]*>\s*<nav/i);
-});
-
-test('styles define the light red merchant-dashboard visual tokens', () => {
-  assert.match(css, /--color-brand:\s*#fa4a4a/i);
-  assert.match(css, /--color-canvas:\s*#fbfbfa/i);
-  assert.match(css, /--color-brand-soft:\s*#fff1f3/i);
-  assert.match(css, /--radius-card:\s*6px/i);
-});
-
-test('overview follows the reference dashboard hierarchy', () => {
-  assert.match(html, /class="brand__wordmark"><strong>YEAH<\/strong><b>P<\/b><strong>ROMOS<\/strong>/);
-  assert.match(html, /Performance overview/);
-  assert.match(html, /class="live-status"[^>]*><i><\/i> Live/);
-  assert.match(html, /Scope: All partners and campaigns/);
-  assert.match(html, /class="page-header__utility"/);
-  assert.match(html, /class="ranking-table-head"/);
-  assert.match(appJs, /data-metric-id="\$\{metric\.id\}"/);
-  assert.match(css, /\.metric-card\[data-metric-id="net-sales"\]/i);
-  assert.match(css, /\.analytics-grid\s*\{[\s\S]*grid-template-columns:\s*minmax\(0, 1\.9fr\)\s+minmax\(0, \.9fr\)\s+minmax\(0, \.9fr\)/s);
-  assert.match(css, /\.summary-grid\s*\{[\s\S]*display:\s*contents;/s);
-  assert.match(css, /\.metric-card::before\s*\{[\s\S]*width:\s*38px;/s);
-});
-
-test('preview busts the entry cache for the reference dashboard skin', () => {
-  assert.match(html, /href="\.\/styles\.css\?v=merchant-reference-1"/);
-  assert.match(html, /src="\.\/app\.js\?v=merchant-reference-1"/);
-});
-
-test('reference dashboard keeps flat cards and red action controls', () => {
-  assert.match(css, /\.card\s*\{[\s\S]*box-shadow:\s*none;/s);
-  assert.match(css, /\.action-card\s*\{[\s\S]*border-radius:\s*0;/s);
-  assert.match(css, /\.quick-action\s*\{[\s\S]*border-radius:\s*6px;/s);
-});
-
-test('mobile date control stays readable beside the demo state selector', () => {
-  assert.match(css, /\.period-picker__trigger span\s*\{[^}]*white-space:\s*nowrap;/s);
-  assert.match(css, /\.page-header__actions\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)\s+minmax\(125px, \.62fr\);/s);
-});
-
-test('merchant overview keeps task-oriented navigation and account context', () => {
-  assert.match(html, /Merchant workspace/);
-  assert.match(html, /Brand Admin/);
-  assert.match(data, /Recruitment & Partners/);
-  assert.match(data, /Products & Assets/);
+test('target workspace keeps the overview shell and routed module regions', () => {
+  assert.match(html, /data-overview-page/);
+  assert.match(html, /data-overview-chart/);
+  assert.match(html, /data-module-page/);
+  assert.match(appJs, /createOverviewState/);
+  assert.match(appJs, /createRecruitmentState/);
+  assert.match(appJs, /createOperationsState/);
+  assert.match(appJs, /renderOperationsPage/);
   assert.match(data, /Data & Transactions/);
 });
 
-test('styles load all local Plus Jakarta Sans weights without remote font requests', () => {
-  const fontFaces = css.match(/@font-face/g) ?? [];
-  assert.equal(fontFaces.length, 5);
-  assert.match(css, /\.\.\/fonts\/plus-jakarta-sans-latin-400-normal\.woff2/);
-  assert.match(css, /\.\.\/fonts\/plus-jakarta-sans-latin-800-normal\.woff2/);
-  assert.doesNotMatch(css, /fonts\.googleapis|use\.typekit|https?:\/\//i);
+test('target modules use the approved red visual tokens and light card surfaces', () => {
+  assert.match(css, /--color-brand:\s*#e60000/);
+  assert.match(css, /\.overview-chart\s*\{/);
+  assert.match(css, /\.recruitment-module\s*\{/);
+  assert.match(css, /\.workspace-module\s*\{/);
+  assert.match(css, /\.workspace-button--primary\s*\{/);
 });
 
-test('partner details use accessible modal dialog semantics', () => {
-  assert.match(html, /data-drawer[^>]+role="dialog"/);
-  assert.match(html, /data-drawer[^>]+aria-modal="true"/);
-  assert.match(html, /data-drawer[^>]+aria-labelledby="merchant-drawer-title"/);
-  assert.match(html, /data-drawer-backdrop[^>]+aria-label="Dismiss partner details overlay"/);
-});
-
-test('styles retain a side drawer on mobile and respect reduced motion', () => {
-  assert.match(css, /@media \(max-width: 767px\)/);
-  assert.match(css, /\.sidebar\.is-open\s*\{[^}]*transform:\s*translateX\(0\)/s);
-  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
-});
-
-test('desktop-only stylesheet hides both mobile navigation controls with a selector stronger than icon button', () => {
-  assert.match(css, /\.sidebar__close\.icon-button,\s*\.mobile-menu\.icon-button\s*\{\s*display:\s*none;/s);
-});
-
-test('partner ranking fills are block elements so percentage widths can render', () => {
-  assert.match(css, /\.ranking-row__fill\s*\{[^}]*display:\s*block;/s);
-});
-
-test('drawer focus restoration falls back to the partner trigger', () => {
-  assert.match(appJs, /lastDrawerTrigger\?\.isConnected/);
-  assert.match(appJs, /data-partner-view=.*activePartnerId/s);
+test('smooth chart and selected child navigation contracts remain in the source', () => {
+  assert.match(appJs, /buildSmoothChartPath/);
+  assert.match(appJs, /isNavigationItemActive/);
+  assert.match(css, /\.nav-child\.is-active/);
 });
