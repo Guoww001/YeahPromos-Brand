@@ -9,7 +9,7 @@
       content="YeahPromos merchant business overview demo"
     />
     <title>Business Overview · YeahPromos</title>
-    <link rel="stylesheet" href="./styles.css?v=merchant-reference-3" />
+    <link rel="stylesheet" href="./styles.css?v=merchant-reference-4" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -54,6 +54,9 @@
       <symbol id="icon-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 10h18M7 15h4" /></symbol>
       <symbol id="icon-bank" viewBox="0 0 24 24"><path d="m3 9 9-6 9 6M5 10v8M9 10v8M15 10v8M19 10v8M3 20h18" /></symbol>
       <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></symbol>
+      <symbol id="icon-rocket" viewBox="0 0 24 24"><path d="M14 4c2.4-.6 4.2-.3 5.1.6.9.9 1.2 2.7.6 5.1l-4.8 4.8-4.8-4.8L14 4Z" /><path d="m10.1 9.9-4.4.8-1.5 3.1 4.2-.7M14.1 13.9l-.7 4.2 3.1-1.5.8-4.4" /><path d="M8.8 15.2 6 18l-2 0 .8-2.8 2.8-2.8M14.7 7.3h.01" /></symbol>
+      <symbol id="icon-file" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v5h5M9 12h6M9 16h6" /></symbol>
+      <symbol id="icon-external" viewBox="0 0 24 24"><path d="M14 5h5v5M19 5l-8 8" /><path d="M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></symbol>
     </svg>
 
     <div class="app-shell">
@@ -72,7 +75,7 @@
 
         <div class="sidebar__footer">
           <div class="sidebar__support">
-            <button class="sidebar__utility" type="button" data-demo-action="Help center">
+            <button class="sidebar__utility" type="button" data-action-navigation="help-center" data-help-center-utility>
               <svg><use href="#icon-help"></use></svg>
               <span>Help center</span>
             </button>
@@ -746,6 +749,70 @@
             </section>
           </section>
 
+          <section class="help-center-page" data-help-center-page hidden aria-labelledby="help-center-content-title">
+            <h2 id="help-center-content-title" class="sr-only">Help center</h2>
+
+            <div class="help-center-search-shell">
+              <label class="help-center-search">
+                <span class="sr-only">Search help articles</span>
+                <svg aria-hidden="true"><use href="#icon-search"></use></svg>
+                <input type="search" data-help-center-search placeholder="Search help articles" autocomplete="off" />
+                <span class="help-center-search__hint">Press / to search</span>
+              </label>
+            </div>
+
+            <div class="help-center-layout">
+              <div class="help-center-main">
+                <div class="help-center-category-grid" data-help-center-categories></div>
+
+                <section class="help-center-card help-center-articles-card" aria-labelledby="help-center-popular-title">
+                  <div class="help-center-section-header">
+                    <div>
+                      <h2 id="help-center-popular-title">Popular articles</h2>
+                      <p>Start with the answers other merchants use most.</p>
+                    </div>
+                    <button class="help-center-link" type="button" data-help-center-action="view-all-articles">View all articles <svg><use href="#icon-arrow"></use></svg></button>
+                  </div>
+                  <div class="help-center-article-list" data-help-center-articles></div>
+                  <button class="help-center-load-more" type="button" data-help-center-action="load-more-articles">
+                    <span>Load more articles</span>
+                    <svg><use href="#icon-chevron"></use></svg>
+                  </button>
+                </section>
+              </div>
+
+              <aside class="help-center-aside" aria-label="Help center support">
+                <section class="help-center-card help-center-support-card" aria-labelledby="help-center-support-title">
+                  <div class="help-center-section-header help-center-section-header--stacked">
+                    <div>
+                      <h2 id="help-center-support-title">Contact support</h2>
+                      <p>Can’t find what you’re looking for?<br />Our support team is here to help.</p>
+                    </div>
+                  </div>
+                  <div class="help-center-support-hours">
+                    <span class="help-center-support-hours__icon"><svg><use href="#icon-clock"></use></svg></span>
+                    <span><strong>Our support hours</strong><small>Mon – Fri, 9:00 AM – 6:00 PM (UTC)</small></span>
+                  </div>
+                  <div class="help-center-support-actions">
+                    <button class="button button--primary" type="button" data-help-center-action="contact-support"><svg><use href="#icon-message"></use></svg>Contact support</button>
+                    <button class="button button--secondary" type="button" data-help-center-action="view-tickets"><svg><use href="#icon-file"></use></svg>View my support tickets</button>
+                  </div>
+                </section>
+
+                <section class="help-center-card help-center-status-card" aria-labelledby="help-center-status-title">
+                  <div class="help-center-section-header help-center-section-header--stacked">
+                    <div>
+                      <h2 id="help-center-status-title">System status</h2>
+                    </div>
+                  </div>
+                  <div class="help-center-status-summary"><span class="help-center-status-summary__icon"><svg><use href="#icon-check"></use></svg></span><span><strong>All systems operational</strong><small>Everything is running smoothly.</small></span></div>
+                  <div class="help-center-status-list" data-help-center-status></div>
+                  <button class="help-center-status-link" type="button" data-help-center-action="view-status"><span>View status page</span><svg><use href="#icon-external"></use></svg></button>
+                </section>
+              </aside>
+            </div>
+          </section>
+
           <section class="module-placeholder card" data-module-placeholder hidden aria-live="polite">
             <div class="module-placeholder__mark">◎</div>
             <span class="eyebrow" data-module-parent>Workspace</span>
@@ -783,6 +850,6 @@
       <button type="button" data-toast-close aria-label="Dismiss notification"><svg><use href="#icon-x"></use></svg></button>
     </div>
 
-    <script type="module" src="./app.js?v=merchant-reference-3"></script>
+    <script type="module" src="./app.js?v=merchant-reference-4"></script>
   </body>
 </html>
