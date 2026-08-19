@@ -909,6 +909,56 @@ export const helpCenterPageData = {
   ],
 };
 
+export const teamAccountsPageData = {
+  demoOnly: true,
+  summary: {
+    activeMembers: 12,
+    totalSeats: 20,
+    pendingInvites: 3,
+    availableSeats: 8,
+  },
+  filters: {
+    brands: [
+      { value: 'all', label: 'All brands' },
+      { value: 'Brand A', label: 'Brand A' },
+      { value: 'Brand B', label: 'Brand B' },
+      { value: 'Brand C', label: 'Brand C' },
+    ],
+    roles: [
+      { value: 'all', label: 'All roles' },
+      { value: 'Admin', label: 'Admin' },
+      { value: 'Manager', label: 'Manager' },
+      { value: 'Editor', label: 'Editor' },
+      { value: 'Analyst', label: 'Analyst' },
+      { value: 'Viewer', label: 'Viewer' },
+    ],
+    statuses: [
+      { value: 'all', label: 'All statuses' },
+      { value: 'Active', label: 'Active' },
+      { value: 'Pending', label: 'Pending' },
+    ],
+  },
+  accounts: [
+    { id: 'ethan-turner', initials: 'ET', avatarTone: 'purple', name: 'Ethan Turner', username: 'ethan.turner', role: 'Admin', scope: ['All Brands'], lastActive: 'May 12, 2025 09:41 AM', datetime: '2025-05-12T09:41:00', status: 'Active', statusTone: 'active', mfa: 'Enabled' },
+    { id: 'liam-smith', initials: 'LS', avatarTone: 'blue', name: 'Liam Smith', username: 'liam.smith', role: 'Manager', scope: ['Brand A', 'Brand B'], lastActive: 'May 12, 2025 08:15 AM', datetime: '2025-05-12T08:15:00', status: 'Active', statusTone: 'active', mfa: 'Enabled' },
+    { id: 'noah-ortiz', initials: 'NO', avatarTone: 'orange', name: 'Noah Ortiz', username: 'noah.ortiz', role: 'Editor', scope: ['Brand A'], lastActive: 'May 11, 2025 04:32 PM', datetime: '2025-05-11T16:32:00', status: 'Active', statusTone: 'active', mfa: 'Enabled' },
+    { id: 'ava-johnson', initials: 'AJ', avatarTone: 'red', name: 'Ava Johnson', username: 'ava.johnson', role: 'Analyst', scope: ['Brand B', 'Brand C'], lastActive: 'May 11, 2025 11:03 AM', datetime: '2025-05-11T11:03:00', status: 'Active', statusTone: 'active', mfa: 'Enabled' },
+    { id: 'mia-scott', initials: 'MS', avatarTone: 'green', name: 'Mia Scott', username: 'mia.scott', role: 'Viewer', scope: ['Brand C'], lastActive: 'May 10, 2025 03:28 PM', datetime: '2025-05-10T15:28:00', status: 'Active', statusTone: 'active', mfa: 'Enabled' },
+    { id: 'james-walker', initials: 'JW', avatarTone: 'yellow', name: 'James Walker', username: 'james.walker', role: 'Manager', scope: ['All Brands'], lastActive: 'May 10, 2025 09:11 AM', datetime: '2025-05-10T09:11:00', status: 'Active', statusTone: 'active', mfa: 'Enabled' },
+    { id: 'isabella-sanchez', initials: 'IS', avatarTone: 'purple', name: 'Isabella Sanchez', username: 'isabella.sanchez', role: 'Editor', scope: ['Brand A', 'Brand B'], lastActive: 'May 09, 2025 02:45 PM', datetime: '2025-05-09T14:45:00', status: 'Active', statusTone: 'active', mfa: 'Enabled' },
+    { id: 'benjamin-davis', initials: 'BD', avatarTone: 'blue', name: 'Benjamin Davis', username: 'benjamin.davis', role: 'Viewer', scope: ['Brand B'], lastActive: 'May 08, 2025 10:22 AM', datetime: '2025-05-08T10:22:00', status: 'Active', statusTone: 'active', mfa: 'Enabled' },
+    { id: 'olivia-lee', initials: 'OL', avatarTone: 'orange', name: 'Olivia Lee', username: 'olivia.lee', role: 'Editor', scope: ['Brand C'], lastActive: 'May 07, 2025 05:18 PM', datetime: '2025-05-07T17:18:00', status: 'Active', statusTone: 'active', mfa: 'Enabled' },
+    { id: 'william-martinez', initials: 'WM', avatarTone: 'cyan', name: 'William Martinez', username: 'william.martinez', role: 'Analyst', scope: ['Brand A', 'Brand C'], lastActive: 'May 07, 2025 09:07 AM', datetime: '2025-05-07T09:07:00', status: 'Pending', statusTone: 'pending', mfa: 'Not enrolled' },
+    { id: 'caroline-white', initials: 'CW', avatarTone: 'pink', name: 'Caroline White', username: 'caroline.white', role: 'Analyst', scope: ['Brand A'], lastActive: 'May 06, 2025 01:26 PM', datetime: '2025-05-06T13:26:00', status: 'Pending', statusTone: 'pending', mfa: 'Not enrolled' },
+    { id: 'daniel-kim', initials: 'DK', avatarTone: 'green', name: 'Daniel Kim', username: 'daniel.kim', role: 'Viewer', scope: ['Brand B'], lastActive: 'May 05, 2025 10:48 AM', datetime: '2025-05-05T10:48:00', status: 'Pending', statusTone: 'pending', mfa: 'Not enrolled' },
+    { id: 'sophia-morgan', initials: 'SM', avatarTone: 'purple', name: 'Sophia Morgan', username: 'sophia.morgan', role: 'Manager', scope: ['Brand A', 'Brand C'], lastActive: 'May 04, 2025 03:12 PM', datetime: '2025-05-04T15:12:00', status: 'Active', statusTone: 'active', mfa: 'Enabled' },
+    { id: 'lucas-brown', initials: 'LB', avatarTone: 'blue', name: 'Lucas Brown', username: 'lucas.brown', role: 'Editor', scope: ['Brand B'], lastActive: 'May 03, 2025 11:39 AM', datetime: '2025-05-03T11:39:00', status: 'Active', statusTone: 'active', mfa: 'Enabled' },
+    { id: 'grace-wilson', initials: 'GW', avatarTone: 'red', name: 'Grace Wilson', username: 'grace.wilson', role: 'Viewer', scope: ['Brand C'], lastActive: 'May 02, 2025 09:18 AM', datetime: '2025-05-02T09:18:00', status: 'Active', statusTone: 'active', mfa: 'Enabled' },
+  ],
+  totalCount: 15,
+  pageSize: 10,
+};
+
 export const brandIntegrationPageData = {
   demoOnly: true,
   brand: {

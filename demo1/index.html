@@ -9,7 +9,7 @@
       content="YeahPromos merchant business overview demo"
     />
     <title>Business Overview · YeahPromos</title>
-    <link rel="stylesheet" href="./styles.css?v=merchant-reference-20" />
+    <link rel="stylesheet" href="./styles.css?v=merchant-reference-21" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -170,6 +170,12 @@
                 <button class="button button--primary" type="button" data-finance-action="deposit">
                   <svg><use href="#icon-plus"></use></svg>
                   Deposit funds
+                </button>
+              </div>
+              <div class="page-header__page-actions team-accounts-page-actions" data-team-accounts-actions hidden>
+                <button class="button button--primary" type="button" data-team-accounts-action="create-account">
+                  <svg><use href="#icon-users"></use></svg>
+                  Create new account
                 </button>
               </div>
               <div class="page-header__page-actions brand-integration-page-actions" data-brand-integration-actions hidden>
@@ -869,6 +875,112 @@
             </div>
           </section>
 
+          <section class="team-accounts-page" data-team-accounts-page hidden aria-labelledby="team-accounts-page-title">
+            <h2 id="team-accounts-page-title" class="sr-only">Team accounts</h2>
+
+            <section class="team-accounts-summary-card" aria-label="Team account summary">
+              <div class="team-accounts-stat team-accounts-stat--members">
+                <span class="team-accounts-stat-icon"><svg><use href="#icon-users"></use></svg></span>
+                <span class="team-accounts-stat-copy"><strong>Active members</strong><b>12</b><small>of 20 seats</small></span>
+              </div>
+              <div class="team-accounts-stat team-accounts-stat--invites">
+                <span class="team-accounts-stat-icon"><svg><use href="#icon-users"></use></svg></span>
+                <span class="team-accounts-stat-copy"><strong>Pending invites</strong><b>3</b><small>Invitations sent</small></span>
+              </div>
+              <div class="team-accounts-stat team-accounts-stat--seats">
+                <span class="team-accounts-stat-icon"><svg><use href="#icon-users"></use></svg></span>
+                <span class="team-accounts-stat-copy"><strong>Available seats</strong><b>8</b><small>Seats remaining</small></span>
+              </div>
+              <div class="team-accounts-invite-card">
+                <div>
+                  <h2>Invite a teammate</h2>
+                  <p>Send an invitation to join your workspace.</p>
+                </div>
+                <form class="team-accounts-invite-form" data-team-accounts-invite-form>
+                  <label class="sr-only" for="team-account-invite-email">Invitee email address</label>
+                  <input id="team-account-invite-email" type="email" placeholder="Enter email address" autocomplete="off" required />
+                  <button type="submit">Invite</button>
+                </form>
+              </div>
+            </section>
+
+            <section class="team-accounts-directory-card" aria-labelledby="team-accounts-directory-title">
+              <h2 id="team-accounts-directory-title" class="sr-only">Team account directory</h2>
+              <div class="team-accounts-toolbar">
+                <div class="team-accounts-toolbar-left">
+                  <form class="team-accounts-search-form" data-team-accounts-search-form>
+                    <label class="team-accounts-search">
+                      <span class="sr-only">Search team accounts</span>
+                      <svg aria-hidden="true"><use href="#icon-search"></use></svg>
+                      <input type="search" data-team-accounts-search placeholder="Search by name or username" autocomplete="off" />
+                    </label>
+                  </form>
+                  <div class="team-accounts-filter-wrap">
+                    <button class="team-accounts-outline-button" type="button" data-team-accounts-action="toggle-filter" aria-expanded="false" aria-controls="team-accounts-filter-menu">
+                      <svg><use href="#icon-filter"></use></svg>
+                      Filters
+                    </button>
+                    <div class="team-accounts-filter-menu" id="team-accounts-filter-menu" data-team-accounts-filter-menu hidden>
+                      <label><span>Role</span><select data-team-accounts-filter="role"><option value="all">All roles</option><option value="Admin">Admin</option><option value="Manager">Manager</option><option value="Editor">Editor</option><option value="Analyst">Analyst</option><option value="Viewer">Viewer</option></select></label>
+                      <label><span>Status</span><select data-team-accounts-filter="status"><option value="all">All statuses</option><option value="Active">Active</option><option value="Pending">Pending</option></select></label>
+                      <button type="button" data-team-accounts-action="reset-filter">Reset filters</button>
+                    </div>
+                  </div>
+                </div>
+                <label class="team-accounts-brand-filter">
+                  <span class="sr-only">Filter by brand</span>
+                  <select data-team-accounts-brand-filter aria-label="Filter team accounts by brand">
+                    <option value="all">All brands</option>
+                    <option value="Brand A">Brand A</option>
+                    <option value="Brand B">Brand B</option>
+                    <option value="Brand C">Brand C</option>
+                  </select>
+                  <svg aria-hidden="true"><use href="#icon-chevron"></use></svg>
+                </label>
+              </div>
+
+              <div class="team-accounts-table-scroll">
+                <table class="team-accounts-table">
+                  <caption class="sr-only">Team accounts</caption>
+                  <colgroup>
+                    <col class="team-accounts-col--account" />
+                    <col class="team-accounts-col--username" />
+                    <col class="team-accounts-col--scope" />
+                    <col class="team-accounts-col--last-active" />
+                    <col class="team-accounts-col--status" />
+                    <col class="team-accounts-col--actions" />
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th scope="col">Account name</th>
+                      <th scope="col">Username</th>
+                      <th scope="col">Role / Brand permission</th>
+                      <th scope="col">Last active <span class="team-accounts-info-icon" title="Last successful account activity"><svg><use href="#icon-info"></use></svg></span></th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody data-team-accounts-rows></tbody>
+                </table>
+              </div>
+
+              <div class="team-accounts-table-footer">
+                <span data-team-accounts-result-count>Showing 1 to 10 of 15 results</span>
+                <div class="team-accounts-footer-controls">
+                  <div class="team-accounts-pagination" data-team-accounts-pagination aria-label="Team accounts pagination"></div>
+                  <label class="team-accounts-page-size">
+                    <span class="sr-only">Team accounts per page</span>
+                    <select data-team-accounts-page-size aria-label="Team accounts per page">
+                      <option value="10">10 / page</option>
+                      <option value="20">20 / page</option>
+                    </select>
+                    <svg aria-hidden="true"><use href="#icon-chevron"></use></svg>
+                  </label>
+                </div>
+              </div>
+            </section>
+          </section>
+
           <section class="brand-integration-page" data-brand-integration-page hidden aria-labelledby="brand-integration-page-title">
             <h2 id="brand-integration-page-title" class="sr-only">Brand integration</h2>
 
@@ -1422,6 +1534,6 @@
       <button type="button" data-toast-close aria-label="Dismiss notification"><svg><use href="#icon-x"></use></svg></button>
     </div>
 
-    <script type="module" src="./app.js?v=merchant-reference-20"></script>
+    <script type="module" src="./app.js?v=merchant-reference-21"></script>
   </body>
 </html>
