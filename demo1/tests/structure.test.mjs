@@ -85,6 +85,28 @@ test('balance and payments has its own routed finance page shell', () => {
   assert.match(data, /demoOnly:\s*true/);
 });
 
+test('help center has its own routed support page shell', () => {
+  assert.match(html, /data-help-center-page/);
+  assert.match(html, /Help center/);
+  assert.match(html, /data-help-center-search/);
+  assert.match(html, /data-help-center-categories/);
+  assert.match(html, /data-help-center-articles/);
+  assert.match(html, /data-help-center-status/);
+  assert.match(appJs, /isHelpCenterPage/);
+  assert.match(appJs, /renderHelpCenterPage/);
+  assert.match(appJs, /visibleArticleCount/);
+  assert.match(data, /helpCenterPageData/);
+  assert.match(html, /All systems operational/);
+});
+
+test('help center reuses the README red navigation tokens', () => {
+  assert.match(css, /body\.is-help-center-page[\s\S]*--help-red:\s*#e60000/i);
+  assert.match(css, /--help-soft-red:\s*#fde8e8/i);
+  assert.match(css, /--help-selected-red:\s*#ff312e/i);
+  assert.match(css, /sidebar__utility\[data-help-center-utility\][\s\S]*background:\s*var\(--help-soft-red\)/i);
+  assert.match(readme, /Help center > Help center/);
+});
+
 test('finance page reuses the README red navigation tokens', () => {
   assert.match(css, /body\.is-finance-page[\s\S]*--finance-red:\s*#e60000/i);
   assert.match(css, /--finance-soft-red:\s*#fde8e8/i);

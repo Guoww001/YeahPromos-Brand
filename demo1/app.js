@@ -1,4 +1,4 @@
-import { attributionPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, dashboardData, financeBalancePageData } from './data.mjs';
+import { attributionPageData, campaignPageData, commissionInvoicesPageData, commissionRulesPageData, dashboardData, financeBalancePageData, helpCenterPageData } from './data.mjs';
 import {
   createDashboardState,
   selectDemoState,
@@ -81,6 +81,13 @@ const invoicesDateRange = document.querySelector('[data-invoices-date-range]');
 const invoicesRows = document.querySelector('[data-invoices-rows]');
 const invoicesResultCount = document.querySelector('[data-invoices-result-count]');
 const invoicesSelectAll = document.querySelector('[data-invoices-select-all]');
+const helpCenterPage = document.querySelector('[data-help-center-page]');
+const helpCenterCategories = document.querySelector('[data-help-center-categories]');
+const helpCenterArticles = document.querySelector('[data-help-center-articles]');
+const helpCenterSearch = document.querySelector('[data-help-center-search]');
+const helpCenterLoadMore = document.querySelector('[data-help-center-action="load-more-articles"]');
+const helpCenterStatus = document.querySelector('[data-help-center-status]');
+const helpCenterUtility = document.querySelector('[data-help-center-utility]');
 
 const campaignState = {
   activeTab: 'all',
@@ -147,6 +154,11 @@ const invoicesState = {
   selectedIds: new Set(),
 };
 
+const helpCenterState = {
+  search: '',
+  visibleArticleCount: 5,
+};
+
 const icon = (name, className = '') => `
   <svg class="${className}" aria-hidden="true">
     <use href="#icon-${name}"></use>
@@ -154,6 +166,11 @@ const icon = (name, className = '') => `
 `;
 
 const findNavigationContext = (navigationId) => {
+  if (navigationId === 'help-center') {
+    const helpCenter = { id: 'help-center', label: 'Help center', icon: 'help' };
+    return { parent: helpCenter, current: helpCenter };
+  }
+
   for (const item of state.navigation) {
     if (item.id === navigationId) return { parent: item, current: item };
     const child = item.children?.find((entry) => entry.id === navigationId);
@@ -1032,6 +1049,57 @@ const renderInvoicesPage = () => {
   renderInvoicesRows();
 };
 
+const getFilteredHelpArticles = () => {
+  const query = helpCenterState.search.trim().toLowerCase();
+  if (!query) return helpCenterPageData.articles;
+
+  return helpCenterPageData.articles.filter((article) => [
+    article.title,
+    article.description,
+    article.category,
+  ].some((value) => value.toLowerCase().includes(query)));
+};
+
+const renderHelpCenterPage = () => {
+  if (!helpCenterPage) return;
+
+  helpCenterCategories.innerHTML = helpCenterPageData.categories.map((category) => `
+    <button class="help-center-category help-center-category--${category.tone}" type="button" data-help-center-category="${category.id}" aria-label="Browse ${category.label} help">
+      <span class="help-center-category__top">
+        <span class="help-center-category__icon">${icon(category.icon)}</span>
+        ${icon('arrow', 'help-center-category__arrow')}
+      </span>
+      <strong>${category.label}</strong>
+      <span class="help-center-category__description">${category.description}</span>
+      <span class="help-center-category__meta"><b>${category.articles} articles</b><i aria-hidden="true">•</i><b>${category.guides} guides</b></span>
+    </button>
+  `).join('');
+
+  const filteredArticles = getFilteredHelpArticles();
+  const visibleArticles = filteredArticles.slice(0, helpCenterState.visibleArticleCount);
+  helpCenterArticles.innerHTML = visibleArticles.length
+    ? visibleArticles.map((article) => `
+        <article class="help-center-article">
+          <span class="help-center-article__icon">${icon('file')}</span>
+          <div class="help-center-article__copy">
+            <strong>${article.title}</strong>
+            <p>${article.description}</p>
+          </div>
+          <time datetime="${article.datetime}"><span>Updated</span>${article.updated}</time>
+        </article>
+      `).join('')
+    : '<div class="help-center-empty"><strong>No help articles found</strong><span>Try a different search term or browse a help category.</span></div>';
+
+  helpCenterLoadMore.hidden = filteredArticles.length <= visibleArticles.length;
+  helpCenterLoadMore.disabled = filteredArticles.length === 0;
+  helpCenterStatus.innerHTML = helpCenterPageData.systems.map((system) => `
+    <div class="help-center-status-row">
+      <span class="help-center-status-row__name"><i aria-hidden="true"></i>${system.label}</span>
+      <strong>${system.status}</strong>
+    </div>
+  `).join('');
+};
+
 const renderPage = () => {
   const context = findNavigationContext(state.activeNavigationChild ?? state.activeNavigationId);
   const isOverview = state.activeNavigationId === 'overview' && !state.activeNavigationChild;
@@ -1040,6 +1108,7 @@ const renderPage = () => {
   const isCommissionRulesPage = state.activeNavigationChild === 'commission-rules-list';
   const isFinancePage = state.activeNavigationChild === 'balance-payments';
   const isInvoicesPage = state.activeNavigationChild === 'commission-invoices' || state.activeNavigationChild === 'invoices';
+  const isHelpCenterPage = state.activeNavigationId === 'help-center';
 
   document.body.classList.toggle('is-campaign-page', isCampaignPage);
   document.body.classList.toggle('is-attribution-page', isAttributionPage);
@@ -1048,6 +1117,12 @@ const renderPage = () => {
   document.body.classList.toggle('is-invoices-page', isInvoicesPage);
   document.body.classList.toggle('is-commission-invoices-page', state.activeNavigationChild === 'commission-invoices');
   document.body.classList.toggle('is-finance-invoices-page', state.activeNavigationChild === 'invoices');
+  document.body.classList.toggle('is-help-center-page', isHelpCenterPage);
+  if (helpCenterUtility) {
+    helpCenterUtility.classList.toggle('is-active', isHelpCenterPage);
+    if (isHelpCenterPage) helpCenterUtility.setAttribute('aria-current', 'page');
+    else helpCenterUtility.removeAttribute('aria-current');
+  }
   pageTitle.textContent = isOverview ? 'Business overview' : context.current.label;
   pageDescription.textContent = isOverview
     ? 'Monitor your affiliate program performance and partner activity.'
@@ -1061,11 +1136,14 @@ const renderPage = () => {
             ? 'Track your account balance, commissions, payouts, and payment methods.'
             : isInvoicesPage
               ? 'Review, filter, and download demo invoice records for the selected workspace.'
+            : isHelpCenterPage
+              ? 'Find answers, learn best practices, and get the support you need.'
       : `${context.current.label} workspace preview for the current brand scope.`;
   breadcrumbParent.textContent = isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage
     ? (isCampaignPage ? 'Campaigns' : isAttributionPage || isCommissionRulesPage || state.activeNavigationChild === 'commission-invoices' ? 'Commission & Rules' : 'Finance')
+    : isHelpCenterPage ? 'Help center'
     : 'Merchant workspace';
-  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isOverview ? 'Overview' : context.current.label;
+  breadcrumbCurrent.textContent = isCampaignPage ? 'All campaigns' : isAttributionPage ? 'Attribution rules' : isCommissionRulesPage ? 'Commission rules' : isFinancePage ? 'Balance & payments' : isInvoicesPage ? 'Invoices' : isHelpCenterPage ? 'Help center' : isOverview ? 'Overview' : context.current.label;
   breadcrumbCurrent.setAttribute('aria-current', 'page');
   overviewPage.hidden = !isOverview;
   campaignPage.hidden = !isCampaignPage;
@@ -1073,12 +1151,13 @@ const renderPage = () => {
   commissionRulesPage.hidden = !isCommissionRulesPage;
   financePage.hidden = !isFinancePage;
   invoicesPage.hidden = !isInvoicesPage;
-  modulePlaceholder.hidden = isOverview || isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage;
+  helpCenterPage.hidden = !isHelpCenterPage;
+  modulePlaceholder.hidden = isOverview || isCampaignPage || isAttributionPage || isCommissionRulesPage || isFinancePage || isInvoicesPage || isHelpCenterPage;
   if (pageActions) pageActions.hidden = !isAttributionPage;
   if (commissionRulesActions) commissionRulesActions.hidden = !isCommissionRulesPage;
   if (financeActions) financeActions.hidden = !isFinancePage;
 
-  if (!isOverview && !isCampaignPage && !isAttributionPage && !isCommissionRulesPage && !isFinancePage && !isInvoicesPage) {
+  if (!isOverview && !isCampaignPage && !isAttributionPage && !isCommissionRulesPage && !isFinancePage && !isInvoicesPage && !isHelpCenterPage) {
     modulePlaceholder.querySelector('[data-module-title]').textContent = context.current.label;
     modulePlaceholder.querySelector('[data-module-parent]').textContent = context.parent.label;
   }
@@ -1088,6 +1167,7 @@ const renderPage = () => {
   if (isCommissionRulesPage) renderCommissionRulesPage();
   if (isFinancePage) renderFinancePage();
   if (isInvoicesPage) renderInvoicesPage();
+  if (isHelpCenterPage) renderHelpCenterPage();
 };
 
 const renderAll = () => {
@@ -1479,6 +1559,49 @@ if (invoicesPage) {
   });
 }
 
+if (helpCenterPage) {
+  helpCenterPage.addEventListener('input', (event) => {
+    if (!event.target.matches('[data-help-center-search]')) return;
+    helpCenterState.search = event.target.value;
+    helpCenterState.visibleArticleCount = 5;
+    renderHelpCenterPage();
+  });
+
+  helpCenterPage.addEventListener('click', (event) => {
+    const category = event.target.closest('[data-help-center-category]');
+    if (category) {
+      const selectedCategory = helpCenterPageData.categories.find((item) => item.id === category.dataset.helpCenterCategory);
+      helpCenterState.search = selectedCategory?.label ?? '';
+      helpCenterState.visibleArticleCount = 5;
+      helpCenterSearch.value = helpCenterState.search;
+      renderHelpCenterPage();
+      showToast(`${selectedCategory?.label ?? 'Help'} articles selected`);
+      return;
+    }
+
+    const action = event.target.closest('[data-help-center-action]');
+    if (!action) return;
+
+    const actionName = action.dataset.helpCenterAction;
+    if (actionName === 'load-more-articles') {
+      helpCenterState.visibleArticleCount += 3;
+      renderHelpCenterPage();
+    } else if (actionName === 'view-all-articles') {
+      helpCenterState.search = '';
+      helpCenterState.visibleArticleCount = helpCenterPageData.articles.length;
+      helpCenterSearch.value = '';
+      renderHelpCenterPage();
+      showToast('Showing all help articles');
+    } else if (actionName === 'contact-support') {
+      showToast('Contact support is ready for product integration');
+    } else if (actionName === 'view-tickets') {
+      showToast('Support tickets are ready for product integration');
+    } else if (actionName === 'view-status') {
+      showToast('System status page is ready for product integration');
+    }
+  });
+}
+
 if (attributionPage) {
   attributionPage.addEventListener('change', (event) => {
     if (!event.target.matches('[data-attribution-model]')) return;
@@ -1557,6 +1680,14 @@ sidebarCloseButton.addEventListener('click', closeSidebar);
 sidebarBackdrop.addEventListener('click', closeSidebar);
 
 document.addEventListener('keydown', (event) => {
+  const activeElement = document.activeElement;
+  const isTyping = activeElement?.matches('input, select, textarea, [contenteditable="true"]');
+  if (event.key === '/' && document.body.classList.contains('is-help-center-page') && !isTyping) {
+    event.preventDefault();
+    helpCenterSearch?.focus();
+    return;
+  }
+
   if (event.key !== 'Escape') return;
 
   if (drawer.classList.contains('is-open')) {
