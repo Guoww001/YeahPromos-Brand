@@ -23310,3 +23310,105 @@ body.is-ppc-page .nav-child[data-nav-child="ppc"] {
     transition-duration: .01ms !important;
   }
 }
+
+/* Sidebar selected states: clear hierarchy in both expanded and collapsed layouts. */
+.sidebar .nav-item.is-active {
+  background: var(--color-brand-soft);
+  box-shadow: none;
+  color: var(--color-text);
+}
+
+.sidebar .nav-item.is-active:hover {
+  background: var(--color-brand-soft);
+  color: var(--color-text);
+}
+
+.sidebar .nav-item:not(.is-active):hover {
+  background: var(--color-brand-soft);
+  color: var(--color-text);
+}
+
+.sidebar .nav-item.is-active::before {
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  background: var(--color-brand);
+}
+
+.sidebar .nav-item:not(.is-active):hover::before {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: -12px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--color-brand);
+  content: "";
+}
+
+body:not(.is-sidebar-collapsed) .sidebar .nav-item:is(.is-active, :hover) .nav-item__label {
+  color: var(--color-text);
+}
+
+body:not(.is-sidebar-collapsed) .sidebar .nav-item:is(.is-active, :hover) :is(.nav-item__icon, .nav-item__chevron) {
+  color: var(--color-nav-selected);
+}
+
+.sidebar .nav-child.is-active {
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-nav-selected);
+  font-weight: 700;
+}
+
+.sidebar .nav-child.is-active:hover {
+  background: transparent;
+  color: var(--color-nav-selected);
+}
+
+.sidebar .nav-child:not(.is-active):hover {
+  background: transparent;
+  color: var(--color-nav-selected);
+  font-weight: 700;
+}
+
+.sidebar .nav-child.is-active::before {
+  border-color: var(--color-nav-selected);
+  background: var(--color-nav-selected);
+}
+
+.sidebar .nav-child:not(.is-active):hover::before {
+  border-color: var(--color-nav-selected);
+  background: var(--color-nav-selected);
+}
+
+body.is-sidebar-collapsed .sidebar__top {
+  justify-content: flex-end;
+  padding: 18px 10px 12px;
+}
+
+body.is-sidebar-collapsed .sidebar__top-actions {
+  position: static;
+}
+
+body.is-sidebar-collapsed .brand {
+  display: none;
+}
+
+body.is-sidebar-collapsed .sidebar .nav-item.is-active {
+  background: var(--color-brand);
+  color: #ffffff;
+}
+
+body.is-sidebar-collapsed .sidebar .nav-item.is-active::before {
+  display: none;
+}
+
+body.is-sidebar-collapsed .sidebar .nav-item:not(.is-active):hover {
+  background: var(--color-brand);
+  color: #ffffff;
+}
+
+body.is-sidebar-collapsed .sidebar .nav-item:not(.is-active):hover::before {
+  display: none;
+}
