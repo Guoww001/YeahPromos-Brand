@@ -9,7 +9,7 @@
       content="YeahPromos merchant business overview demo"
     />
     <title>Business Overview · YeahPromos</title>
-    <link rel="stylesheet" href="./styles.css?v=merchant-reference-24" />
+    <link rel="stylesheet" href="./styles.css?v=merchant-reference-25" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -73,15 +73,14 @@
           <a class="brand" href="#main-content" aria-label="YeahPromos home">
             <span class="brand__wordmark"><strong>YEAH</strong><b>P</b><strong>ROMOS</strong></span>
           </a>
-          <div class="sidebar__top-actions">
+          <span class="sidebar__top-actions">
             <button class="icon-button sidebar__collapse" type="button" data-sidebar-collapse aria-controls="app-sidebar" aria-pressed="false" aria-label="Collapse sidebar" title="Collapse sidebar">
               <svg><use href="#icon-chevron"></use></svg>
-              <span class="sr-only">Collapse sidebar</span>
             </button>
-            <button class="icon-button sidebar__close" type="button" data-sidebar-close aria-label="Close menu">
-              <svg><use href="#icon-x"></use></svg>
-            </button>
-          </div>
+          </span>
+          <button class="icon-button sidebar__close" type="button" data-sidebar-close aria-label="Close menu">
+            <svg><use href="#icon-x"></use></svg>
+          </button>
         </div>
 
         <div class="sidebar__label">Merchant workspace</div>
@@ -89,17 +88,17 @@
 
         <div class="sidebar__footer">
           <div class="sidebar__support">
-            <button class="sidebar__utility" type="button" data-utility-route="help-center" data-action-navigation="help-center" data-help-center-utility aria-label="Help center">
+            <button class="sidebar__utility" type="button" data-utility-route="help-center" data-action-navigation="help-center" data-help-center-utility aria-label="Open help center">
               <svg><use href="#icon-help"></use></svg>
               <span>Help center</span>
             </button>
-            <button class="sidebar__utility" type="button" data-utility-route="workspace-settings" data-action-navigation="workspace-settings" aria-label="Settings">
+            <button class="sidebar__utility" type="button" data-utility-route="workspace-settings" data-action-navigation="workspace-settings" aria-label="Open workspace settings">
               <svg><use href="#icon-settings"></use></svg>
               <span>Settings</span>
             </button>
           </div>
 
-          <button class="account-card" type="button" data-demo-action="Account menu" aria-label="Open Demo Admin account menu">
+          <button class="account-card" type="button" data-demo-action="Account menu" aria-label="Open account menu">
             <span class="account-card__avatar">D</span>
             <span class="account-card__copy">
               <strong>Demo Admin</strong>
@@ -166,6 +165,16 @@
                 <button class="button button--secondary" type="button" data-attribution-action="export">Export settings</button>
                 <button class="button button--primary" type="button" data-attribution-action="save">Save changes</button>
               </div>
+              <div class="page-header__page-actions coupon-attribution-page-actions" data-coupon-attribution-actions hidden>
+                <button class="button button--secondary" type="button" data-coupon-attribution-action="export">
+                  <svg><use href="#icon-download"></use></svg>
+                  Export rules
+                </button>
+                <button class="button button--primary" type="button" data-coupon-attribution-action="add-rule">
+                  <svg><use href="#icon-plus"></use></svg>
+                  Add rule
+                </button>
+              </div>
               <div class="page-header__page-actions commission-rules-page-actions" data-commission-rules-actions hidden>
                 <button class="button button--primary" type="button" data-commission-action="create">
                   <svg><use href="#icon-plus"></use></svg>
@@ -174,6 +183,12 @@
               </div>
               <div class="page-header__page-actions restriction-rules-page-actions" data-restriction-rules-actions hidden>
                 <button class="button button--primary" type="button" data-restriction-rules-action="create">
+                  <svg><use href="#icon-plus"></use></svg>
+                  Create rule
+                </button>
+              </div>
+              <div class="page-header__page-actions ppc-page-actions" data-ppc-actions hidden>
+                <button class="button button--primary" type="button" data-ppc-action="create">
                   <svg><use href="#icon-plus"></use></svg>
                   Create rule
                 </button>
@@ -610,6 +625,131 @@
             </div>
           </section>
 
+          <section class="coupon-attribution-page" data-coupon-attribution-page hidden aria-labelledby="coupon-attribution-page-title">
+            <h2 id="coupon-attribution-page-title" class="sr-only">Coupon attribution</h2>
+
+            <div class="coupon-attribution-summary-grid" data-coupon-attribution-summary></div>
+
+            <aside class="coupon-attribution-policy-strip" aria-label="Coupon attribution primary policy">
+              <span class="coupon-attribution-policy-strip__icon"><svg><use href="#icon-shield"></use></svg></span>
+              <div>
+                <span class="eyebrow">Order decision policy</span>
+                <strong>Coupon ownership is the primary signal</strong>
+                <p>Validate the code first. A partner-owned coupon receives primary credit; an eligible link is retained as assisted context and never creates a second primary commission.</p>
+              </div>
+              <button class="button button--secondary" type="button" data-coupon-attribution-action="policy">View precedence</button>
+            </aside>
+
+            <div class="coupon-attribution-layout">
+              <section class="coupon-attribution-card coupon-attribution-list-card" aria-labelledby="coupon-attribution-list-title">
+                <div class="coupon-attribution-card__header">
+                  <div>
+                    <span class="eyebrow">Commission &amp; Rules</span>
+                    <h2 id="coupon-attribution-list-title">Coupon attribution</h2>
+                    <p>Define how coupon ownership, referral links, and conflicts decide partner credit.</p>
+                  </div>
+                  <button class="icon-button coupon-attribution-settings" type="button" data-coupon-attribution-action="settings" aria-label="Configure coupon attribution table">
+                    <svg><use href="#icon-settings"></use></svg>
+                  </button>
+                </div>
+
+                <div class="coupon-attribution-toolbar" aria-label="Coupon attribution filters">
+                  <label class="coupon-attribution-filter">
+                    <span>Status</span>
+                    <select data-coupon-attribution-filter="status" aria-label="Filter coupon attribution rules by status">
+                      <option value="all">All statuses</option>
+                      <option value="Active">Active</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
+                  </label>
+                  <label class="coupon-attribution-filter">
+                    <span>Coupon scope</span>
+                    <select data-coupon-attribution-filter="couponScope" aria-label="Filter by coupon scope">
+                      <option value="all">All scopes</option>
+                      <option value="Unique partner codes">Unique partner codes</option>
+                      <option value="Partner campaign codes">Partner campaign codes</option>
+                      <option value="Public campaign codes">Public campaign codes</option>
+                      <option value="Expired or invalid codes">Expired or invalid codes</option>
+                    </select>
+                  </label>
+                  <label class="coupon-attribution-filter">
+                    <span>Match type</span>
+                    <select data-coupon-attribution-filter="matchType" aria-label="Filter by coupon match type">
+                      <option value="all">All match types</option>
+                      <option value="Exact code match">Exact code match</option>
+                      <option value="Coupon + eligible click">Coupon + eligible click</option>
+                      <option value="Code with no owner">Code with no owner</option>
+                      <option value="Invalid code">Invalid code</option>
+                      <option value="Multiple exact matches">Multiple exact matches</option>
+                      <option value="No eligible touch">No eligible touch</option>
+                    </select>
+                  </label>
+                  <label class="coupon-attribution-filter">
+                    <span>Conflict outcome</span>
+                    <select data-coupon-attribution-filter="conflict" aria-label="Filter by conflict outcome">
+                      <option value="all">All outcomes</option>
+                      <option value="Primary signal">Primary signal</option>
+                      <option value="Assisted link only">Assisted link only</option>
+                      <option value="Link fallback">Link fallback</option>
+                      <option value="Log exception">Log exception</option>
+                      <option value="Manual resolution">Manual resolution</option>
+                      <option value="No commission">No commission</option>
+                    </select>
+                  </label>
+                  <label class="coupon-attribution-search">
+                    <span class="sr-only">Search coupon attribution rules</span>
+                    <svg><use href="#icon-search"></use></svg>
+                    <input type="search" data-coupon-attribution-search placeholder="Search rules..." autocomplete="off" />
+                  </label>
+                </div>
+
+                <div class="coupon-attribution-table-scroll">
+                  <table class="coupon-attribution-table">
+                    <caption class="sr-only">Coupon attribution rules</caption>
+                    <colgroup>
+                      <col class="coupon-attribution-col--check" />
+                      <col class="coupon-attribution-col--name" />
+                      <col class="coupon-attribution-col--scope" />
+                      <col class="coupon-attribution-col--match" />
+                      <col class="coupon-attribution-col--priority" />
+                      <col class="coupon-attribution-col--fallback" />
+                      <col class="coupon-attribution-col--lookback" />
+                      <col class="coupon-attribution-col--status" />
+                      <col class="coupon-attribution-col--actions" />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th scope="col">
+                          <label class="coupon-attribution-checkbox coupon-attribution-checkbox--header">
+                            <input type="checkbox" data-coupon-attribution-select-all aria-label="Select all visible coupon attribution rules" />
+                            <span aria-hidden="true"></span>
+                          </label>
+                        </th>
+                        <th scope="col">Rule name</th>
+                        <th scope="col">Coupon scope</th>
+                        <th scope="col">Match type</th>
+                        <th scope="col">Priority <button class="inline-info" type="button" data-coupon-attribution-action="priority-info" aria-label="About coupon rule priority"><svg><use href="#icon-info"></use></svg></button></th>
+                        <th scope="col">Fallback</th>
+                        <th scope="col">Lookback</th>
+                        <th scope="col">Status</th>
+                        <th scope="col"><span class="sr-only">Actions</span></th>
+                      </tr>
+                    </thead>
+                    <tbody data-coupon-attribution-rows></tbody>
+                  </table>
+                </div>
+
+                <div class="coupon-attribution-list-footer">
+                  <span data-coupon-attribution-result-count>Showing 1 to 6 of 6 rules</span>
+                  <span class="coupon-attribution-footer-note"><svg><use href="#icon-info"></use></svg> One primary commission per order</span>
+                </div>
+              </section>
+
+              <aside class="coupon-attribution-card coupon-attribution-detail-card" data-coupon-attribution-detail aria-labelledby="coupon-attribution-detail-title"></aside>
+            </div>
+          </section>
+
           <section class="commission-rules-page" data-commission-rules-page hidden aria-labelledby="commission-rules-page-title">
             <h2 id="commission-rules-page-title" class="sr-only">Commission rules</h2>
 
@@ -871,6 +1011,152 @@
               </section>
 
               <aside class="restriction-rules-card restriction-rules-detail-card" data-restriction-rules-detail aria-labelledby="restriction-rules-detail-title"></aside>
+            </div>
+          </section>
+
+          <section class="restriction-rules-page ppc-page" data-ppc-page hidden aria-labelledby="ppc-page-title">
+            <h2 id="ppc-page-title" class="sr-only">PPC</h2>
+
+            <div class="restriction-rules-summary-grid" data-ppc-summary></div>
+
+            <aside class="restriction-rules-policy-strip" aria-label="PPC decision priority">
+              <span class="restriction-rules-policy-strip__icon"><svg><use href="#icon-shield"></use></svg></span>
+              <div>
+                <span class="eyebrow">PPC business rules</span>
+                <strong>Specific match → Block → Review → Allow</strong>
+                <p>Partner, campaign, and region scope wins first. Undefined brand terms default to Block; missing evidence is Review, never automatic approval.</p>
+              </div>
+              <button class="button button--secondary" type="button" data-ppc-action="policy">View policy order</button>
+            </aside>
+
+            <div class="restriction-rules-layout">
+              <section class="restriction-rules-card restriction-rules-list-card" aria-labelledby="ppc-list-title">
+                <div class="restriction-rules-card__header">
+                  <div>
+                    <span class="eyebrow">PPC policy management</span>
+                    <h2 id="ppc-list-title">PPC</h2>
+                    <p>Define paid-search keywords, channels, regions, partner scope, and violation handling.</p>
+                  </div>
+                  <button class="icon-button restriction-rules-settings" type="button" data-ppc-action="settings" aria-label="Configure PPC rules table">
+                    <svg><use href="#icon-settings"></use></svg>
+                  </button>
+                </div>
+
+                <div class="restriction-rules-toolbar" aria-label="PPC rule filters">
+                  <label class="restriction-rules-filter">
+                    <span>Status</span>
+                    <select data-ppc-filter="status" aria-label="Filter PPC rules by status">
+                      <option value="all">All statuses</option>
+                      <option value="Active">Active</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Inactive">Inactive</option>
+                      <option value="Expired">Expired</option>
+                    </select>
+                  </label>
+                  <label class="restriction-rules-filter">
+                    <span>Policy</span>
+                    <select data-ppc-filter="policy" aria-label="Filter PPC rules by policy">
+                      <option value="all">All policies</option>
+                      <option value="Block">Block</option>
+                      <option value="Allow">Allow</option>
+                      <option value="Review">Review</option>
+                    </select>
+                  </label>
+                  <label class="restriction-rules-filter">
+                    <span>Channel</span>
+                    <select data-ppc-filter="channel" aria-label="Filter PPC rules by channel">
+                      <option value="all">All channels</option>
+                      <option value="Paid search">Paid search</option>
+                      <option value="Google Ads">Google Ads</option>
+                      <option value="Meta / TikTok">Meta / TikTok</option>
+                    </select>
+                  </label>
+                  <label class="restriction-rules-filter">
+                    <span>Region</span>
+                    <select data-ppc-filter="region" aria-label="Filter PPC rules by region">
+                      <option value="all">All regions</option>
+                      <option value="North America">North America</option>
+                      <option value="US, CA, UK">US, CA, UK</option>
+                      <option value="US, UK">US, UK</option>
+                    </select>
+                  </label>
+                  <label class="restriction-rules-filter">
+                    <span>Effective date</span>
+                    <select data-ppc-filter="effectiveDate" aria-label="Filter PPC rules by effective date">
+                      <option value="all">All dates</option>
+                      <option value="30d">Last 30 days</option>
+                      <option value="90d">Last 90 days</option>
+                      <option value="2025">Year 2025</option>
+                    </select>
+                  </label>
+                  <button class="button button--secondary restriction-rules-more-filters" type="button" data-ppc-action="more-filters">
+                    <svg><use href="#icon-filter"></use></svg>
+                    More filters
+                  </button>
+                  <label class="restriction-rules-search">
+                    <span class="sr-only">Search PPC rules</span>
+                    <svg><use href="#icon-search"></use></svg>
+                    <input type="search" data-ppc-search placeholder="Search PPC rules..." autocomplete="off" />
+                  </label>
+                </div>
+
+                <div class="restriction-rules-table-scroll">
+                  <table class="restriction-rules-table">
+                    <caption class="sr-only">PPC rules</caption>
+                    <colgroup>
+                      <col class="restriction-rules-col--check" />
+                      <col class="restriction-rules-col--name" />
+                      <col class="restriction-rules-col--policy" />
+                      <col class="restriction-rules-col--terms" />
+                      <col class="restriction-rules-col--channel" />
+                      <col class="restriction-rules-col--region" />
+                      <col class="restriction-rules-col--scope" />
+                      <col class="restriction-rules-col--effective" />
+                      <col class="restriction-rules-col--status" />
+                      <col class="restriction-rules-col--actions" />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th scope="col">
+                          <label class="restriction-rules-checkbox restriction-rules-checkbox--header">
+                            <input type="checkbox" data-ppc-select-all aria-label="Select all visible PPC rules" />
+                            <span aria-hidden="true"></span>
+                          </label>
+                        </th>
+                        <th scope="col">Rule name</th>
+                        <th scope="col">Policy</th>
+                        <th scope="col">Keywords / terms</th>
+                        <th scope="col">Channel</th>
+                        <th scope="col">Region</th>
+                        <th scope="col">Partner scope</th>
+                        <th scope="col">Effective date</th>
+                        <th scope="col">Status</th>
+                        <th scope="col"><span class="sr-only">Actions</span></th>
+                      </tr>
+                    </thead>
+                    <tbody data-ppc-rows></tbody>
+                  </table>
+                </div>
+
+                <div class="restriction-rules-list-footer">
+                  <span data-ppc-result-count>Showing 1 to 7 of 7 rules</span>
+                  <div class="restriction-rules-pagination" aria-label="PPC rules pagination">
+                    <button type="button" aria-label="Previous PPC rules page" disabled>‹</button>
+                    <button type="button" class="is-current" aria-current="page" data-ppc-page-number="1">1</button>
+                    <button type="button" data-ppc-page-number="2">2</button>
+                    <button type="button" aria-label="Next PPC rules page" data-ppc-action="next-page">›</button>
+                    <label>
+                      <span class="sr-only">PPC rows per page</span>
+                      <select aria-label="PPC rows per page">
+                        <option>10 / page</option>
+                        <option>25 / page</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+              </section>
+
+              <aside class="restriction-rules-card restriction-rules-detail-card" data-ppc-detail aria-labelledby="ppc-detail-title"></aside>
             </div>
           </section>
 
@@ -1925,6 +2211,6 @@
       <button type="button" data-toast-close aria-label="Dismiss notification"><svg><use href="#icon-x"></use></svg></button>
     </div>
 
-    <script type="module" src="./app.js?v=merchant-reference-24"></script>
+    <script type="module" src="./app.js?v=merchant-reference-25"></script>
   </body>
 </html>
